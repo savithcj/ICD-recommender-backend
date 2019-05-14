@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %} Entering Codes {% endblock %}
+{% block content %}
+<br>
+<form method = get" action= "{% url 'results' %}">
+    {{ entering }}
+    <br>
+    <br>
+    <button type = "submit">View Recommendations</button>
+</form>
+{% endblock %}

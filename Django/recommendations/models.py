@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class Rule(models.Model):
     lhs = models.CharField(db_column = 'lhs', max_length = 50)
     rhs = models.CharField(db_column = 'rhs', max_length = 10)

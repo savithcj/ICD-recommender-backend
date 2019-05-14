@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %} Results {% endblock %}
+{% block content %}
+Suggested Codes:
+<br>
+{% for result in results %}
+    {{ result.rhs }} <br>
+{% endfor %}
+{% endblock %}
