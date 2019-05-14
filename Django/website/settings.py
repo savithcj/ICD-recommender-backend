@@ -15,7 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-with open(os.path.join(BASE_DIR, 'secret.json')) as secret_file:
+with open(os.path.join(BASE_DIR, 'secret/secret.json')) as secret_file:
     secrets = json.load(secret_file)
 
 # Quick-start development settings - unsuitable for production

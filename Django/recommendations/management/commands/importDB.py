@@ -9,8 +9,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         Rule.objects.all().delete()
         
-        df1 = pd.read_csv("three_digit_rules.csv")
-        df2 = pd.read_csv("four_digit_rules.csv")
+        df1 = pd.read_csv("secret/three_digit_rules.csv")
+        df2 = pd.read_csv("secret/four_digit_rules.csv")
         df = pd.concat([df1,df2])
         df = df.reset_index()
 

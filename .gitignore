@@ -1,7 +1,6 @@
 env/
-*.csv
 *.sqlite3
-secret.json
+secret/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
