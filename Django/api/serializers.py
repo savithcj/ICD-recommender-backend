@@ -6,8 +6,12 @@ class RulesSerializer(serializers.ModelSerializer):
         model = Rule
         fields = ("lhs","rhs")
 
-
 class CodesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Code
         fields = ("code","description","parent","children")
+
+class ChildrenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Code
+        fields = ("code","description")
