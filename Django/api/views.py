@@ -7,7 +7,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-from recommendations.models import Rule
+from recommendations.models import Rule, Code
 
 # Create your views here.
 
@@ -18,6 +18,11 @@ class ListAllRules(generics.ListAPIView):
     """
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
+
+
+class ListAllCodes(generics.ListAPIView):
+    queryset = Code.objects.all()
+    serializer_class = serializers.CodesSerializer
 
 #TO DO: implement access permissions?
 
