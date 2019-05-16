@@ -18,19 +18,23 @@ class ListAllRules(generics.ListAPIView):
     """
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
+
+
 class ListAllCodes(generics.ListAPIView):
     queryset = Code.objects.all()
     serializer_class = serializers.CodesSerializer
+
 
 @permission_classes((permissions.AllowAny,))
 class ListChildrenOfCode(APIView):
     def get_object(self, pk):
         try:
-            code = Code.objects.get(code=pk)
-            children = Code.objects.filter(parent=code.code)
+            childrenCodes = Code.objects.get(code=pk).children
+            childrenCodes = childrenCodes.split(",")
+            children = Code.objects.filter(code__in=childrenCodes)
             return children
         except ObjectDoesNotExist:
-            raise Http404
+            return Code.objects.none()
     
     def get(self, request, pk, format=None, **kwargs):
         children = self.get_object(pk)
