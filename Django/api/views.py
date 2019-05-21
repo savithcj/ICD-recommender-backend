@@ -15,23 +15,10 @@ from itertools import combinations
 
 class ListAllRules(generics.ListAPIView):
     """
-    Provides a get method handler.
+    Lists all rules
     """
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
-
-
-class ListAllCodes(generics.ListAPIView):
-    queryset = Code.objects.all()
-    serializer_class = serializers.CodesSerializer
-
-
-@permission_classes((permissions.AllowAny,))
-class CodeInformation(APIView):
-    def get(self, request, pk, format=None, **kwargs):
-        CodeInfo = get_object_or_404(Code, pk=pk)
-        serializer = serializers.CodesSerializer(CodeInfo)
-        return Response(serializer.data)
 
 
 @permission_classes((permissions.AllowAny,))
@@ -74,11 +61,18 @@ class ListRequestedRules(APIView):
                     empty += entry[i] + ","
                 new_lhs.append(empty[:-1])
 
-            # get rules and append description
+            # get rules
             rules = Rule.objects.filter(lhs__in=new_lhs).order_by('-confidence')
+
+            # exclude rules with code in RHS that already exist in the LHS
+            print(r'(' + '|'.join(new_lhs) + ')')
+            rules = rules.exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
+
+            # append description
             for rule in rules:
                 code = Code.objects.get(code=rule.rhs)
                 rule.description = code.description
+
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()

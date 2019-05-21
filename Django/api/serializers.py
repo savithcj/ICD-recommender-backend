@@ -21,12 +21,6 @@ class ExtendedRulesSerializer(serializers.ModelSerializer):
                   "confidence", "num_accepted", "num_rejected", "description")
 
 
-class CodesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Code
-        fields = ("code", "description", "parent", "children")
-
-
 class CodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Code
