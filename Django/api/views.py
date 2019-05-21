@@ -53,10 +53,10 @@ class ListChildrenOfCode(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListRequestedRules(APIView):
-    def get_object(self, pk):
+    def get_object(self, inCodes):
         try:
             # Sort input codes
-            inputCodes = pk
+            inputCodes = inCodes
             inputRules = inputCodes.split(",")
             inputRules.sort()
 
@@ -64,26 +64,28 @@ class ListRequestedRules(APIView):
             lhs = []
             for i in range(len(inputRules)):
                 lhs += list(combinations(inputRules, i+1))
+            print("LHS", lhs)
 
+            # Concatening items in combinations together
             new_lhs = []
             for entry in lhs:
                 empty = ''
                 for i in range(len(entry)):
                     empty += entry[i] + ","
                 new_lhs.append(empty[:-1])
-            qs = Rule.objects.none()
 
-            for combination in new_lhs:
-                qTemp = Rule.objects.filter(lhs=combination)
-                print(qTemp)
-                qs = qs.union(qTemp).distinct()
-            return qs
+            # get rules and append description
+            rules = Rule.objects.filter(lhs__in=new_lhs).order_by('-confidence')
+            for rule in rules:
+                code = Code.objects.get(code=rule.rhs)
+                rule.description = code.description
+            return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
 
-    def get(self, request, pk, format=None, **kwargs):
-        rules = self.get_object(pk)
-        serializer = serializers.RulesSerializer(rules, many=True)
+    def get(self, request, inCodes, format=None, **kwargs):
+        rules = self.get_object(inCodes)
+        serializer = serializers.ExtendedRulesSerializer(rules, many=True)
         return Response(serializer.data)
 
 
