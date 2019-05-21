@@ -11,7 +11,7 @@ class CodesSerializer(serializers.ModelSerializer):
         model = Code
         fields = ("code","description","parent","children")
 
-class ChildrenSerializer(serializers.ModelSerializer):
+class CodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Code
         fields = ("code","description")
