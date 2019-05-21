@@ -9,6 +9,5 @@ urlpatterns = [
     path('children/<str:pk>/', views.ListChildrenOfCode.as_view(),
          name="children-of-code"),
     path('family/<str:pk>/', views.Family.as_view(), name="family-of-code"),
-    path('requestRules/<str:pk>/',
-         views.ListRequestedRules.as_view(), name="rules-specific")
+    path('requestRules/<str:inCodes>/', views.ListRequestedRules.as_view(), name="rules-specific")
 ]
