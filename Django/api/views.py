@@ -15,7 +15,7 @@ from itertools import combinations
 
 class ListAllRules(generics.ListAPIView):
     """
-    Provides a get method handler.
+    Lists all rules
     """
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
