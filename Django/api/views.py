@@ -10,7 +10,6 @@ from django.shortcuts import render, get_object_or_404
 from recommendations.models import Rule, Code
 from itertools import combinations
 
-import time
 # Create your views here.
 
 
@@ -43,7 +42,6 @@ class ListChildrenOfCode(APIView):
 class ListRequestedRules(APIView):
     def get_object(self, inCodes):
         try:
-            time.sleep(5)
             # Sort input codes
             inputCodes = inCodes
             inputRules = inputCodes.split(",")
@@ -64,7 +62,8 @@ class ListRequestedRules(APIView):
                 new_lhs.append(empty[:-1])
 
             # get rules
-            rules = Rule.objects.filter(lhs__in=new_lhs).order_by('-confidence')
+            rules = Rule.objects.filter(
+                lhs__in=new_lhs).order_by('-confidence')
 
             # exclude rules with code in RHS that already exist in the LHS
             print(r'(' + '|'.join(new_lhs) + ')')
