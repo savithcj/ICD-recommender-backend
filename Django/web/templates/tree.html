@@ -1,6 +1,4 @@
-{% extends 'base.html' %}
-{% block content %}
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -47,22 +45,12 @@ var treeData = [
     "children": [
       {
         "name": "Level 2: A",
-        "parent": "Top Level",
-        "children": [
-          {
-            "name": "Son of A",
-            "parent": "Level 2: A"
-          },
-          {
-            "name": "Daughter of A",
-            "parent": "Level 2: A"
-          },
-          {
-              "name": "third",
-              "parent": "Level 2: A"
-          },
-        ]
+        "parent": "Top Level"
       },
+      {
+          "name": "Level 2: C",
+          "parent": "Top Level"
+      },    
       {
         "name": "Level 2: B",
         "parent": "Top Level",
@@ -117,13 +105,89 @@ var treeData2 = [
 ];
 
 
+var tree1 = [
+  {
+    "name": "A",
+    "parent": null,
+    "children": [
+      {"name": "A01", "parent": "A"},
+      {"name": "A02", "parent": "A", "children": [
+                {"name": "A021", "parent": "A02"},
+                {"name": "A022", "parent": "A02"},
+                {"name": "A023", "parent": "A02"},
+                {"name": "A024", "parent": "A02"},
+                {"name": "A025", "parent": "A02"},
+                ]},
+      {"name": "A03", "parent": "A"}
+    ]
+  },
+];
+
+var tree2 = [
+  {
+    "name": "A02",
+    "parent": null,
+    "children": [
+      {"name": "A021", "parent": "A02", "children":[
+                {"name": "A0211", "parent": "A021"},
+                {"name": "A0212", "parent": "A021"},
+                {"name": "A0213", "parent": "A021"},
+                ]},
+      {"name": "A022", "parent": "A02"},
+      {"name": "A023", "parent": "A02"},
+      {"name": "A024", "parent": "A02"},
+      {"name": "A025", "parent": "A02"},
+    ]
+  },
+];
+
+var tree3 = [
+  {
+    "name": "A02",
+    "parent": null,
+    "children": [
+      {"name": "A021", "parent": "A02"},
+      {"name": "A022", "parent": "A02"},
+      {"name": "A023", "parent": "A02", "children":[
+                {"name": "A0231", "parent": "A023"},
+                {"name": "A0232", "parent": "A023"},
+                {"name": "A0233", "parent": "A023"},
+                ]},
+      {"name": "A024", "parent": "A02"},
+      {"name": "A025", "parent": "A02"},
+    ]
+  },
+];
+
+var tree4 = [
+  {
+    "name": "A02",
+    "parent": null,
+    "children": [
+      {"name": "A021", "parent": "A02"},
+      {"name": "A022", "parent": "A02"},
+      {"name": "A023", "parent": "A02"},
+      {"name": "A024", "parent": "A02", "children":[
+                {"name": "A0241", "parent": "A024"},
+                {"name": "A0242", "parent": "A024"},
+                {"name": "A0243", "parent": "A024"},
+                ]},
+      {"name": "A025", "parent": "A02"},
+    ]
+  },
+];
+
+
 // ************** Generate the tree diagram	 *****************
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
 	width = 960 - margin.right - margin.left,
-	height = 500 - margin.top - margin.bottom;
+	height = 700 - margin.top - margin.bottom;
+
+var border=1;
+var bordercolor='black';
 	
 var i = 0,
-	duration = 2500, // time to perform a bunch of things
+	duration = 4500, // time to perform a bunch of things
 	root;
 
 var tree = d3.layout.tree()
@@ -135,8 +199,29 @@ var diagonal = d3.svg.diagonal()
 var svg = d3.select("body").append("svg")
 	.attr("width", width + margin.right + margin.left)
 	.attr("height", height + margin.top + margin.bottom)
-  .append("g")
+    .append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var borderPath = svg.append("rect")
+       			.attr("x", 0)
+       			.attr("y", 0)
+       			.attr("height", height + margin.top + margin.bottom)
+       			.attr("width", width + margin.right + margin.left)
+       			.style("stroke", bordercolor)
+       			.style("fill", "none")
+       			.style("stroke-width", border)
+                   .attr("transform", "translate(" + "-" + margin.left + ", -" + margin.top + ")");
+
+var borderPathInner = svg.append("rect")
+       			.attr("x", margin.left)
+       			.attr("y", margin.top)
+       			.attr("height", height)
+       			.attr("width", width)
+       			.style("stroke", bordercolor)
+       			.style("fill", "none")
+       			.style("stroke-width", border)
+                .attr("transform", "translate(" + "-" + margin.left + ", -" + margin.top + ")");
+                   
 
 root = treeData[0];
 root.x0 = height / 2;
@@ -153,7 +238,7 @@ function update(source) {
 	  links = tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 180; }); // set the width between levels
+  nodes.forEach(function(d) { d.y = d.depth * 180; }); // set the depth between levels (horizontal length of links)
 
   // Update the nodes…
   var node = svg.selectAll("g.node")
@@ -162,31 +247,40 @@ function update(source) {
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
 	  .attr("class", "node")
-	  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+      .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; }) // this is where the new nodes come from
 	  .on("click", click);
 
   nodeEnter.append("circle")
-	  .attr("r", 1e-6)
+	  .attr("r", 1e-6) // radius of circles as they start to transition to where they belong/proper size
 	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeEnter.append("text")
-	  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
-	  .attr("dy", ".35em")
+	  .attr("x", function(d) { return d.children || d._children ? -30 : 30; }) // how far to the side the text is
+	  .attr("dy", ".85em") // how far below the nodes the text is
 	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-	  .text(function(d) { return d.name; })
-	  .style("fill-opacity", 1e-6);
+	  .text(function(d) { return d.name; }) // text is name of node
+	  .style("fill-opacity", 1e-6); // how opaque the nodes start
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
 	  .duration(duration)
-	  .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+	  .attr("transform", function(d) { 
+          if(d.name == "Top Level"){
+              return "translate(" + 300 + "," + 300 + ")";
+          }
+          else{
+          return "translate(" + d.y + "," + d.x + ")"; 
+          }
+          });
 
+    
   nodeUpdate.select("circle")
-	  .attr("r", 25) // radius of circles 
+	  .attr("r", 25) // final radius of circles 
 	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; }); // color of node when it's children are collapsed
+      // remove the _ to colour all nodes which have children
 
   nodeUpdate.select("text")
-	  .style("fill-opacity", 1); // fill opacity when node has it's children collapsed
+	  .style("fill-opacity", 1); // final fill opacity of text 
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
@@ -195,7 +289,7 @@ function update(source) {
 	  .remove();
 
   nodeExit.select("circle")
-	  .attr("r", 1e-6); // radius of children node as they are collapsed
+	  .attr("r", 1e-6); // radius that nodes go to when disappearing
 
   nodeExit.select("text")
 	  .style("fill-opacity", 1e-6); // makes text become opaque as nodes are collapsed
@@ -250,15 +344,14 @@ function click(d) {
 
 function click(d) {
     console.log(d)
-    if (d.name.endsWith("2") ){
-        root = treeData[0];
+    if(d.parent){
+        if (d.name.endsWith("2")) {
+            root = treeData[0];
+        }
+        else {
+            root = treeData2[0];
+        }
     }
-    else{
-        root = treeData2[0];
-    }
-    //if(d.parent){
-      //  root = d.parent
-    //}
     update(d);
 }
 
@@ -266,4 +359,3 @@ function click(d) {
 	
   </body>
 </html>
-{% endblock %}
