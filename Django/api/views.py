@@ -86,14 +86,6 @@ class ListRequestedRules(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class Family(APIView):
-    def get_parent(self, pk):
-        try:
-            parentCode = Code.objects.get(code=pk).parent
-            parent = Code.objects.filter(code__iexact=parentCode)
-            return parent
-        except ObjectDoesNotExist:
-            return Code.objects.none()
-
     def get_children(self, pk):
         try:
             childrenCodes = Code.objects.get(code=pk).children
@@ -113,13 +105,22 @@ class Family(APIView):
         except ObjectDoesNotExist:
             return Code.objects.none()
 
+    def get_single(self, pk):
+        try:
+            selfs = Code.objects.get(code=pk)
+            return selfs
+        except ObjectDoesNotExist:
+            return Code.objects.none()
+
     def get(self, request, pk, format=None, **kwargs):
-        parent = self.get_parent(pk)
+        selfs = self.get_single(pk)
+        parent = self.get_single(selfs.parent)
         children = self.get_children(pk)
         siblings = self.get_siblings(pk)
-        parentSerializer = serializers.CodeSerializer(parent, many=True)
+        parentSerializer = serializers.CodeSerializer(parent, many=False)
         siblingSerializer = serializers.CodeSerializer(siblings, many=True)
         childrenSerializer = serializers.CodeSerializer(children, many=True)
-        return Response({'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
+        selfSerializer = serializers.CodeSerializer(selfs, many=False)
+        return Response({'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data, 'self': selfSerializer.data})
 
 # TO DO: implement access permissions?

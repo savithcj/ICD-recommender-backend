@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Circle Tree Example</title>
+
+    <style>
+	
+	.node {
+		cursor: pointer;
+	}
+
+	.node circle {
+	  fill: #fff;
+	  stroke: steelblue;
+	  stroke-width: 3px;
+	}
+
+	.node text {
+	  font: 12px sans-serif;
+	}
+
+	.link {
+	  fill: none;
+	  stroke: #ccc;
+	  stroke-width: 2px;
+	}
+	
+    </style>
+
+  </head>
+
+  <body>
+
+<!-- load the d3.js library -->	
+<script src="http://d3js.org/d3.v3.min.js"></script>
+	
+<script>
+
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+	width = 960 - margin.right - margin.left,
+	height = 700 - margin.top - margin.bottom;
+    hd = 150; // horizontal distance
+
+var border=1;
+var bordercolor='black';
+	
+var i = 0,
+	duration = 4500, // time to perform a bunch of things
+	root;
+
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width + margin.right + margin.left)
+	.attr("height", height + margin.top + margin.bottom)
+
+var borderPath = svg.append("rect")
+       			.attr("x", 0)
+       			.attr("y", 0)
+       			.attr("height", height + margin.top + margin.bottom)
+       			.attr("width", width + margin.right + margin.left)
+       			.style("stroke", bordercolor)
+       			.style("fill", "none")
+       			.style("stroke-width", border);
+
+var borderPathInner = svg.append("rect")
+       			.attr("x", margin.left)
+       			.attr("y", margin.top)
+       			.attr("height", height)
+       			.attr("width", width)
+       			.style("stroke", bordercolor)
+       			.style("fill", "none")
+       			.style("stroke-width", border);
+
+var root = svg.append("circle")
+                .attr("cx", margin.left)
+                .attr("cy", height/2)
+                .attr("r", 20)
+                .style("stroke", bordercolor)
+       			.style("fill", "lightblue")
+       			.style("stroke-width", border);
+
+
+var self = svg.append("circle")
+                .attr("cx", margin.left + hd)
+                .attr("cy", height/2)
+                .attr("r", 20)
+                .style("stroke", bordercolor)
+       			.style("fill", "lightblue")
+       			.style("stroke-width", border)
+                .append("text")
+                .attr("x", 25) // how far to the side the text is
+                .attr("y", 25) // how far below the nodes the text is
+                //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+                .text("hello") // text is name of node
+                //.style("fill-opacity", 1e-6); // how opaque the nodes start
+
+                
+
+
+
+
+
+</script>
+	
+  </body>
+</html>
