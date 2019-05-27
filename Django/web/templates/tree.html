@@ -177,7 +177,8 @@ var tree4 = [
   },
 ];
 
-
+var selfnode = ""
+var selfsiblings = []
 // ************** Generate the tree diagram	 *****************
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
 	width = 960 - margin.right - margin.left,
@@ -223,9 +224,9 @@ var borderPathInner = svg.append("rect")
                 .attr("transform", "translate(" + "-" + margin.left + ", -" + margin.top + ")");
                    
 
-root = treeData[0];
-root.x0 = height / 2;
-root.y0 = 0;
+root = tree2[0];
+root.x0 = height / 2; // where nodes come from initially
+root.y0 = 0; // where nodes come from initially
   
 update(root);
 
@@ -234,7 +235,7 @@ d3.select(self.frameElement).style("height", "500px");
 function update(source) {
 
   // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
+  var nodes = tree.nodes(root).reverse()
 	  links = tree.links(nodes);
 
   // Normalize for fixed-depth.
@@ -261,22 +262,83 @@ function update(source) {
 	  .text(function(d) { return d.name; }) // text is name of node
 	  .style("fill-opacity", 1e-6); // how opaque the nodes start
 
+
+
+
+
+
+
+
+    var before = 0;
+    var after = 0;
+    if(source.parent != null){
+        for(i=0; i < source.parent.children.length; i++){
+            if(source.parent.children[i].name < selfnode){
+                before++;
+            }
+            else if(source.parent.children[i].name > selfnode){
+                after++;
+            }
+        }
+    }
+    else{
+        for(i=0; i < source.children.length; i++){
+            if(source.children[i].name < selfnode){
+                before++;
+            }
+            else if(source.children[i].name > selfnode){
+                after++;
+            }
+        }
+    }
+
+    childrenCount = source.children.length
+
+    var spacing = height/2/(Math.max(before,after)+1)
+    var beforeCounter = 0;
+    var afterCounter = 0;
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
 	  .duration(duration)
 	  .attr("transform", function(d) { 
-          if(d.name == "Top Level"){
-              return "translate(" + 300 + "," + 300 + ")";
+          console.log(d.name)
+          if(!d.parent){
+              return "translate(" + 0 + "," + height/2 + ")"; // putting parent node to left and center
+          }
+          else if(d.name == selfnode){
+              return "translate(" + 180 + "," + height/2 + ")"; // putting self node to center
+          }
+          else if(d.name.length == selfnode.length){ // siblings
+              if(d.name < selfnode){
+                  var xCoord = height/2 - ++beforeCounter*spacing
+                  return "translate(" + 180 + "," + xCoord + ")";
+              }
+              else {
+                  var xCoord = height/2 + after--*spacing
+                  return "translate(" + 180 + "," + xCoord + ")";
+              }
           }
           else{
-          return "translate(" + d.y + "," + d.x + ")"; 
+              var xCoord = d.x + d.parent.x0
+              console.log("parent x0 " + d.parent.x0)
+              console.log("d.x " + d.x)
+              return "translate(" + 360 + "," + xCoord + ")"; 
           }
           });
 
     
+
+
+
+
+
   nodeUpdate.select("circle")
 	  .attr("r", 25) // final radius of circles 
-	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; }); // color of node when it's children are collapsed
+	  .style("fill", function(d) { 
+          if(d.name == selfnode) { // colour the node if it is the selfnode
+            return "lightsteelblue";
+          } 
+        }); // color of node when it's children are collapsed
       // remove the _ to colour all nodes which have children
 
   nodeUpdate.select("text")
@@ -285,7 +347,14 @@ function update(source) {
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
 	  .duration(duration)
-	  .attr("transform", function(d) { return "translate(" + source.parent.y + "," + source.parent.x + ")"; })
+	  .attr("transform", function(d) { 
+          if(source.parent){
+            return "translate(" + source.parent.y + "," + source.parent.x + ")"; 
+          }
+          else{
+              return "translate(" + source.y + "," + source.x + ")";
+          }
+        })
 	  .remove();
 
   nodeExit.select("circle")
@@ -294,9 +363,10 @@ function update(source) {
   nodeExit.select("text")
 	  .style("fill-opacity", 1e-6); // makes text become opaque as nodes are collapsed
 
+
   // Update the links…
   var link = svg.selectAll("path.link")
-	  .data(links, function(d) { return d.target.id; });
+	  .data(links, function(d) {return d.target.id; });
 
   // Enter any new links at the parent's previous position.
   link.enter().insert("path", "g")
@@ -315,8 +385,16 @@ function update(source) {
   link.exit().transition()
 	  .duration(duration)
 	  .attr("d", function(d) {
-		var o = {x: source.parent.x, y: source.parent.y};
-		return diagonal({source: o, target: o});
+          if(source.parent){
+             var o = {x: source.parent.x, y: source.parent.y};
+		     return diagonal({source: o, target: o});
+          }
+          else{
+            var o = {x: source.x, y: source.y};
+		    return diagonal({source: o, target: o});
+          }
+
+		
 	  })
 	  .remove();
 
@@ -343,14 +421,19 @@ function click(d) {
 */
 
 function click(d) {
+    selfnode = d.name;
     console.log(d)
-    if(d.parent){
-        if (d.name.endsWith("2")) {
-            root = treeData[0];
-        }
-        else {
-            root = treeData2[0];
-        }
+    if (d.name == "A02") {
+        root = tree1[0];
+    }
+    else if (d.name == "A021"){
+        root = tree2[0];
+    }
+    else if (d.name == "A023"){
+        root = tree3[0];
+    }
+    else if (d.name == "A024"){
+        root = tree4[0];
     }
     update(d);
 }
