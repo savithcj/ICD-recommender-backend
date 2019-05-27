@@ -8,3 +8,7 @@ def index(request):
 
 def tree(request):
     return render(request, 'tree.html')
+
+
+def circletree(request):
+    return render(request, 'circletree.html')
