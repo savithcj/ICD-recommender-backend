@@ -113,6 +113,7 @@ class Family(APIView):
             return Code.objects.none()
 
     def get(self, request, pk, format=None, **kwargs):
+        pk = pk.upper()
         selfs = self.get_single(pk)
         parent = self.get_single(selfs.parent)
         children = self.get_children(pk)
