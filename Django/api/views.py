@@ -122,7 +122,7 @@ class Family(APIView):
         siblingSerializer = serializers.CodeSerializer(siblings, many=True)
         childrenSerializer = serializers.CodeSerializer(children, many=True)
 
-        if parent.exists():
+        if parent:
             return Response({'self': selfSerializer.data, 'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
         else:
             return Response({'self': selfSerializer.data, 'parent': None, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
