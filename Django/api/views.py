@@ -97,10 +97,14 @@ class Family(APIView):
 
     def get_siblings(self, pk):
         try:
-            parent = Code.objects.get(code=pk).parent
-            siblingCodes = Code.objects.get(code=parent).children.split(",")
-            siblings = Code.objects.filter(code__in=siblingCodes)
-            return siblings
+            if(Code.objects.get(code=pk).parent):
+                parent = Code.objects.get(code=pk).parent
+                siblingCodes = Code.objects.get(
+                    code=parent).children.split(",")
+                siblings = Code.objects.filter(code__in=siblingCodes)
+                return siblings
+            else:
+                return Code.objects.filter(code=pk)
         except ObjectDoesNotExist:
             return Code.objects.none()
 
