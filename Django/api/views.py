@@ -117,10 +117,14 @@ class Family(APIView):
         parent = self.get_single(selfs.parent)
         children = self.get_children(pk)
         siblings = self.get_siblings(pk)
+        selfSerializer = serializers.CodeSerializer(selfs, many=False)
         parentSerializer = serializers.CodeSerializer(parent, many=False)
         siblingSerializer = serializers.CodeSerializer(siblings, many=True)
         childrenSerializer = serializers.CodeSerializer(children, many=True)
-        selfSerializer = serializers.CodeSerializer(selfs, many=False)
-        return Response({'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data, 'self': selfSerializer.data})
+
+        if parent:
+            return Response({'self': selfSerializer.data, 'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
+        else:
+            return Response({'self': selfSerializer.data, 'parent': None, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
 
 # TO DO: implement access permissions?
