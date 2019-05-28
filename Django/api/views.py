@@ -99,7 +99,6 @@ class Family(APIView):
         try:
             parent = Code.objects.get(code=pk).parent
             siblingCodes = Code.objects.get(code=parent).children.split(",")
-            siblingCodes.remove(pk)
             siblings = Code.objects.filter(code__in=siblingCodes)
             return siblings
         except ObjectDoesNotExist:
