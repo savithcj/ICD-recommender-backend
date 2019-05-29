@@ -7,7 +7,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
-from recommendations.models import Rule, Code
+from recommendations.models import Rule, Code, TreeCode
 from itertools import combinations
 
 # Create your views here.
@@ -88,43 +88,45 @@ class ListRequestedRules(APIView):
 class Family(APIView):
     def get_children(self, pk):
         try:
-            childrenCodes = Code.objects.get(code=pk).children
+            childrenCodes = TreeCode.objects.get(code=pk).children
             childrenCodes = childrenCodes.split(",")
-            children = Code.objects.filter(code__in=childrenCodes)
+            children = TreeCode.objects.filter(code__in=childrenCodes)
             return children
         except ObjectDoesNotExist:
-            return Code.objects.none()
+            return TreeCode.objects.none()
 
     def get_siblings(self, pk):
         try:
-            if(Code.objects.get(code=pk).parent):
-                parent = Code.objects.get(code=pk).parent
-                siblingCodes = Code.objects.get(
+            if(TreeCode.objects.get(code=pk).parent):
+                parent = TreeCode.objects.get(code=pk).parent
+                siblingCodes = TreeCode.objects.get(
                     code=parent).children.split(",")
-                siblings = Code.objects.filter(code__in=siblingCodes)
+                siblings = TreeCode.objects.filter(code__in=siblingCodes)
                 return siblings
             else:
-                return Code.objects.filter(code=pk)
+                return TreeCode.objects.filter(code=pk)
         except ObjectDoesNotExist:
-            return Code.objects.none()
+            return TreeCode.objects.none()
 
     def get_single(self, pk):
         try:
-            selfs = Code.objects.get(code=pk)
+            selfs = TreeCode.objects.get(code=pk)
             return selfs
         except ObjectDoesNotExist:
-            return Code.objects.none()
+            return TreeCode.objects.none()
 
     def get(self, request, pk, format=None, **kwargs):
         pk = pk.upper()
         selfs = self.get_single(pk)
+        print("PK:", pk)
+        print("SELF: ", selfs)
         parent = self.get_single(selfs.parent)
         children = self.get_children(pk)
         siblings = self.get_siblings(pk)
-        selfSerializer = serializers.CodeSerializer(selfs, many=False)
-        parentSerializer = serializers.CodeSerializer(parent, many=False)
-        siblingSerializer = serializers.CodeSerializer(siblings, many=True)
-        childrenSerializer = serializers.CodeSerializer(children, many=True)
+        selfSerializer = serializers.TreeCodeSerializer(selfs, many=False)
+        parentSerializer = serializers.TreeCodeSerializer(parent, many=False)
+        siblingSerializer = serializers.TreeCodeSerializer(siblings, many=True)
+        childrenSerializer = serializers.TreeCodeSerializer(children, many=True)
 
         if parent:
             return Response({'self': selfSerializer.data, 'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
