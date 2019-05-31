@@ -22,6 +22,17 @@ class ListAllRules(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
+class SingleCodeDescription(APIView):
+    def get(self, request, pk, format=None, **kwargs):
+        try:
+            codeObject = Code.objects.get(code=pk)
+        except ObjectDoesNotExist:
+            return Response({None})
+        serializer = serializers.CodeSerializer(codeObject, many=False)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
 class ListChildrenOfCode(APIView):
     def get_object(self, pk):
         try:
