@@ -51,7 +51,7 @@ class ListChildrenOfCode(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListRequestedRules(APIView):
-    def get_object(self, inCodes):
+    def get_object(self, inCodes, request):
         try:
             # Sort input codes
             inputCodes = inCodes
@@ -62,7 +62,6 @@ class ListRequestedRules(APIView):
             lhs = []
             for i in range(len(inputRules)):
                 lhs += list(combinations(inputRules, i+1))
-            print("LHS", lhs)
 
             # Concatening items in combinations together
             new_lhs = []
@@ -72,12 +71,28 @@ class ListRequestedRules(APIView):
                     empty += entry[i] + ","
                 new_lhs.append(empty[:-1])
 
+            # special params
+            kwargs = dict()
+            kwargs["min_age"] = None
+            kwargs["max_age"] = None
+            kwargs["gender"] = None
+
+            ageRange = [65, 45, 20, 0]
+            age_param = request.GET.get('age', None)
+            if age_param is not None and age_param.isdigit():
+                print("In Age:", age)
+                for minAge in ageRange:
+                    if age >= minAge:
+                        kwargs["min_age"] = minAge
+                        print("Min Age:", minAge)
+                        break
+                pass
+
             # get rules
             rules = Rule.objects.filter(
-                lhs__in=new_lhs).order_by('-confidence')
+                lhs__in=new_lhs, **{k: v for k, v in kwargs.items() if v is not None}).order_by('-confidence')
 
             # exclude rules with code in RHS that already exist in the LHS
-            print(r'(' + '|'.join(new_lhs) + ')')
             rules = rules.exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
 
             # append description
@@ -90,7 +105,7 @@ class ListRequestedRules(APIView):
             return Rule.objects.none()
 
     def get(self, request, inCodes, format=None, **kwargs):
-        rules = self.get_object(inCodes)
+        rules = self.get_object(inCodes, request)
         serializer = serializers.ExtendedRulesSerializer(rules, many=True)
         return Response(serializer.data)
 
