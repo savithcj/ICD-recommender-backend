@@ -80,6 +80,7 @@ class ListRequestedRules(APIView):
             ageRange = [65, 45, 20, 0]
             age_param = request.GET.get('age', None)
             if age_param is not None and age_param.isdigit():
+                age = int(age_param)
                 print("In Age:", age)
                 for minAge in ageRange:
                     if age >= minAge:
