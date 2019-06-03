@@ -102,6 +102,7 @@ class Command(BaseCommand):
                 self.chapterRanges.append(chapChildren)
                 self.chapters[chapChildren] = chap
 
+            self.chapterRanges.sort()
             self.chapterRanges.reverse()
             # chapChild1 = chapChildren[0]
             # chapChild2 = chapChildren[4]
