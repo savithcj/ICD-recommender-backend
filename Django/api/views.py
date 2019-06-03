@@ -143,7 +143,7 @@ class Family(APIView):
             return TreeCode.objects.none()
 
     def get(self, request, pk, format=None, **kwargs):
-        pk = pk.upper()
+        # pk = pk.upper()
         selfs = self.get_single(pk)
         print("PK:", pk)
         print("SELF: ", selfs)
