@@ -138,14 +138,11 @@ class Family(APIView):
             selfs = TreeCode.objects.get(code=inCode)
             return selfs
         except ObjectDoesNotExist:
-            return TreeCode.objects.none()
+            return None
 
     def get(self, request, inCode, format=None, **kwargs):
-        # inCode = inCode.upper()
         selfs = self.get_single(inCode)
-        print("inCode:", inCode)
-        print("SELF: ", selfs)
-        if not selfs.exists():
+        if selfs == None:
             return Response({'self': None, 'parent': None, 'siblings': None, 'children': None})
         parent = self.get_single(selfs.parent)
         children = self.get_children(inCode)
