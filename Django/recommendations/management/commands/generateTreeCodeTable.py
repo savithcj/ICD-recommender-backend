@@ -16,10 +16,9 @@ class Command(BaseCommand):
             parent = code[:-1]
         return parent
 
-    def setCategoryHiearchy(self, start, end, block, startLetter, parentDict, childrenDict):
+    def setCategoryHiearchy(self, startNum, endNum, block, startLetter, parentDict, childrenDict):
         # sets hierarchy of block categories
-        # parentDict[block] = startLetter
-        for j in range(start, end+1):
+        for j in range(startNum, endNum+1):
             child = startLetter + '{:02d}'.format(j)
             parentDict[child] = block
             childrenDict[block].append(child)
@@ -104,18 +103,6 @@ class Command(BaseCommand):
 
             self.chapterRanges.sort()
             self.chapterRanges.reverse()
-            # chapChild1 = chapChildren[0]
-            # chapChild2 = chapChildren[4]
-
-            # descriptions[chapChild1] = chapDesc
-            # descriptions[chapChild2] = chapDesc
-
-            # parentDict[chapChild1] = chap
-            # parentDict[chapChild2] = chap
-
-            # childrenDict[chap].append(chapChild1)
-            # if chapChild1 != chapChild2:
-            #     childrenDict[chap].append(chapChild2)
 
         # Add ICD-10 blocks
         with open('secret/ICDBlocks.txt') as f:
@@ -133,23 +120,19 @@ class Command(BaseCommand):
                 # Add 3 letter codes to blocks
                 if len(block) > 3:
                     print(block, ': ', block[0], block[1:3], block[5:7])
-                    start = int(block[1:3])
-                    end = int(block[5:7])
+                    startNum = int(block[1:3])
+                    endNum = int(block[5:7])
                     startLetter = block[0]
-                    # parentDict[code] = startLetter
-                    # for single letter code
-                    # allCodes.add(startLetter)
-                    # childrenDict[startLetter].append(code)
-                    # parentDict[startLetter] = ''
-                    if start < end:
-                        self.setCategoryHiearchy(start, end, block, startLetter, parentDict, childrenDict)
-                    if start > end:
-                        end = 99
-                        self.setCategoryHiearchy(start, end, block, startLetter, parentDict, childrenDict)
-                        startLetter = block[4]
-                        start = 00
-                        end = end = int(block[5:7])
-                        self.setCategoryHiearchy(start, end, block, startLetter, parentDict, childrenDict)
+                    endLetter = block[4]
+                    if startLetter != endLetter:
+                        self.setCategoryHiearchy(startNum, 99, block, startLetter, parentDict, childrenDict)
+                        numLettersBetween = ord(endLetter) - ord(startLetter) - 1
+                        for i in range(numLettersBetween):
+                            print(chr(ord(startLetter)+i+1))
+                            self.setCategoryHiearchy(0, 99, block, chr(ord(startLetter)+i+1), parentDict, childrenDict)
+                        self.setCategoryHiearchy(0, endNum, block, endLetter, parentDict, childrenDict)
+                    else:
+                        self.setCategoryHiearchy(startNum, endNum, block, startLetter, parentDict, childrenDict)
                 else:
                     print(block)
 
