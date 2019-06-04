@@ -170,7 +170,27 @@ class ListMatchingDescriptions(APIView):
 
     def get(self, request, descSubstring, format=None, **kwargs):
         codes = self.get_object(descSubstring)
-        print("CODES MATCHING SUBSTRING: ", codes)
         serializer = serializers.CodeSerializer(codes, many=True)
         return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
+class ListAncestors(APIView):
+    def get_object(self, code):
+
+        ancestors = []
+        print("Getting ancestors of", code)
+        while True:
+            try:
+                ancestor = TreeCode.objects.get(code=code)
+                serializer = serializers.CodeSerializer(ancestor, many=False)
+                ancestors.append(serializer)
+                code = ancestor.parent
+                print("parent:", ancestor.parent)
+            except ObjectDoesNotExist:
+                return ancestors
+
+    def get(self, request, inCode, format=None, **kwargs):
+        ancestors = self.get_object(inCode)
+        return Response([ancestor.data for ancestor in ancestors])
 # TO DO: implement access permissions?

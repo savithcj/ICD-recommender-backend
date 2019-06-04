@@ -7,5 +7,6 @@ urlpatterns = [
     path('family/<str:pk>/', views.Family.as_view(), name="family-of-code"),
     path('codeDescription/<str:pk>/', views.SingleCodeDescription.as_view(), name="single-code"),
     path('requestRules/<str:inCodes>/', views.ListRequestedRules.as_view(), name="rules-specific"),
-    path('matchDescription/<str:descSubstring>/', views.ListMatchingDescriptions.as_view(), name="match-description")
+    path('matchDescription/<str:descSubstring>/', views.ListMatchingDescriptions.as_view(), name="match-description"),
+    path('ancestors/<str:inCode>/', views.ListAncestors.as_view(), name="ancestors-of-code")
 ]
