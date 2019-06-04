@@ -160,4 +160,17 @@ class Family(APIView):
         else:
             return Response({'self': selfSerializer.data, 'parent': None, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
 
+
+@permission_classes((permissions.AllowAny,))
+class ListMatchingDescriptions(APIView):
+    def get_object(self, descSubstring):
+        if len(descSubstring) < 3:
+            return Code.objects.none()
+        return Code.objects.filter(description__icontains=descSubstring)
+
+    def get(self, request, descSubstring, format=None, **kwargs):
+        codes = self.get_object(descSubstring)
+        print("CODES MATCHING SUBSTRING: ", codes)
+        serializer = serializers.CodeSerializer(codes, many=True)
+        return Response(serializer.data)
 # TO DO: implement access permissions?
