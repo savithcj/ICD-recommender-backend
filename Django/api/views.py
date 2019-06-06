@@ -7,6 +7,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
+from django.db.models.functions import Length
 from recommendations.models import Rule, Code, TreeCode
 from itertools import combinations
 
@@ -163,7 +164,7 @@ class ListMatchingDescriptions(APIView):
     def get_object(self, descSubstring):
         if len(descSubstring) < 3:
             return Code.objects.none()
-        return Code.objects.filter(description__icontains=descSubstring)
+        return Code.objects.filter(description__icontains=descSubstring).order_by(Length('code').asc())[:15]
 
     def get(self, request, descSubstring, format=None, **kwargs):
         codes = self.get_object(descSubstring)
