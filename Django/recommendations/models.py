@@ -22,6 +22,7 @@ class Code(models.Model):
     description = models.CharField(db_column='description', max_length=100)
     parent = models.CharField(db_column='parent', max_length=20)
     children = models.TextField(db_column='children', max_length=1000)
+    times_coded = models.IntegerField(db_column='times_coded', default=0)
 
     class Meta:
         db_table = 'codes'

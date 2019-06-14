@@ -9,7 +9,8 @@ import ListViewer from "./Components/ListViewer/ListViewer";
 import TreeViewer from "./Components/TreeViewer/TreeViewer";
 import MenuBar from "./Components/MenuBar/MenuBar";
 
-import CustomListItem from "./Components/CustomListItem/CustomListItem";
+import SelectedCodesGrid from "./Components/SelectedCodesGrid/SelectedCodesGrid";
+import { __esModule } from "d3-random";
 
 const defaultLayoutLg = [
   { w: 7, h: 16, x: 0, y: 2, i: "0" },
@@ -52,7 +53,6 @@ const defaultLayouts = {
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("layouts") || defaultLayouts;
-// const originalLayouts = defaultLayouts;
 
 const ageOptions = [...Array(120).keys()].map(x => "" + x);
 
@@ -73,11 +73,10 @@ class App extends Component {
     codeAutoCompleteDisplayed: [], // autocomplete suggestions to be displayed
     ageAutoCompleteDisplayed: [],
     genderAutoCompleteDisplayed: [],
-    // searchedCodeList: {}, // list of code searched via API
     cachedCodeWithDescription: [], // caches the autocomplete codes in json format with descriptions
 
     ////// Code Selection Feature
-    selectedCodes: [],
+    selectedCodes: [], // list of selected code with descriptions
     recommendedCodes: null //list of recommended codes based on the selected codes
   };
 
@@ -156,7 +155,9 @@ class App extends Component {
       fetch(url)
         .then(response => response.json())
         .then(results => {
-          this.appendCodeToCache(results["code matches"]);
+          this.appendCodeToCache(
+            results["code matches"].concat(results["description matches"]).concat(results["keyword matches"])
+          );
           this.populateAutoCompleteList(results, inputValue);
         });
     }
@@ -197,28 +198,30 @@ class App extends Component {
    * Called upon by CodeInputField when an item is selected.
    * Pass selected codes to this.getRecommendedCodes.
    */
-  addSelectedCode = newValue => {
+  addSelectedCode = newCodeObj => {
     let selectedCodes = Array.from(this.state.selectedCodes);
 
     // check if the code already exist in the selection
-    const getDuplicate = selectedCodes.find(codeObj => codeObj.code === newValue);
+    const getDuplicate = selectedCodes.find(codeObj => codeObj.code === newCodeObj);
 
     if (getDuplicate === undefined) {
       // get code description from auto-suggest cache
       const codeDescriptions = Array.from(this.state.cachedCodeWithDescription);
-      const cachedCode = codeDescriptions.find(codeObj => codeObj.code === newValue);
+      const cachedCode = codeDescriptions.find(codeObj => codeObj.code === newCodeObj);
 
       // construct new code object
       const newCode = {
         code: cachedCode.code,
-        description: cachedCode.description
+        description: cachedCode.description,
+        x: this.state.selectedCodes.length * 2,
+        y: Infinity,
+        w: 3,
+        h: 1
       };
 
       selectedCodes.push(newCode);
 
-      this.setState(prev => {
-        prev.selectedCodes.push(newCode);
-      });
+      this.setState({ selectedCodes });
 
       this.getRecommendedCodes(selectedCodes);
     } else {
@@ -226,18 +229,29 @@ class App extends Component {
     }
   };
 
+  //the only reason we are not using addSelectedCode here is because we already have descriptions.
   addCodeFromTree = newValue => {
+    //newValue is a code object containing code, and description
+
     let selectedCodes = Array.from(this.state.selectedCodes);
 
     // check if the code already exist in the selection
     const getDuplicate = selectedCodes.find(codeObj => codeObj.code === newValue.code);
 
     if (getDuplicate === undefined) {
-      selectedCodes.push(newValue);
+      // construct new code object
+      const newCode = {
+        code: newValue.code,
+        description: newValue.description,
+        x: this.state.selectedCodes.length * 2,
+        y: Infinity,
+        w: 3,
+        h: 1
+      };
 
-      this.setState(prev => {
-        prev.selectedCodes.push(newValue);
-      });
+      selectedCodes.push(newCode);
+
+      this.setState({ selectedCodes });
 
       this.getRecommendedCodes(selectedCodes);
     } else {
@@ -257,14 +271,18 @@ class App extends Component {
    * item from the listViewers. Removes the code with a
    * matching ID from the list
    */
-  handleRemoveSelectedCode = event => {
-    const removeCodeIndex = this.state.selectedCodes.findIndex(codeObj => codeObj.code === event.currentTarget.id);
+  handleRemoveSelectedCode = code => {
+    console.log(code);
+    const removeCodeIndex = this.state.selectedCodes.findIndex(codeObj => codeObj.code === code);
 
     const codes = [...this.state.selectedCodes];
     codes.splice(removeCodeIndex, 1);
 
     this.setState({
       selectedCodes: codes
+      // selectedCodeGrids: this.state.selectedCodeGrids.filter(el => {
+      //   return el.i !== code;
+      // })
     });
 
     this.getRecommendedCodes(codes);
@@ -483,6 +501,9 @@ class App extends Component {
     return (
       <div className="App">
         <MenuBar
+          title="ICD-10 Code Suggestion and Usage Insight"
+          firstLinkName="Admin"
+          firstLinkRoute="/admin"
           handleLayoutConfirm={this.handleLayoutModifierButton}
           handleResetLayout={this.resetLayout}
           inModifyMode={this.state.isLayoutModifiable}
@@ -501,22 +522,19 @@ class App extends Component {
               <TreeViewer ref={this.treeViewDiv} id="1337" addCodeFromTree={this.addCodeFromTree} />
             </div>
             <div key="1" className={highlightEditDiv} data-grid={{ x: 0, y: 2, w: 4, h: 9 }}>
-              <ListViewer
-                className="selectedCodes"
-                title="Selected Codes"
+              <SelectedCodesGrid
                 items={this.state.selectedCodes}
-                noItemsMessage="No codes selected"
-                keyName="code"
-                valueName="code"
-                descriptionName="description"
+                itemsGrid={this.state.selectedCodeGrids}
                 removeItemButton={this.handleRemoveSelectedCode}
                 removeAllItemsButton={this.state.selectedCodes.length === 0 ? null : this.resetSelectedCodes}
                 exploreButton={this.handleExploreSelectedCodeButton}
+                addItem={this.addSelectedCode}
+                onLayoutChange={this.handleCodeGridLayoutChange}
               />
             </div>
 
             <div key="2" className={highlightEditDiv} data-grid={{ x: 0, y: 11, w: 4, h: 8 }}>
-              {/* <ListViewer
+              <ListViewer
                 className="recommendedCodes"
                 title="Recommended Codes"
                 items={this.state.recommendedCodes}
@@ -530,8 +548,8 @@ class App extends Component {
                 removeItemButton={this.handleRemoveRecommendedCode}
                 exploreButton={this.handleExploreRecommendedCodeButton}
                 tooltipValueName="reason"
-              /> */}
-              <CustomListItem />
+              />
+              {/* <CustomListItem /> */}
             </div>
 
             <div key="3" className={highlightEditDiv} data-grid={{ x: 0, y: 0, w: 4, h: 2, minW: 4, minH: 2 }}>
