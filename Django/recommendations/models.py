@@ -8,8 +8,9 @@ class Rule(models.Model):
     max_age = models.IntegerField(db_column='max_age')
     support = models.FloatField(db_column='support')
     confidence = models.FloatField(db_column='confidence')
-    num_accepted = models.IntegerField(db_column='num_accepted')
-    num_rejected = models.IntegerField(db_column='num_rejected')
+    num_accepted = models.IntegerField(db_column='num_accepted', default=0)
+    num_rejected = models.IntegerField(db_column='num_rejected', default=0)
+    num_suggested = models.IntegerField(db_column='num_suggested', default=0)
 
     class Meta:
         #managed = False
