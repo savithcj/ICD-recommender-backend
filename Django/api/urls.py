@@ -9,5 +9,6 @@ urlpatterns = [
     path('requestRules/<str:inCodes>/', views.ListRequestedRules.as_view(), name="rules-specific"),
     path('matchDescription/<str:descSubstring>/', views.ListMatchingDescriptions.as_view(), name="match-description"),
     path('ancestors/<str:inCode>/', views.ListAncestors.as_view(), name="ancestors-of-code"),
-    path('codeAutosuggestions/<str:matchString>/', views.ListCodeAutosuggestions.as_view(), name="code-autosuggestions")
+    path('codeAutosuggestions/<str:matchString>/', views.ListCodeAutosuggestions.as_view(), name="code-autosuggestions"),
+    path('codeUsed/<str:inCodes>/', views.CodeUsed.as_view(), name="code-used"),
 ]

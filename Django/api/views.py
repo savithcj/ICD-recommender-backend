@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models.functions import Length
 from recommendations.models import Rule, Code, TreeCode
 from itertools import combinations
+from django.http import HttpResponse
 
 
 class ListAllRules(generics.ListAPIView):
@@ -151,7 +152,8 @@ class Family(APIView):
         selfSerializer = serializers.TreeCodeSerializer(selfs, many=False)
         parentSerializer = serializers.TreeCodeSerializer(parent, many=False)
         siblingSerializer = serializers.TreeCodeSerializer(siblings, many=True)
-        childrenSerializer = serializers.TreeCodeSerializer(children, many=True)
+        childrenSerializer = serializers.TreeCodeSerializer(
+            children, many=True)
 
         if parent:
             return Response({'self': selfSerializer.data, 'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
@@ -205,5 +207,18 @@ class ListCodeAutosuggestions(APIView):
         serializerCode = serializers.CodeSerializer(matchesCode, many=True)
         return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": []})
 
+
+@permission_classes((permissions.AllowAny,))
+class CodeUsed(APIView):
+    def put(self, request, inCodes, format=None, **kwargs):
+        codeList = inCodes.split(",")
+        codes = Code.objects.filter(code__in=codeList)
+        if len(codes) > 0:
+            for code in codes:
+                code.times_coded += 1
+                code.save()
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=204)
 
 # TO DO: implement access permissions?
