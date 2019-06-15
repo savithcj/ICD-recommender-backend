@@ -17,9 +17,11 @@ class Command(BaseCommand):
         # initialize code usage numbers for each block
         blockUsage = dict()
         blockNames = []
+        blockParents = dict()
         for blockObject in blockObjects:
             blockUsage[blockObject.code] = 0
             blockNames.append(blockObject.code)
+            blockParents[blockObject.code] = blockObject.parent
 
         codeObjects = Code.objects.all()
         for count, codeObject in enumerate(codeObjects):
@@ -48,6 +50,7 @@ class Command(BaseCommand):
         print("Saving block usage numbers...")
         with transaction.atomic():
             for blockName in blockNames:
-                block = CodeBlockUsage.objects.create(block=blockName, times_coded=blockUsage[blockName])
+                block = CodeBlockUsage.objects.create(
+                    block=blockName, times_coded=blockUsage[blockName], parent=blockParents[blockName])
                 block.save()
         print("Done")
