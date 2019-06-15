@@ -8,7 +8,7 @@ from rest_framework import permissions
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from django.db.models.functions import Length
-from recommendations.models import Rule, Code, TreeCode
+from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
 from itertools import combinations
 from django.http import HttpResponse
 
@@ -19,6 +19,13 @@ class ListAllRules(generics.ListAPIView):
     """
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
+
+class ListCodeBlockUsage(generics.ListAPIView):
+    """
+    Lists all rules
+    """
+    queryset = CodeBlockUsage.objects.all()
+    serializer_class = serializers.CodeBlockUsageSerializer
 
 
 @permission_classes((permissions.AllowAny,))

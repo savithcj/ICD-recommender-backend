@@ -11,4 +11,5 @@ urlpatterns = [
     path('ancestors/<str:inCode>/', views.ListAncestors.as_view(), name="ancestors-of-code"),
     path('codeAutosuggestions/<str:matchString>/', views.ListCodeAutosuggestions.as_view(), name="code-autosuggestions"),
     path('codeUsed/<str:inCodes>/', views.CodeUsed.as_view(), name="code-used"),
+    path('codeBlockUsage/', views.ListCodeBlockUsage.as_view(), name="code-block-usage"),
 ]

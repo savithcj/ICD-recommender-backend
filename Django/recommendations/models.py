@@ -37,3 +37,11 @@ class TreeCode(models.Model):
 
     class Meta:
         db_table = 'tree_codes'
+
+
+class CodeBlockUsage(models.Model):
+    block = models.CharField(db_column='block', max_length=20, primary_key=True)
+    times_coded = models.IntegerField(db_column='times_coded', default=0)
+
+    class Meta:
+        db_table = 'code_usage'
