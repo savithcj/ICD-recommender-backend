@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from recommendations.models import Rule, Code, TreeCode
+from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
 
 
 class RulesSerializer(serializers.ModelSerializer):
@@ -7,6 +7,12 @@ class RulesSerializer(serializers.ModelSerializer):
         model = Rule
         fields = ("lhs", "rhs", "min_age", "max_age", "support",
                   "confidence", "num_accepted", "num_rejected")
+
+
+class CodeBlockUsageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CodeBlockUsage
+        fields = ("block", "times_coded")
 
 
 class ExtendedRulesSerializer(serializers.ModelSerializer):
