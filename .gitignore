@@ -1,3 +1,6 @@
+
+frontend/package-lock.json
+
 env/
 *.sqlite3
 secret/
