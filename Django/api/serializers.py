@@ -12,7 +12,7 @@ class RulesSerializer(serializers.ModelSerializer):
 class CodeBlockUsageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodeBlockUsage
-        fields = ("block", "times_coded", "parent")
+        fields = ("block", "times_coded", "parent", "destination_counts")
 
 
 class ExtendedRulesSerializer(serializers.ModelSerializer):
