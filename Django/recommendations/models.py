@@ -43,7 +43,6 @@ class TreeCode(models.Model):
 class CodeBlockUsage(models.Model):
     block = models.CharField(db_column='block', max_length=20, primary_key=True)
     times_coded = models.IntegerField(db_column='times_coded', default=0)
-    parent = models.CharField(db_column='parent', max_length=20, null=True)
     destination_counts = models.CharField(db_column='destination_counts', max_length=1000,
                                           validators=[int_list_validator], null=True)
 
