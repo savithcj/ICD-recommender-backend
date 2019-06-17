@@ -20,12 +20,19 @@ class ListAllRules(generics.ListAPIView):
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
 
-class ListCodeBlockUsage(generics.ListAPIView):
-    """
-    Lists all rules
-    """
-    queryset = CodeBlockUsage.objects.all()
-    serializer_class = serializers.CodeBlockUsageSerializer
+
+@permission_classes((permissions.AllowAny,))
+class ListCodeBlockUsage(APIView):
+    def get(self, request, format=None, **kwargs):
+        blocks = CodeBlockUsage.objects.all()
+        for block in blocks:
+            treeCode = TreeCode.objects.get(code=block.block)
+            block.description = treeCode.description
+            block.parent = treeCode.parent
+        serializer = serializers.CodeBlockUsageSerializer(blocks, many=True)
+        return Response(serializer.data)
+    # queryset = CodeBlockUsage.objects.all()
+    # serializer_class = serializers.CodeBlockUsageSerializer
 
 
 @permission_classes((permissions.AllowAny,))
@@ -83,6 +90,8 @@ class ListRequestedRules(APIView):
             kwargs["min_age"] = None
             kwargs["max_age"] = None
             kwargs["gender"] = None
+
+            # TODO: Implement gender
 
             ageRange = [65, 45, 20, 0]
             age_param = request.GET.get('age', None)

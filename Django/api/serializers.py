@@ -10,9 +10,18 @@ class RulesSerializer(serializers.ModelSerializer):
 
 
 class CodeBlockUsageSerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
+    parent = serializers.SerializerMethodField()
+
+    def get_description(self, obj):
+        return obj.description
+
+    def get_parent(self, obj):
+        return obj.parent
+
     class Meta:
         model = CodeBlockUsage
-        fields = ("block", "times_coded", "parent", "destination_counts")
+        fields = ("block", "times_coded", "parent", "destination_counts", "description")
 
 
 class ExtendedRulesSerializer(serializers.ModelSerializer):
