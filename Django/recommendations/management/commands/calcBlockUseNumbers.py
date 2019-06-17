@@ -39,11 +39,9 @@ class Command(BaseCommand):
         # initialize code usage numbers for each block
         blockNames = []
         blockUsage = dict()
-        blockParents = dict()
         for blockObject in blockObjects:
             blockNames.append(blockObject.code)
             blockUsage[blockObject.code] = 0
-            blockParents[blockObject.code] = blockObject.parent
 
         # Find number of rule destinations for each block
         print("Calculating rule destinations for each block...")
@@ -84,7 +82,6 @@ class Command(BaseCommand):
                 destStr = destStr[:-1]
                 block = CodeBlockUsage.objects.create(
                     block=blockName, times_coded=blockUsage[blockName],
-                    parent=blockParents[blockName],
                     destination_counts=destStr)
                 block.save()
         print("Done")
