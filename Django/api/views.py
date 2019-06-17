@@ -26,9 +26,11 @@ class ListCodeBlockUsage(APIView):
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
         for block in blocks:
-            treeCode = TreeCode.objects.get(code=block.block)
-            block.description = treeCode.description
-            block.parent = treeCode.parent
+            blockObject = TreeCode.objects.get(code=block.block)
+            block.description = blockObject.description
+            block.parent = blockObject.parent
+            parentObject = TreeCode.objects.get(code=block.parent)
+            block.parent_description = parentObject.description
         serializer = serializers.CodeBlockUsageSerializer(blocks, many=True)
         return Response(serializer.data)
     # queryset = CodeBlockUsage.objects.all()
