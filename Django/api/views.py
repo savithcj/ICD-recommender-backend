@@ -20,6 +20,7 @@ class ListAllRules(generics.ListAPIView):
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
 
+
 class ListCodeBlockUsage(generics.ListAPIView):
     """
     Lists all rules
@@ -83,6 +84,8 @@ class ListRequestedRules(APIView):
             kwargs["min_age"] = None
             kwargs["max_age"] = None
             kwargs["gender"] = None
+
+            # TODO: Implement gender
 
             ageRange = [65, 45, 20, 0]
             age_param = request.GET.get('age', None)
