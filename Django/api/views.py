@@ -30,7 +30,7 @@ class ModifyRule(APIView):
         if 'LHSCodes' not in body_data or 'RHSCodes' not in body_data:
             return HttpResponse(400)
 
-        if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) < 1:
+        if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) != 1:
             return HttpResponse(400)
 
         for counter, code in enumerate(body_data['LHSCodes']):
@@ -60,9 +60,10 @@ class ModifyRule(APIView):
             pass
 
         if 'id' in body_data and body_data['id'] != '':
-            # TODO: Modifying a rule
+            # Modifying a rule
             pass
         else:
+            # TODO: Sort codes before appending
             newRule = Rule.objects.create(
                 lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
             newRule.save()
