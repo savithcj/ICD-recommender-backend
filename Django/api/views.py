@@ -11,8 +11,66 @@ from django.db.models.functions import Length
 from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
 from itertools import combinations
 from django.http import HttpResponse
+import json
 
 
+@permission_classes((permissions.AllowAny,))
+class ModifyRule(APIView):
+    serializer_class = serializers.RulesSerializer
+
+    def put(self, request, format=None, **kwargs):
+        body = request.body.decode('utf-8')
+        body_data = json.loads(body)
+        LHSCodes = ''
+        RHSCodes = ''
+        ageStart = None
+        ageEnd = None
+        gender = ''
+
+        if 'LHSCodes' not in body_data or 'RHSCodes' not in body_data:
+            return HttpResponse(400)
+
+        if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) < 1:
+            return HttpResponse(400)
+
+        for counter, code in enumerate(body_data['LHSCodes']):
+            LHSCodes = LHSCodes + str(code)
+            if counter < len(body_data['LHSCodes']) - 1:
+                LHSCodes = LHSCodes + ','
+
+        for counter, code in enumerate(body_data['RHSCodes']):
+            RHSCodes = RHSCodes + str(code)
+            if counter < len(body_data['RHSCodes']) - 1:
+                RHS = RHS + ','
+
+        if 'ageStart' in body_data:
+            ageStart = int(body_data['ageStart'])
+        else:
+            ageStart = 0
+
+        if 'ageEnd' in body_data:
+            ageEnd = int(body_data['ageEnd'])
+        else:
+            ageEnd = 0
+
+        # FIXME: gender not implemented in Rule
+        if 'gender' in body_data:
+            gender = body_data['gender']
+        else:
+            pass
+
+        if 'id' in body_data and body_data['id'] != '':
+            # TODO: Modifying a rule
+            pass
+        else:
+            newRule = Rule.objects.create(
+                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
+            newRule.save()
+
+        return HttpResponse(201)
+
+
+@permission_classes((permissions.AllowAny,))
 class ListAllRules(generics.ListAPIView):
     """
     Lists all rules
@@ -231,12 +289,12 @@ class CodeUsed(APIView):
     def put(self, request, inCodes, format=None, **kwargs):
         codeList = inCodes.split(",")
         codes = Code.objects.filter(code__in=codeList)
-        if len(codes) > 0:
+        if len(codes) == len(codeList):
             for code in codes:
                 code.times_coded += 1
                 code.save()
             return HttpResponse(status=200)
         else:
-            return HttpResponse(status=204)
+            return HttpResponse(status=400)
 
-# TO DO: implement access permissions?
+# TODO: implement access permissions?
