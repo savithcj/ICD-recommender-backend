@@ -72,6 +72,32 @@ class ModifyRule(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+class RuleFlagging(generics.ListAPIView):
+    queryset = Rule.objects.all()
+    serializer_class = serializers.RulesSerializer
+
+    def put(self, request, ruleId, format=None, **kwargs):
+        print("ruleId=" + ruleId)
+
+        try:
+            ruleObj = Rule.objects.get(id=ruleId)
+            # ruleObj.update()
+            # TODO: Implement updating flag columns
+            return HttpResponse(200)
+
+        except Exception as e:
+            print(e)
+            return HttpResponse(400)
+
+
+@permission_classes((permissions.AllowAny,))
+class RuleSearch(generics.ListAPIView):
+    queryset = Rule.objects.all()
+    serializer_class = serializers.RulesSerializer
+    # TODO: Implementation of rule search
+
+
+@permission_classes((permissions.AllowAny,))
 class ListAllRules(generics.ListAPIView):
     """
     Lists all rules

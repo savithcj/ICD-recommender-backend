@@ -12,6 +12,8 @@ class Rule(models.Model):
     num_accepted = models.IntegerField(db_column='num_accepted', default=0)
     num_rejected = models.IntegerField(db_column='num_rejected', default=0)
     num_suggested = models.IntegerField(db_column='num_suggested', default=0)
+    review_status = models.IntegerField(db_column='review_status', default=0)
+    active = models.BooleanField(db_column='active', default=True)
 
     class Meta:
         #managed = False
