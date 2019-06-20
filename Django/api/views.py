@@ -221,6 +221,53 @@ class ListRequestedRules(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+class ListFlaggedRules(APIView):
+    def get_objects(self):
+        try:
+            rules = Rule.objects.filter(review_status=1)
+
+            # append description
+            for rule in rules:
+                rule.description = "Suggested: "+str(rule.num_suggested) + ", " + \
+                    "Accepted: "+str(rule.num_accepted)+", "+"Rejected: "+str(rule.num_rejected)
+
+            return rules
+        except ObjectDoesNotExist:
+            return Rule.objects.none()
+
+    def get(self, request, format=None, **kwargs):
+        rules = self.get_objects()
+        serializer = serializers.ExtendedRulesSerializer(rules, many=True)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
+class UpdateFlaggedRule(APIView):
+    def put(self, request, ruleIdAndDecision, format=None, **kwargs):
+        ruleId, decision = ruleIdAndDecision.split(",")
+        try:
+            rule = Rule.objects.get(id=ruleId)
+            print(rule.review_status)
+            if(rule.review_status == 0):
+                return HttpResponse(status=400, reason="Not a flagged rule")
+            if(rule.review_status == 2 or rule.review_status == 3):
+                return HttpResponse(status=400, reason="Rule already reviewed")
+            if(decision == "ACCEPT"):
+                rule.review_status = 2
+                rule.active = True
+            elif(decision == "REJECT"):
+                rule.review_status = 3
+                rule.active = False
+            else:
+                return HttpResponse(status=400, reason="Error evaluating decision => "+decision)
+
+            rule.save()
+            return HttpResponse(status=200)
+        except Exception as e:
+            return HttpResponse(status=400, reason=e)
+
+
+@permission_classes((permissions.AllowAny,))
 class Family(APIView):
     def get_children(self, inCode):
         try:

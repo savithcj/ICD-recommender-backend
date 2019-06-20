@@ -15,4 +15,6 @@ urlpatterns = [
     path('modifyRule/', views.ModifyRule.as_view(), name="modify-rule"),
     path('ruleSearch/', views.RuleSearch.as_view(), name="rule-search"),
     path('flagRuleForReview/<str:ruleId>/', views.FlagRuleForReview.as_view(), name="flag-rule-for-review"),
+    path('flaggedRules/', views.ListFlaggedRules.as_view(), name="flagged-rules"),
+    path('updateFlaggedRule/<str:ruleIdAndDecision>/', views.UpdateFlaggedRule.as_view(), name="update-flagged-rule"),
 ]
