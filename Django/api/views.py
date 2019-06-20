@@ -79,7 +79,7 @@ class FlagRuleForReview(generics.ListAPIView):
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
 
-    def put(self, request, ruleId, format=None, **kwargs):
+    def get(self, request, ruleId, format=None, **kwargs):
         print("ruleId=" + ruleId)
 
         try:
@@ -200,7 +200,7 @@ class ListRequestedRules(APIView):
             # get rules
             rules = Rule.objects.filter(
                 lhs__in=new_lhs, **{k: v for k, v in kwargs.items() if v is not None}).order_by('-confidence')
-
+            # TODO: exclude rules that have been supressed(column active)
             # exclude rules with code in RHS that already exist in the LHS
             rules = rules.exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
 
