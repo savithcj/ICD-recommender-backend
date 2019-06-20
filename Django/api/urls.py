@@ -14,5 +14,5 @@ urlpatterns = [
     path('codeBlockUsage/', views.ListCodeBlockUsage.as_view(), name="code-block-usage"),
     path('modifyRule/', views.ModifyRule.as_view(), name="modify-rule"),
     path('ruleSearch/', views.RuleSearch.as_view(), name="rule-search"),
-    path('ruleFlagging/<str:ruleId>/', views.RuleFlagging.as_view(), name="rule-flagging"),
+    path('flagRuleForReview/<str:ruleId>/', views.FlagRuleForReview.as_view(), name="flag-rule-for-review"),
 ]

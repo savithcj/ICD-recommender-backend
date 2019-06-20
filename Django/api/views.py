@@ -72,7 +72,7 @@ class ModifyRule(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class RuleFlagging(generics.ListAPIView):
+class FlagRuleForReview(generics.ListAPIView):
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
 
