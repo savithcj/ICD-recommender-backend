@@ -12,6 +12,7 @@ class Rule(models.Model):
     num_accepted = models.IntegerField(db_column='num_accepted', default=0)
     num_rejected = models.IntegerField(db_column='num_rejected', default=0)
     num_suggested = models.IntegerField(db_column='num_suggested', default=0)
+    # review_status: 1- user flagged for rule supression, 2- admin approved for rule supression 3- admin disapprove rule for supression(always show)
     review_status = models.IntegerField(db_column='review_status', default=0)
     active = models.BooleanField(db_column='active', default=True)
 

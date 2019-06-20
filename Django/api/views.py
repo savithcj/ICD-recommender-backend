@@ -81,8 +81,10 @@ class RuleFlagging(generics.ListAPIView):
 
         try:
             ruleObj = Rule.objects.get(id=ruleId)
-            # ruleObj.update()
-            # TODO: Implement updating flag columns
+            if ruleObj.active is True and ruleObj.review_status == 0:
+                ruleObj.review_status = 1  # set to user flagged for admin review status
+                ruleObj.active = False  # disables rule from showing
+                ruleObj.save()
             return HttpResponse(200)
 
         except Exception as e:
