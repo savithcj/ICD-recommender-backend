@@ -249,7 +249,7 @@ class UpdateFlaggedRule(APIView):
             rule = Rule.objects.get(id=ruleId)
             print(rule.review_status)
             if(rule.review_status == 0):
-                print(reason="Not a flagged rule")
+                print("Not a flagged rule")
                 return HttpResponse(status=400)
             if(rule.review_status == 2 or rule.review_status == 3):
                 print("Rule already reviewed")
