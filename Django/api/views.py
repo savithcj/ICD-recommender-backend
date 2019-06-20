@@ -33,12 +33,16 @@ class ModifyRule(APIView):
         if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) != 1:
             return HttpResponse(400)
 
-        for counter, code in enumerate(body_data['LHSCodes']):
+        LHSCodesList = list(body_data['LHSCodes'])
+        LHSCodesList.sort()
+        for counter, code in enumerate(LHSCodesList):
             LHSCodes = LHSCodes + str(code)
             if counter < len(body_data['LHSCodes']) - 1:
                 LHSCodes = LHSCodes + ','
 
-        for counter, code in enumerate(body_data['RHSCodes']):
+        RHSCodesList = list(body_data['RHSCodes'])
+        RHSCodesList.sort()
+        for counter, code in enumerate(RHSCodesList):
             RHSCodes = RHSCodes + str(code)
             if counter < len(body_data['RHSCodes']) - 1:
                 RHS = RHS + ','
@@ -63,7 +67,6 @@ class ModifyRule(APIView):
             # Modifying a rule
             pass
         else:
-            # TODO: Sort codes before appending
             newRule = Rule.objects.create(
                 lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
             newRule.save()
