@@ -37,7 +37,7 @@ class ExtendedRulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
-                  "confidence", "num_accepted", "num_rejected", "description")
+                  "confidence", "num_accepted", "num_rejected", "description", "review_status")
 
 
 class CodeSerializer(serializers.ModelSerializer):
