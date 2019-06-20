@@ -249,9 +249,11 @@ class UpdateFlaggedRule(APIView):
             rule = Rule.objects.get(id=ruleId)
             print(rule.review_status)
             if(rule.review_status == 0):
-                return HttpResponse(status=400, reason="Not a flagged rule")
+                print(reason="Not a flagged rule")
+                return HttpResponse(status=400)
             if(rule.review_status == 2 or rule.review_status == 3):
-                return HttpResponse(status=400, reason="Rule already reviewed")
+                print("Rule already reviewed")
+                return HttpResponse(status=400)
             if(decision == "ACCEPT"):
                 rule.review_status = 2
                 rule.active = True
@@ -259,12 +261,15 @@ class UpdateFlaggedRule(APIView):
                 rule.review_status = 3
                 rule.active = False
             else:
-                return HttpResponse(status=400, reason="Error evaluating decision => "+decision)
+                print("Error evaluating decision => "+decision)
+                return HttpResponse(status=400)
 
             rule.save()
+            print("Succesfully updated rule")
             return HttpResponse(status=200)
         except Exception as e:
-            return HttpResponse(status=400, reason=e)
+            print(e)
+            return HttpResponse(status=400)
 
 
 @permission_classes((permissions.AllowAny,))
