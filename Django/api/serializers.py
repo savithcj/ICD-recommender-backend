@@ -5,7 +5,7 @@ from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
 class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
-        fields = ("lhs", "rhs", "min_age", "max_age", "support",
+        fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
                   "confidence", "num_accepted", "num_rejected", "num_suggested")
 
 
