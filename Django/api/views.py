@@ -111,8 +111,9 @@ class RuleSearch(generics.ListAPIView):
         for code in RHSCodesList:
             rules = rules.filter(rhs__icontains=code)
 
-        serializer = serializers.RulesSerializer(rules, many=True)
+        print(len(rules))
 
+        serializer = serializers.RulesSerializer(rules, many=True)
         return Response(serializer.data)
 
 
