@@ -11,12 +11,12 @@ from django.db.models.functions import Length
 from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
 from itertools import combinations
 from django.http import HttpResponse
+from django.forms.models import model_to_dict
 import json
 
 
 @permission_classes((permissions.AllowAny,))
 class ModifyRule(APIView):
-    serializer_class = serializers.RulesSerializer
 
     def put(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
@@ -27,10 +27,8 @@ class ModifyRule(APIView):
         ageEnd = None
         gender = ''
 
-        if 'LHSCodes' not in body_data or 'RHSCodes' not in body_data:
-            return HttpResponse(400)
-
         if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) != 1:
+            print("Wrong number of items in fields, rule not created.")
             return HttpResponse(400)
 
         LHSCodesList = list(body_data['LHSCodes'])
@@ -45,7 +43,7 @@ class ModifyRule(APIView):
         for counter, code in enumerate(RHSCodesList):
             RHSCodes = RHSCodes + str(code)
             if counter < len(body_data['RHSCodes']) - 1:
-                RHS = RHS + ','
+                RHSCodes = RHSCodes + ','
 
         if 'ageStart' in body_data:
             ageStart = int(body_data['ageStart'])
@@ -76,10 +74,7 @@ class ModifyRule(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class FlagRuleForReview(generics.ListAPIView):
-    queryset = Rule.objects.all()
-    serializer_class = serializers.RulesSerializer
-
-    def get(self, request, ruleId, format=None, **kwargs):
+    def put(self, request, ruleId, format=None, **kwargs):
         print("ruleId=" + ruleId)
 
         try:
@@ -97,9 +92,28 @@ class FlagRuleForReview(generics.ListAPIView):
 
 @permission_classes((permissions.AllowAny,))
 class RuleSearch(generics.ListAPIView):
-    queryset = Rule.objects.all()
-    serializer_class = serializers.RulesSerializer
-    # TODO: Implementation of rule search
+
+    def post(self, request, format=None, **kwargs):
+        body = request.body.decode('utf-8')
+        body_data = json.loads(body)
+        LHSCodesList = list(body_data["LHSCodes"])
+        RHSCodesList = list(body_data["RHSCodes"])
+
+        if len(LHSCodesList) < 1 and len(RHSCodesList) < 1:
+            print("Nothing entered in search.")
+            return HttpResponse(400)
+
+        rules = Rule.objects.all()
+
+        for code in LHSCodesList:
+            rules = rules.filter(lhs__icontains=code)
+
+        for code in RHSCodesList:
+            rules = rules.filter(rhs__icontains=code)
+
+        serializer = serializers.RulesSerializer(rules, many=True)
+
+        return Response(serializer.data)
 
 
 @permission_classes((permissions.AllowAny,))
@@ -123,8 +137,6 @@ class ListCodeBlockUsage(APIView):
             block.parent_description = parentObject.description
         serializer = serializers.CodeBlockUsageSerializer(blocks, many=True)
         return Response(serializer.data)
-    # queryset = CodeBlockUsage.objects.all()
-    # serializer_class = serializers.CodeBlockUsageSerializer
 
 
 @permission_classes((permissions.AllowAny,))
@@ -199,9 +211,8 @@ class ListRequestedRules(APIView):
 
             # get rules
             rules = Rule.objects.filter(
-                lhs__in=new_lhs, **{k: v for k, v in kwargs.items() if v is not None}).order_by('-confidence')
-            # exclude rules that have been supressed(column active)
-            rules = rules.exclude(active=False)
+                lhs__in=new_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True).order_by('-confidence')
+
             # exclude rules with code in RHS that already exist in the LHS
             rules = rules.exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
 
@@ -243,6 +254,7 @@ class ListFlaggedRules(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class UpdateFlaggedRule(APIView):
+
     def put(self, request, ruleIdAndDecision, format=None, **kwargs):
         ruleId, decision = ruleIdAndDecision.split(",")
         try:
