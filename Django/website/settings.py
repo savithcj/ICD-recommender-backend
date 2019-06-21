@@ -27,7 +27,7 @@ SECRET_KEY = secrets['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -129,10 +129,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': 
+    'DEFAULT_PERMISSION_CLASSES':
     ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
 }
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
+#CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
