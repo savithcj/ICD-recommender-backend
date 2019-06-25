@@ -52,3 +52,12 @@ class CodeBlockUsage(models.Model):
 
     class Meta:
         db_table = 'code_usage'
+
+
+class DaggerAsterisk(models.Model):
+    dagger = models.CharField(db_column='dagger', max_length=20)
+    asterisk = models.CharField(db_column='asterisk', max_length=20)
+    description = models.CharField(db_column='description', max_length=1000)
+
+    class Meta:
+        db_table = 'dagger_asterisk'
