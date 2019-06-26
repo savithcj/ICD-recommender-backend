@@ -11,7 +11,11 @@ class Command(BaseCommand):
         DaggerAsterisk.objects.all().delete()
 
         with transaction.atomic():
-            with open('secret/DaggerAsterisks.csv') as f:
+            with open('secret/DaggerAsterisksCodes.csv') as f:
                 r = csv.reader(f, delimiter=',')
+                i = 0
                 for row in r:
-                    DaggerAsterisk.objects.create(dagger=row[0], asterisk=row[1], description=row[2]).save()
+                    if i == 0:
+                        i += 1
+                    else:
+                        DaggerAsterisk.objects.create(dagger=row[0], asterisk=row[1]).save()

@@ -55,4 +55,4 @@ class TreeCodeSerializer(serializers.ModelSerializer):
 class daggerAsteriskSerializer(serializers.ModelSerializer):
     class Meta:
         model = DaggerAsterisk
-        fields = ("dagger", "asterisk", "daggerAsteriskDescription")
+        fields = ("dagger", "asterisk")
