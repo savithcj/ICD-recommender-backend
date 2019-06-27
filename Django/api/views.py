@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from django.forms.models import model_to_dict
 import json
 from django.db.models import Q
+from django.db import transaction
 
 # TODO: implement access permissions?
 
@@ -418,3 +419,42 @@ class CodeUsed(APIView):
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=400)
+
+
+@permission_classes((permissions.AllowAny,))
+class EnterLog(APIView):
+    """
+    Receives log of user interaction with the system and updates the database.
+    """
+
+    def put(self, request, format=None, **kwargs):
+        body_unicode = request.body.decode('utf-8')  # Decoding the body
+        body = json.loads(body_unicode)  # Loading body in json format
+        rules = body['rule_actions']  # Rule id and action
+        entered = body['entered']  # List of codes entered
+        codes = Code.objects.filter(code__in=entered)  # Removing any potential incorrect codes
+        with transaction.atomic():  # To make all of the changes then save them at the same time
+            # All rules suggested have num_suggested incremented.
+            # Num accepted or rejected incremented based on the action
+            for rule in rules:
+                ruleObject = Rule.objects.get(id=rule['id'])
+                ruleObject.num_suggested += 1
+                if rule['action'] == 'A':
+                    ruleObject.num_accepted += 1
+                elif rule['action'] == 'R':
+                    ruleObject.num_rejected += 1
+                elif rule['action'] == 'I':
+                    pass
+                else:
+                    return HttpResponse(status=400)
+                ruleObject.save()
+
+            # Potentially a false code entered and removed by the query above
+            if len(codes) == len(entered):
+                for code in codes:
+                    code.times_coded += 1
+                    code.save()
+            else:
+                return HttpResponse(status=400)
+
+        return HttpResponse(status=200)
