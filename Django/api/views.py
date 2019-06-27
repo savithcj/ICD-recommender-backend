@@ -15,6 +15,8 @@ from django.forms.models import model_to_dict
 import json
 from django.db.models import Q
 
+# TODO: implement access permissions?
+
 
 @permission_classes((permissions.AllowAny,))
 class ModifyRule(APIView):
@@ -80,10 +82,11 @@ class FlagRuleForReview(generics.ListAPIView):
 
         try:
             ruleObj = Rule.objects.get(id=ruleId)
+            ruleObj.num_flags += 1
             if ruleObj.active is True and ruleObj.review_status == 0:
                 ruleObj.review_status = 1  # set to user flagged for admin review status
-                ruleObj.active = False  # disables rule from showing
-                ruleObj.save()
+                # ruleObj.active = False  # disables rule from showing
+            ruleObj.save()
             return HttpResponse(200)
 
         except Exception as e:
@@ -415,6 +418,3 @@ class CodeUsed(APIView):
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=400)
-
-
-# TODO: implement access permissions?
