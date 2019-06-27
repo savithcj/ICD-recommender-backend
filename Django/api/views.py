@@ -180,8 +180,9 @@ class ListRequestedRules(APIView):
             inputRules.sort()
 
             # Build combinations of codes
+            # max combination in the LHS of 5 codes
             lhs = []
-            for i in range(len(inputRules)):
+            for i in range(min(len(inputRules), 5)):
                 lhs += list(combinations(inputRules, i+1))
 
             # Concatening items in combinations together
@@ -213,17 +214,24 @@ class ListRequestedRules(APIView):
                 pass
 
             # get rules
-            rules = Rule.objects.filter(
-                lhs__in=new_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True).order_by('-confidence')
+            # sqllite has max query param size of 999
+            # werid stuff below to get around max param size. have to get rule ids and then query the rules.
+            # direct query will cause overflow of param size
+            maxSqlParams = 900
+            ruleIds = []
+            for i in range(0, len(new_lhs), maxSqlParams):
+                temp_lhs = new_lhs[i:i+maxSqlParams]
+                tempRules = Rule.objects.filter(
+                    lhs__in=temp_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True)
+                for rule in tempRules:
+                    ruleIds.append(rule.id)
 
+            # construct a new queryset of rules because the old queryset would cause max param size error
             # exclude rules with code in RHS that already exist in the LHS
-            rules = rules.exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
-
-            # append description
+            rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
             for rule in rules:
                 code = Code.objects.get(code=rule.rhs)
                 rule.description = code.description
-
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
