@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
+from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage, DaggerAsterisk
 
 
 class RulesSerializer(serializers.ModelSerializer):
@@ -50,3 +50,9 @@ class TreeCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TreeCode
         fields = ("code", "description")
+
+
+class daggerAsteriskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DaggerAsterisk
+        fields = ("dagger", "asterisk")

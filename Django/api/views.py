@@ -8,11 +8,12 @@ from rest_framework import permissions
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from django.db.models.functions import Length
-from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage
+from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage, DaggerAsterisk
 from itertools import combinations
 from django.http import HttpResponse
 from django.forms.models import model_to_dict
 import json
+from django.db.models import Q
 
 
 @permission_classes((permissions.AllowAny,))
@@ -231,6 +232,28 @@ class ListRequestedRules(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+class DaggerAsteriskAPI(APIView):
+    def get_object(self, inCodes, request):
+        try:
+            # Getting input codes
+            inputCodes = inCodes
+            inputCodes = inputCodes.split(",")
+
+            # Getting combinations with the codes in either dagger or asterisk
+            rules = DaggerAsterisk.objects.filter(Q(dagger__in=inputCodes) | Q(asterisk__in=inputCodes))
+            # Removing combinations with code in both the dagger and asterisk
+            rules = rules.exclude(asterisk__in=inputCodes, dagger__in=inputCodes)
+            return rules
+        except ObjectDoesNotExist:
+            return Rule.objects.none()
+
+    def get(self, request, inCodes, format=None, **kwargs):
+        rules = self.get_object(inCodes, request)
+        serializer = serializers.daggerAsteriskSerializer(rules, many=True)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
 class ListFlaggedRules(APIView):
     def get_objects(self):
         try:
@@ -392,5 +415,6 @@ class CodeUsed(APIView):
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=400)
+
 
 # TODO: implement access permissions?
