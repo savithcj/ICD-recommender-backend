@@ -16,9 +16,10 @@ class Rule(models.Model):
     # review_status: 1- user flagged, 2- admin approved for rule supression 3- admin disapprove rule for supression(always show)
     review_status = models.IntegerField(db_column='review_status', default=0)
     active = models.BooleanField(db_column='active', default=True)
+    # manual: 0 for a rule that has been mined, 1 for a rule that has been entered by an admin
+    manual = models.IntegerField(db_column='manual', default=0)
 
     class Meta:
-        #managed = False
         db_table = 'rules'
         unique_together = (("rhs", "lhs", "min_age", "max_age"),)
 

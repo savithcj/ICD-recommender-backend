@@ -10,7 +10,6 @@ urlpatterns = [
     path('matchDescription/<str:descSubstring>/', views.ListMatchingDescriptions.as_view(), name="match-description"),
     path('ancestors/<str:inCode>/', views.ListAncestors.as_view(), name="ancestors-of-code"),
     path('codeAutosuggestions/<str:matchString>/', views.ListCodeAutosuggestions.as_view(), name="code-autosuggestions"),
-    path('codeUsed/<str:inCodes>/', views.CodeUsed.as_view(), name="code-used"),
     path('codeBlockUsage/', views.ListCodeBlockUsage.as_view(), name="code-block-usage"),
     path('modifyRule/', views.ModifyRule.as_view(), name="modify-rule"),
     path('ruleSearch/', views.RuleSearch.as_view(), name="rule-search"),
@@ -18,4 +17,5 @@ urlpatterns = [
     path('flaggedRules/', views.ListFlaggedRules.as_view(), name="flagged-rules"),
     path('updateFlaggedRule/<str:ruleIdAndDecision>/', views.UpdateFlaggedRule.as_view(), name="update-flagged-rule"),
     path('daggerAsterisk/<str:inCodes>/', views.DaggerAsteriskAPI.as_view(), name="dagger-asterisk"),
+    path('enterLog/', views.EnterLog.as_view(), name="enter-log"),
 ]
