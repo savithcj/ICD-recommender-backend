@@ -20,6 +20,7 @@ from django.db.models import Q
 
 @permission_classes((permissions.AllowAny,))
 class ModifyRule(APIView):
+    """Used to manually create/modify a rule from  the Admin page"""
 
     def put(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
@@ -34,6 +35,7 @@ class ModifyRule(APIView):
             print("Wrong number of items in fields, rule not created.")
             return HttpResponse(400)
 
+        # read and sort LHS codes from json, append to string
         LHSCodesList = list(body_data['LHSCodes'])
         LHSCodesList.sort()
         for counter, code in enumerate(LHSCodesList):
@@ -41,6 +43,7 @@ class ModifyRule(APIView):
             if counter < len(body_data['LHSCodes']) - 1:
                 LHSCodes = LHSCodes + ','
 
+        # read and sort RHS codes from json, append to strinf
         RHSCodesList = list(body_data['RHSCodes'])
         RHSCodesList.sort()
         for counter, code in enumerate(RHSCodesList):
@@ -58,16 +61,17 @@ class ModifyRule(APIView):
         else:
             ageEnd = 0
 
-        # FIXME: gender not implemented in Rule
+        # TODO: gender not implemented in Rule
         if 'gender' in body_data:
             gender = body_data['gender']
         else:
             pass
 
+        # If an id attribute is provided by the json object, we are modifying an existing rule in database
         if 'id' in body_data and body_data['id'] != '':
-            # Modifying a rule
+            # TODO: Modifying a rule
             pass
-        else:
+        else:  # Creating a new rule
             newRule = Rule.objects.create(
                 lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
             newRule.save()
@@ -77,6 +81,8 @@ class ModifyRule(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class FlagRuleForReview(generics.ListAPIView):
+    """Used to flag a rule for review"""
+
     def put(self, request, ruleId, format=None, **kwargs):
         print("ruleId=" + ruleId)
 
@@ -96,6 +102,7 @@ class FlagRuleForReview(generics.ListAPIView):
 
 @permission_classes((permissions.AllowAny,))
 class RuleSearch(generics.ListAPIView):
+    """Used to search for a rule given LHS and/or RHS codes"""
 
     def post(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
@@ -109,9 +116,11 @@ class RuleSearch(generics.ListAPIView):
 
         rules = Rule.objects.all()
 
+        # Filter the result set using each of the codes from LHS
         for code in LHSCodesList:
             rules = rules.filter(lhs__icontains=code)
 
+        # Filter the result set using each of the codes from RHS
         for code in RHSCodesList:
             rules = rules.filter(rhs__icontains=code)
 
