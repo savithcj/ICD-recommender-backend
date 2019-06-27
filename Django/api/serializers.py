@@ -5,8 +5,9 @@ from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage, DaggerA
 class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
+        # can remove conf_factor and interact_factor later
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
-                  "confidence", "num_accepted", "num_rejected", "num_suggested")
+                  "confidence", "num_accepted", "num_rejected", "num_suggested", "conf_factor", "interact_factor", "score")
 
 
 class CodeBlockUsageSerializer(serializers.ModelSerializer):

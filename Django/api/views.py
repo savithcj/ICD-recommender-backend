@@ -242,6 +242,16 @@ class ListRequestedRules(APIView):
             for rule in rules:
                 code = Code.objects.get(code=rule.rhs)
                 rule.description = code.description
+                effective_confidence = 0.9*rule.manual + rule.confidence
+                scaling = 10  # scales how much confidence vs user interaction affects the score
+                expo = rule.num_suggested/scaling + 1
+                rule.conf_factor = effective_confidence**expo  # confidence based portion of score
+                ignored = rule.num_suggested - rule.num_accepted - rule.num_rejected
+                ignored_factor = 0.5  # weight of ignored codes added
+                rule.interact_factor = (1 - effective_confidence**expo)*(rule.num_accepted +
+                                                                         ignored_factor*ignored) / (rule.num_accepted+1)
+                rule.score = rule.conf_factor + rule.interact_factor
+                # can change conf_factor and interact_factor to non-members of rule later
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
@@ -422,20 +432,6 @@ class ListCodeAutosuggestions(APIView):
         serializerDesc = serializers.CodeSerializer(matchesDesc, many=True)
         serializerCode = serializers.CodeSerializer(matchesCode, many=True)
         return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": []})
-
-
-@permission_classes((permissions.AllowAny,))
-class CodeUsed(APIView):
-    def put(self, request, inCodes, format=None, **kwargs):
-        codeList = inCodes.split(",")
-        codes = Code.objects.filter(code__in=codeList)
-        if len(codes) == len(codeList):
-            for code in codes:
-                code.times_coded += 1
-                code.save()
-            return HttpResponse(status=200)
-        else:
-            return HttpResponse(status=400)
 
 
 @permission_classes((permissions.AllowAny,))
