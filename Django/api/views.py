@@ -13,13 +13,16 @@ from itertools import combinations
 from django.http import HttpResponse
 from django.forms.models import model_to_dict
 import json
+import random
 from django.db.models import Q
+from django.db import transaction
 
 # TODO: implement access permissions?
 
 
 @permission_classes((permissions.AllowAny,))
 class ModifyRule(APIView):
+    """Used to manually create/modify a rule from  the Admin page"""
 
     def put(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
@@ -34,6 +37,7 @@ class ModifyRule(APIView):
             print("Wrong number of items in fields, rule not created.")
             return HttpResponse(400)
 
+        # read and sort LHS codes from json, append to string
         LHSCodesList = list(body_data['LHSCodes'])
         LHSCodesList.sort()
         for counter, code in enumerate(LHSCodesList):
@@ -41,6 +45,7 @@ class ModifyRule(APIView):
             if counter < len(body_data['LHSCodes']) - 1:
                 LHSCodes = LHSCodes + ','
 
+        # read and sort RHS codes from json, append to strinf
         RHSCodesList = list(body_data['RHSCodes'])
         RHSCodesList.sort()
         for counter, code in enumerate(RHSCodesList):
@@ -58,16 +63,17 @@ class ModifyRule(APIView):
         else:
             ageEnd = 0
 
-        # FIXME: gender not implemented in Rule
+        # TODO: gender not implemented in Rule
         if 'gender' in body_data:
             gender = body_data['gender']
         else:
             pass
 
+        # If an id attribute is provided by the json object, we are modifying an existing rule in database
         if 'id' in body_data and body_data['id'] != '':
-            # Modifying a rule
+            # TODO: Modifying a rule
             pass
-        else:
+        else:  # Creating a new rule
             newRule = Rule.objects.create(
                 lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
             newRule.save()
@@ -77,6 +83,8 @@ class ModifyRule(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class FlagRuleForReview(generics.ListAPIView):
+    """Used to flag a rule for review"""
+
     def put(self, request, ruleId, format=None, **kwargs):
         print("ruleId=" + ruleId)
 
@@ -96,6 +104,7 @@ class FlagRuleForReview(generics.ListAPIView):
 
 @permission_classes((permissions.AllowAny,))
 class RuleSearch(generics.ListAPIView):
+    """Used to search for a rule given LHS and/or RHS codes"""
 
     def post(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
@@ -109,23 +118,16 @@ class RuleSearch(generics.ListAPIView):
 
         rules = Rule.objects.all()
 
+        # Filter the result set using each of the codes from LHS
         for code in LHSCodesList:
             rules = rules.filter(lhs__icontains=code)
 
+        # Filter the result set using each of the codes from RHS
         for code in RHSCodesList:
             rules = rules.filter(rhs__icontains=code)
 
         serializer = serializers.RulesSerializer(rules, many=True)
         return Response(serializer.data)
-
-
-@permission_classes((permissions.AllowAny,))
-class ListAllRules(generics.ListAPIView):
-    """
-    Lists all rules
-    """
-    queryset = Rule.objects.all()
-    serializer_class = serializers.RulesSerializer
 
 
 @permission_classes((permissions.AllowAny,))
@@ -180,8 +182,9 @@ class ListRequestedRules(APIView):
             inputRules.sort()
 
             # Build combinations of codes
+            # max combination in the LHS of 5 codes
             lhs = []
-            for i in range(len(inputRules)):
+            for i in range(min(len(inputRules), 5)):
                 lhs += list(combinations(inputRules, i+1))
 
             # Concatening items in combinations together
@@ -213,16 +216,36 @@ class ListRequestedRules(APIView):
                 pass
 
             # get rules
-            rules = Rule.objects.filter(
-                lhs__in=new_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True).order_by('-confidence')
+            # sqllite has max query param size of 999
+            # werid stuff below to get around max param size. have to get rule ids and then query the rules.
+            # direct query will cause overflow of param size
+            maxSqlParams = 900
+            ruleIds = []
+            for i in range(0, len(new_lhs), maxSqlParams):
+                temp_lhs = new_lhs[i:i+maxSqlParams]
+                tempRules = Rule.objects.filter(
+                    lhs__in=temp_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True)
+                for rule in tempRules:
+                    ruleIds.append(rule.id)
+            # construct a new queryset of rules because the old queryset would cause max param size error
 
             # exclude rules with code in RHS that already exist in the LHS
-            rules = rules.exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
+            rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
 
-            # append description
+            # Adding parts to the rule
             for rule in rules:
                 code = Code.objects.get(code=rule.rhs)
                 rule.description = code.description
+                effective_confidence = 0.9*rule.manual + rule.confidence
+                scaling = 10  # scales how much confidence vs user interaction affects the score
+                expo = rule.num_suggested/scaling + 1
+                rule.conf_factor = effective_confidence**expo  # confidence based portion of score
+                ignored = rule.num_suggested - rule.num_accepted - rule.num_rejected
+                ignored_factor = 0.5  # weight of ignored codes added
+                rule.interact_factor = (1 - effective_confidence**expo)*(rule.num_accepted +
+                                                                         ignored_factor*ignored) / (rule.num_suggested+1)
+                rule.score = rule.conf_factor + rule.interact_factor
+                # can change conf_factor and interact_factor to non-members of rule later
 
             return rules
         except ObjectDoesNotExist:
@@ -407,14 +430,39 @@ class ListCodeAutosuggestions(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class CodeUsed(APIView):
-    def put(self, request, inCodes, format=None, **kwargs):
-        codeList = inCodes.split(",")
-        codes = Code.objects.filter(code__in=codeList)
-        if len(codes) == len(codeList):
-            for code in codes:
-                code.times_coded += 1
-                code.save()
-            return HttpResponse(status=200)
-        else:
-            return HttpResponse(status=400)
+class EnterLog(APIView):
+    """
+    Receives log of user interaction with the system and updates the database.
+    """
+
+    def put(self, request, format=None, **kwargs):
+        body_unicode = request.body.decode('utf-8')  # Decoding the body
+        body = json.loads(body_unicode)  # Loading body in json format
+        rules = body['rule_actions']  # Rule id and action
+        entered = body['entered']  # List of codes entered
+        codes = Code.objects.filter(code__in=entered)  # Removing any potential incorrect codes
+        with transaction.atomic():  # To make all of the changes then save them at the same time
+            # All rules suggested have num_suggested incremented.
+            # Num accepted or rejected incremented based on the action
+            for rule in rules:
+                ruleObject = Rule.objects.get(id=rule['id'])
+                ruleObject.num_suggested += 1
+                if rule['action'] == 'A':
+                    ruleObject.num_accepted += 1
+                elif rule['action'] == 'R':
+                    ruleObject.num_rejected += 1
+                elif rule['action'] == 'I':
+                    pass
+                else:
+                    return HttpResponse(status=400)
+                ruleObject.save()
+
+            # Potentially a false code entered and removed by the query above
+            if len(codes) == len(entered):
+                for code in codes:
+                    code.times_coded += 1
+                    code.save()
+            else:
+                return HttpResponse(status=400)
+
+        return HttpResponse(status=200)
