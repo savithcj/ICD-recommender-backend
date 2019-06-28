@@ -21,6 +21,15 @@ from django.db import transaction
 
 
 @permission_classes((permissions.AllowAny,))
+class ListAllRules(generics.ListAPIView):
+    """
+    Lists all rules
+    """
+    queryset = Rule.objects.all()
+    serializer_class = serializers.RulesSerializer
+
+
+@permission_classes((permissions.AllowAny,))
 class ModifyRule(APIView):
     """Used to manually create/modify a rule from  the Admin page"""
 
