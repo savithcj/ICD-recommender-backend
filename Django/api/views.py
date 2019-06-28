@@ -243,7 +243,7 @@ class ListRequestedRules(APIView):
                 ignored = rule.num_suggested - rule.num_accepted - rule.num_rejected
                 ignored_factor = 0.5  # weight of ignored codes added
                 rule.interact_factor = (1 - effective_confidence**expo)*(rule.num_accepted +
-                                                                         ignored_factor*ignored) / (rule.num_accepted+1)
+                                                                         ignored_factor*ignored) / (rule.num_suggested+1)
                 rule.score = rule.conf_factor + rule.interact_factor
                 # can change conf_factor and interact_factor to non-members of rule later
 

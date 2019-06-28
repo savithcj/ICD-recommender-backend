@@ -7,7 +7,7 @@ class RulesSerializer(serializers.ModelSerializer):
         model = Rule
         # can remove conf_factor and interact_factor later
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
-                  "confidence", "num_accepted", "num_rejected", "num_suggested", "conf_factor", "interact_factor", "score")
+                  "confidence", "num_accepted", "num_rejected", "num_suggested")
 
 
 class CodeBlockUsageSerializer(serializers.ModelSerializer):
@@ -31,14 +31,27 @@ class CodeBlockUsageSerializer(serializers.ModelSerializer):
 
 class ExtendedRulesSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
+    conf_factor = serializers.SerializerMethodField()
+    interact_factor = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
 
     def get_description(self, obj):
         return obj.description
 
+    def get_conf_factor(self, obj):
+        return obj.conf_factor
+
+    def get_interact_factor(self, obj):
+        return obj.interact_factor
+
+    def get_score(self, obj):
+        return obj.score
+
     class Meta:
         model = Rule
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
-                  "confidence", "num_accepted", "num_rejected", "description", "review_status")
+                  "confidence", "num_accepted", "num_rejected", "description",
+                  "review_status", "conf_factor", "interact_factor", "score")
 
 
 class CodeSerializer(serializers.ModelSerializer):
