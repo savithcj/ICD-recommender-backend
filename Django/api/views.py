@@ -13,6 +13,7 @@ from itertools import combinations
 from django.http import HttpResponse
 from django.forms.models import model_to_dict
 import json
+import random
 from django.db.models import Q
 from django.db import transaction
 
@@ -130,15 +131,6 @@ class RuleSearch(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListAllRules(generics.ListAPIView):
-    """
-    Lists all rules
-    """
-    queryset = Rule.objects.all()
-    serializer_class = serializers.RulesSerializer
-
-
-@permission_classes((permissions.AllowAny,))
 class ListCodeBlockUsage(APIView):
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
@@ -235,10 +227,12 @@ class ListRequestedRules(APIView):
                     lhs__in=temp_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True)
                 for rule in tempRules:
                     ruleIds.append(rule.id)
-
             # construct a new queryset of rules because the old queryset would cause max param size error
+
             # exclude rules with code in RHS that already exist in the LHS
             rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
+
+            # Adding parts to the rule
             for rule in rules:
                 code = Code.objects.get(code=rule.rhs)
                 rule.description = code.description
@@ -252,6 +246,7 @@ class ListRequestedRules(APIView):
                                                                          ignored_factor*ignored) / (rule.num_accepted+1)
                 rule.score = rule.conf_factor + rule.interact_factor
                 # can change conf_factor and interact_factor to non-members of rule later
+
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
