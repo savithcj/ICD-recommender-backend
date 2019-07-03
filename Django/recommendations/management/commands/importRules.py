@@ -53,12 +53,34 @@ class Command(BaseCommand):
         print("Saving...")
         with transaction.atomic():
             for row in range(df.shape[0]):
-                rule = Rule.objects.create(lhs=df.loc[row, "lhs"],
-                                           rhs=df.loc[row, "rhs"], min_age=df.loc[row, "min_age"],
-                                           max_age=df.loc[row, "max_age"], support=df.loc[row, "support"],
-                                           confidence=df.loc[row, "confidence"],
-                                           num_accepted=df.loc[row, "num_accepted"],
-                                           num_rejected=df.loc[row, "num_rejected"],
-                                           oracle=True)
-                rule.save()
+                ruleM = Rule.objects.create(lhs=df.loc[row, "lhs"],
+                                            rhs=df.loc[row, "rhs"],
+                                            gender='M',
+                                            min_age=df.loc[row, "min_age"],
+                                            max_age=df.loc[row, "max_age"],
+                                            support=df.loc[row, "support"],
+                                            confidence=df.loc[row, "confidence"],
+                                            oracle=True)
+                ruleM.save()
+                ruleF = Rule.objects.create(lhs=df.loc[row, "lhs"],
+                                            rhs=df.loc[row, "rhs"],
+                                            gender='F',
+                                            min_age=df.loc[row, "min_age"],
+                                            max_age=df.loc[row, "max_age"],
+                                            support=df.loc[row, "support"],
+                                            confidence=df.loc[row, "confidence"],
+                                            oracle=True)
+                ruleF.save()
+
+            with open("secret/output_rules_cleaned.csv", 'r') as f:
+                for line in f.readlines():
+                    line = line.split(",")
+                    rule = Rule.objects.create(lhs=line[0].split("_")[0],
+                                               rhs=line[1].split("_")[0],
+                                               gender=line[1].split("_")[3],
+                                               min_age=line[1].split("_")[1],
+                                               max_age=line[1].split("_")[2],
+                                               support=line[2],
+                                               confidence=line[3])
+                    rule.save()
         print("Done")

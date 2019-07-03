@@ -5,7 +5,6 @@ from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage, DaggerA
 class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
-        # can remove conf_factor and interact_factor later
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
                   "confidence", "num_accepted", "num_rejected", "num_suggested")
 
@@ -29,10 +28,24 @@ class CodeBlockUsageSerializer(serializers.ModelSerializer):
         fields = ("block", "times_coded", "parent", "destination_counts", "description", "parent_description")
 
 
+class FlaggedRuleSerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
+
+    def get_description(self, obj):
+        return obj.description
+
+    class Meta:
+        model = Rule
+        fields = ("id", "lhs", "rhs", "gender", "min_age", "max_age", "support",
+                  "confidence", "num_accepted", "num_rejected", "description",
+                  "review_status", "oracle")
+
+
 class ExtendedRulesSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     conf_factor = serializers.SerializerMethodField()
     interact_factor = serializers.SerializerMethodField()
+    # can remove conf_factor and interact_factor later
     score = serializers.SerializerMethodField()
 
     def get_description(self, obj):
@@ -49,7 +62,7 @@ class ExtendedRulesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rule
-        fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
+        fields = ("id", "lhs", "rhs", "gender", "min_age", "max_age", "support",
                   "confidence", "num_accepted", "num_rejected", "description",
                   "review_status", "conf_factor", "interact_factor", "score", "oracle")
 
