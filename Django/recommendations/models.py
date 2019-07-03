@@ -18,6 +18,8 @@ class Rule(models.Model):
     active = models.BooleanField(db_column='active', default=True)
     # manual: 0 for a rule that has been mined, 1 for a rule that has been entered by an admin
     manual = models.IntegerField(db_column='manual', default=0)
+    # oracle: rules that were mined by Mingkai and agreed upon by a panel of professionals
+    oracle = models.BooleanField(db_column='oracle', default=False)
 
     class Meta:
         db_table = 'rules'
