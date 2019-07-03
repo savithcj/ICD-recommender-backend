@@ -303,7 +303,7 @@ class ListFlaggedRules(APIView):
 
     def get(self, request, format=None, **kwargs):
         rules = self.get_objects()
-        serializer = serializers.ExtendedRulesSerializer(rules, many=True)
+        serializer = serializers.FlaggedRuleSerializer(rules, many=True)
         return Response(serializer.data)
 
 
