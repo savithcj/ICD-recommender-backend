@@ -51,7 +51,7 @@ class ExtendedRulesSerializer(serializers.ModelSerializer):
         model = Rule
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
                   "confidence", "num_accepted", "num_rejected", "description",
-                  "review_status", "conf_factor", "interact_factor", "score")
+                  "review_status", "conf_factor", "interact_factor", "score", "oracle")
 
 
 class CodeSerializer(serializers.ModelSerializer):

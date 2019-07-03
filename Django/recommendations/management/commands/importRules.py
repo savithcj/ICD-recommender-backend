@@ -58,6 +58,7 @@ class Command(BaseCommand):
                                            max_age=df.loc[row, "max_age"], support=df.loc[row, "support"],
                                            confidence=df.loc[row, "confidence"],
                                            num_accepted=df.loc[row, "num_accepted"],
-                                           num_rejected=df.loc[row, "num_rejected"],)
+                                           num_rejected=df.loc[row, "num_rejected"],
+                                           oracle=True)
                 rule.save()
         print("Done")
