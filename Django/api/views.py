@@ -84,7 +84,7 @@ class ModifyRule(APIView):
             pass
         else:  # Creating a new rule
             newRule = Rule.objects.create(
-                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
+                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True)
             newRule.save()
 
         return HttpResponse(201)

@@ -5,7 +5,7 @@ from django.core.validators import int_list_validator
 class Rule(models.Model):
     lhs = models.CharField(db_column='lhs', max_length=50)
     rhs = models.CharField(db_column='rhs', max_length=10)
-    gender = models.CharField(db_column='gender', max_length=1, default='O')
+    gender = models.CharField(db_column='gender', max_length=1, null=True)
     min_age = models.IntegerField(db_column='min_age', default=0)
     max_age = models.IntegerField(db_column='max_age', default=150)
     support = models.FloatField(db_column='support', default=0)
