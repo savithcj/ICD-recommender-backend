@@ -23,6 +23,8 @@ with open(os.path.join(BASE_DIR, 'secret/secret.json')) as secret_file:
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = secrets['SECRET_KEY']
+DB_USER = secrets['DB_USER']
+DB_PASSWORD = secrets['DB_PASSWORD']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,9 +85,17 @@ WSGI_APPLICATION = 'website.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'icd_recommender',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
