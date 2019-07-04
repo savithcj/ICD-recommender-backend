@@ -6,53 +6,52 @@ import numpy as np
 
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
+    help = 'Imports the oracle rules in addition to extra mined rules'
 
     def handle(self, *args, **options):
         print("Reading rules...")
-        Rule.objects.all().delete()
+        Rule.objects.all().delete()  # Deletes all existing rules before importing
 
-        df1 = pd.read_csv("secret/three_digit_rules.csv")
-        df2 = pd.read_csv("secret/four_digit_rules.csv")
-        df = pd.concat([df1, df2])
+        df1 = pd.read_csv("secret/three_digit_rules.csv")  # 3 digit oracle rules
+        df2 = pd.read_csv("secret/four_digit_rules.csv")  # 4 digit oracle rules
+        df = pd.concat([df1, df2])  # Concatenating to one dataframe
         df = df.reset_index()
 
+        # Removing unnecessary columns
         df = df.drop(columns=["Unnamed: 0", "id", "group", "role", "score_group", "counts", "voter_total", "round"])
 
         lhs = []
         rhs = []
         age_min = []
         age_max = []
-        num_accepted = []
-        num_rejected = []
 
         for row in range(df.shape[0]):
+            # Making confidence to float
             df.loc[row, "confidence"] = float(df.loc[row, "confidence"][:-1])/100
-            rule = df.loc[row, "rules"].split(" => ")
-            lhs.append(rule[0][1:-1])
-            rhs.append(rule[1][1:-1])
+            rule = df.loc[row, "rules"].split(" => ")  # Splitting rule into LHS and RHS
+            lhs.append(rule[0][1:-1])  # Adding LHS
+            rhs.append(rule[1][1:-1])  # Adding RHS
+            # Setting age bracket for >=65
             if(df.loc[row, "age_group"] == ">=65"):
                 age_min.append(65)
                 age_max.append(150)
+            # Setting age bracket for other age groups
             else:
                 age = df.loc[row, "age_group"].split(" to ")
                 age_min.append(float(age[0]))
                 age_max.append(float(age[1]))
-            num_accepted.append(0)
-            num_rejected.append(0)
 
         df["confidence"] = df["confidence"].astype("float")
         df["lhs"] = lhs
         df["rhs"] = rhs
         df["min_age"] = age_min
         df["max_age"] = age_max
-        df["num_accepted"] = num_accepted
-        df["num_rejected"] = num_rejected
-        df = df.drop(columns=["rules", "age_group", "index"])
 
         print("Saving...")
-        with transaction.atomic():
+        ruleSet = set()  # Create a set of rules to prevent duplicate rules
+        with transaction.atomic():  # Saves all of the rules at once
             for row in range(df.shape[0]):
+                # Creating male version of the rule (oracle rules did not have a gender)
                 ruleM = Rule.objects.create(lhs=df.loc[row, "lhs"],
                                             rhs=df.loc[row, "rhs"],
                                             gender='M',
@@ -61,7 +60,12 @@ class Command(BaseCommand):
                                             support=df.loc[row, "support"],
                                             confidence=df.loc[row, "confidence"],
                                             oracle=True)
-                ruleM.save()
+                # Adding the rule to the set
+                ruleSet.add((df.loc[row, "lhs"], df.loc[row, "rhs"], 'M',
+                             df.loc[row, "min_age"], df.loc[row, "max_age"]))
+                ruleM.save()  # Saving
+
+                # Creating female version of the rule
                 ruleF = Rule.objects.create(lhs=df.loc[row, "lhs"],
                                             rhs=df.loc[row, "rhs"],
                                             gender='F',
@@ -70,17 +74,26 @@ class Command(BaseCommand):
                                             support=df.loc[row, "support"],
                                             confidence=df.loc[row, "confidence"],
                                             oracle=True)
+                # Adding the rule to the set
+                ruleSet.add((df.loc[row, "lhs"], df.loc[row, "rhs"], 'F',
+                             df.loc[row, "min_age"], df.loc[row, "max_age"]))
                 ruleF.save()
-
+            # Adding the additional mined rules
             with open("secret/output_rules_cleaned.csv", 'r') as f:
-                for line in f.readlines():
-                    line = line.split(",")
-                    rule = Rule.objects.create(lhs=line[0].split("_")[0],
-                                               rhs=line[1].split("_")[0],
-                                               gender=line[1].split("_")[3],
-                                               min_age=line[1].split("_")[1],
-                                               max_age=line[1].split("_")[2],
-                                               support=line[2],
-                                               confidence=line[3])
-                    rule.save()
+                for i, line in enumerate(f.readlines()):
+                    if i != 0:  # If i = 0, it is the header, and therefore should not be processed
+                        line = line.strip().split(",")
+                        potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
+                                         3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
+                        if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                            rule = Rule.objects.create(lhs=line[0].split("_")[0],
+                                                       rhs=line[1].split("_")[0],
+                                                       gender=line[1].split("_")[3],
+                                                       min_age=line[1].split("_")[1],
+                                                       max_age=line[1].split("_")[2],
+                                                       support=line[2],
+                                                       confidence=line[3])
+                            ruleSet.add(potentialRule)
+                            rule.save()
+
         print("Done")
