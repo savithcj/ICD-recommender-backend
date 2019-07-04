@@ -238,10 +238,10 @@ class ListRequestedRules(APIView):
 
                 for rule in tempRules:
                     ruleIds.append(rule.id)
-                    if len(ruleIds) > 100:
-                        break
-                if len(ruleIds) > 100:
-                    break
+                #     if len(ruleIds) > 100:
+                #         break
+                # if len(ruleIds) > 100:
+                #     break
             # construct a new queryset of rules because the old queryset would cause max param size error
 
             # exclude rules with code in RHS that already exist in the LHS
