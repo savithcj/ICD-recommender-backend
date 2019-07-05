@@ -84,7 +84,7 @@ class ModifyRule(APIView):
             pass
         else:  # Creating a new rule
             newRule = Rule.objects.create(
-                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd)
+                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True)
             newRule.save()
 
         return HttpResponse(201)
@@ -210,36 +210,60 @@ class ListRequestedRules(APIView):
             kwargs["max_age"] = None
             kwargs["gender"] = None
 
-            # TODO: Implement gender
-
-            ageRange = [65, 45, 20, 0]
-            age_param = request.GET.get('age', None)
-            if age_param is not None and age_param.isdigit():
-                age = int(age_param)
-                print("In Age:", age)
-                for minAge in ageRange:
-                    if age >= minAge:
-                        kwargs["min_age"] = minAge
-                        print("Min Age:", minAge)
-                        break
-                pass
-
             # get rules
             # sqllite has max query param size of 999
             # werid stuff below to get around max param size. have to get rule ids and then query the rules.
             # direct query will cause overflow of param size
-            maxSqlParams = 900
+            maxSqlParams = 500
             ruleIds = []
+            age_param = request.GET.get('age', None)
+            gender_param = request.GET.get('gender', None)
             for i in range(0, len(new_lhs), maxSqlParams):
                 temp_lhs = new_lhs[i:i+maxSqlParams]
                 tempRules = Rule.objects.filter(
-                    lhs__in=temp_lhs, **{k: v for k, v in kwargs.items() if v is not None}, active=True)
+                    lhs__in=temp_lhs, active=True)
+
+                # Excluding rules that aren't for the patient age
+                if age_param is not None and age_param.isdigit():
+                    age = int(age_param)
+                    print("In Age:", age)
+                    tempRules = tempRules.filter(min_age__lte=age)
+                    tempRules = tempRules.filter(max_age__gte=age)
+
+                # Getting rules for the correct gender
+                if gender_param == "Male":
+                    tempRules = tempRules.filter(gender='M')
+                elif gender_param == "Female":
+                    tempRules = tempRules.filter(gender='F')
+
                 for rule in tempRules:
                     ruleIds.append(rule.id)
+                #     if len(ruleIds) > 100:
+                #         break
+                # if len(ruleIds) > 100:
+                #     break
             # construct a new queryset of rules because the old queryset would cause max param size error
 
             # exclude rules with code in RHS that already exist in the LHS
             rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
+
+            # # Excluding rules that aren't for the patient age
+            # age_param = request.GET.get('age', None)
+            # if age_param is not None and age_param.isdigit():
+            #     age = int(age_param)
+            #     print("In Age:", age)
+            #     rules = rules.exclude(min_age__gt=age)
+            #     rules = rules.exclude(max_age__lt=age)
+
+            # Filtering rules for the correct gender
+            # gender_param = request.GET.get('gender', None)
+            # print("In gender:", gender_param)
+            # if gender_param == "Male":
+            #     rules = rules.filter(gender='M')
+            # elif gender_param == "Female":
+            #     rules = rules.filter(gender='F')
+
+            print("\n\n\n\n\n", len(rules), "\n\n\n\n\n")
 
             # Adding parts to the rule
             for rule in rules:

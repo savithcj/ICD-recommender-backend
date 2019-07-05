@@ -50,12 +50,17 @@ class Command(BaseCommand):
         # how many rules have block A00-A09 as a LHS and this element as RHS
         destinationMatrix = np.zeros([numBlocks, numBlocks])
         rules = Rule.objects.all()
-        for rule in rules:
+        for ruleCount, rule in enumerate(rules):
+            if ruleCount % 1000 == 0:
+                print("Rule:", ruleCount)
             lhsCodes = rule.lhs.split(',')
 
             lhsBlocks = [self.findBlock(lhsCode, blockNames) for lhsCode in lhsCodes]
             rhsBlock = self.findBlock(rule.rhs, blockNames)
             # print(lhsCodes, lhsBlocks, rule.rhs, rhsBlock)
+            # TEMPORARY FIX. If block doesnt exist don't count it
+            if (any([lhsBlock == None for lhsBlock in lhsBlocks]) or rhsBlock == None):
+                continue
             for lhsBlock in lhsBlocks:
                 if lhsBlock != rhsBlock:
                     lhsIndex = blockNames.index(lhsBlock)

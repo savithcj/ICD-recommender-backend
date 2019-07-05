@@ -5,7 +5,7 @@ from django.core.validators import int_list_validator
 class Rule(models.Model):
     lhs = models.CharField(db_column='lhs', max_length=50)
     rhs = models.CharField(db_column='rhs', max_length=10)
-    gender = models.CharField(db_column='gender', max_length=1, default='O')
+    gender = models.CharField(db_column='gender', max_length=1, null=True)
     min_age = models.IntegerField(db_column='min_age', default=0)
     max_age = models.IntegerField(db_column='max_age', default=150)
     support = models.FloatField(db_column='support', default=0)
@@ -29,7 +29,7 @@ class Rule(models.Model):
 
 class Code(models.Model):
     code = models.CharField(db_column='code', max_length=20, primary_key=True)
-    description = models.CharField(db_column='description', max_length=100)
+    description = models.CharField(db_column='description', max_length=1000)
     parent = models.CharField(db_column='parent', max_length=20)
     children = models.TextField(db_column='children', max_length=1000)
     times_coded = models.IntegerField(db_column='times_coded', default=0)
@@ -40,7 +40,7 @@ class Code(models.Model):
 
 class TreeCode(models.Model):
     code = models.CharField(db_column='code', max_length=20, primary_key=True)
-    description = models.CharField(db_column='description', max_length=100)
+    description = models.CharField(db_column='description', max_length=1000)
     parent = models.CharField(db_column='parent', max_length=20)
     children = models.TextField(db_column='children', max_length=1000)
 
