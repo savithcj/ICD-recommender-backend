@@ -33,9 +33,10 @@ const theme = createMuiTheme({
 
 const useStyles = makeStyles(() => ({
   root: {
-    flexGrow: 1,
-    width: "100%",
     height: "100%",
+    width: "100%",
+    flexGrow: 1,
+    borderRadius: "5px",
     overflow: "auto",
     backgroundColor: "inherit",
     padding: 0

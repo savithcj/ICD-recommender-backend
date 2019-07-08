@@ -2,6 +2,7 @@ import React from "react";
 import ListViewer from "../../Components/ListViewer/ListViewer";
 import { connect } from "react-redux";
 import * as actions from "../../Store/Actions/index";
+import { getStringFromListOfCodes } from "../../Util/utility";
 
 const selectedCodesViewer = props => {
   const handleRemoveSelectedCode = event => {
@@ -11,6 +12,10 @@ const selectedCodesViewer = props => {
     props.removeSelectedCode(removeCodeIndex);
     props.getRecommendedCodes(selectedCodes);
     props.getDaggerAsterisks(selectedCodes);
+
+    if (selectedCodes.length === 0) {
+      resetSelectedCodes();
+    }
   };
 
   const handleExploreSelectedCodeButton = event => {
@@ -22,11 +27,20 @@ const selectedCodesViewer = props => {
     props.setSelectedCodes([]);
     props.setRecommendedCodes(null);
     props.setDaggerAsterisk(null);
+    props.setAge(null);
+    props.setGender(null);
+  };
+
+  const copyToClipboard = () => {
+    const codeSelection = getStringFromListOfCodes(props.selectedCodes);
+    navigator.clipboard.writeText(codeSelection);
+    props.setAlertMessage({ message: "Selected codes copied to clipboard", messageType: "success" });
   };
 
   const acceptSelectedCodes = () => {
     //TODO:Make API call to update code usage during a session
     resetSelectedCodes();
+    copyToClipboard();
   };
 
   const selectedCodesComponentMenuItems = [
@@ -76,7 +90,10 @@ const mapDispatchToProps = dispatch => {
       dispatch(actions.fetchRecommendationsAndUpdateCache(codeObjArray, age, gender)),
     getDaggerAsterisks: codeObjArray => dispatch(actions.fetchDaggerAsterisksAndUpdateCache(codeObjArray)),
     setRecommendedCodes: valueToSet => dispatch(actions.setRecommendedCodes(valueToSet)),
-    setDaggerAsterisk: valueToSet => dispatch(actions.setDaggerAsterisk(valueToSet))
+    setDaggerAsterisk: valueToSet => dispatch(actions.setDaggerAsterisk(valueToSet)),
+    setAge: valueToSet => dispatch(actions.setAge(valueToSet)),
+    setGender: valueToSet => dispatch(actions.setGender(valueToSet)),
+    setAlertMessage: newValue => dispatch(actions.setAlertMessage(newValue))
   };
 };
 

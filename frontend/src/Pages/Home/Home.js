@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputBoxes from "../../Containers/InputBoxes/InputBoxes";
 import SelectedCodes from "../../Containers/SelectedCodes/SelectedCodes";
 import RecommendedCodes from "../../Containers/RecommendedCodes/RecommendedCodes";
@@ -8,18 +8,48 @@ import MenuBar from "../../Containers/MenuBar/MenuBar";
 import { getFromLS, saveToLS } from "../../Util/layoutFunctions";
 import { defaultLayouts } from "./layouts";
 import { WidthProvider, Responsive } from "react-grid-layout";
+import * as actions from "../../Store/Actions/index";
+import { connect } from "react-redux";
 import "./Home.css";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
+import { useAlert, positions } from "react-alert";
+
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("homeLayouts", "layouts") || defaultLayouts;
 const treeViewDiv = React.createRef();
-const Home = () => {
+
+const Home = props => {
   //Local state of the Home page
 
   const [layouts, setLayouts] = useState(JSON.parse(JSON.stringify(originalLayouts)));
   const [isLayoutModifiable, setLayoutModifiable] = useState(false);
+
+  const alert = useAlert();
+
+  //this useEffect is equivalent to the componentWillUnmount lifecycle method
+  //It's used to clear the global state when navigating away from the home page
+  useEffect(() => {
+    return () => {
+      props.resetState();
+    };
+  }, []);
+
+  //equivalent to componentDidUpdate. Listens to changes to the alertMessage state
+  //in the store and displays messages to the user
+  useEffect(() => {
+    if (props.alertMessage) {
+      alert.show(props.alertMessage.message, {
+        timeout: 2500,
+        position: positions.BOTTOM_CENTER,
+        type: props.alertMessage.messageType,
+        onClose: () => {
+          props.setAlertMessage(null);
+        }
+      });
+    }
+  }, [props.alertMessage]);
 
   const resetLayout = () => {
     setLayouts(defaultLayouts);
@@ -91,4 +121,20 @@ const Home = () => {
   );
 };
 
-export default Home;
+const mapStateToProps = state => {
+  return {
+    alertMessage: state.alert.alertMessage
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setAlertMessage: newValue => dispatch(actions.setAlertMessage(newValue)),
+    resetState: () => dispatch(actions.resetState())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);
