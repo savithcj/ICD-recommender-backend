@@ -218,6 +218,8 @@ class ListRequestedRules(APIView):
             ruleIds = []
             age_param = request.GET.get('age', None)
             gender_param = request.GET.get('gender', None)
+            print(age_param)
+            print(gender_param)
             for i in range(0, len(new_lhs), maxSqlParams):
                 temp_lhs = new_lhs[i:i+maxSqlParams]
                 tempRules = Rule.objects.filter(
@@ -262,8 +264,6 @@ class ListRequestedRules(APIView):
             #     rules = rules.filter(gender='M')
             # elif gender_param == "Female":
             #     rules = rules.filter(gender='F')
-
-            print("\n\n\n\n\n", len(rules), "\n\n\n\n\n")
 
             # Adding parts to the rule
             for rule in rules:
