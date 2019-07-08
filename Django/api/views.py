@@ -182,7 +182,7 @@ class ListChildrenOfCode(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListRequestedRules(APIView):
-    def get_object(self, inCodes, request):
+    def get_object(self, inCodes, request, active=None):
         try:
             # Sort input codes
             inputCodes = inCodes
@@ -221,8 +221,7 @@ class ListRequestedRules(APIView):
             print(gender_param)
             for i in range(0, len(new_lhs), maxSqlParams):
                 temp_lhs = new_lhs[i:i+maxSqlParams]
-                tempRules = Rule.objects.filter(
-                    lhs__in=temp_lhs, active=True)
+                tempRules = Rule.objects.filter(lhs__in=temp_lhs)
 
                 # Excluding rules that aren't for the patient age
                 if age_param is not None and age_param.isdigit():
@@ -247,6 +246,9 @@ class ListRequestedRules(APIView):
 
             # exclude rules with code in RHS that already exist in the LHS
             rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
+
+            if active != None:
+                rules = rules.filter(active=active)
 
             # # Excluding rules that aren't for the patient age
             # age_param = request.GET.get('age', None)
@@ -280,6 +282,19 @@ class ListRequestedRules(APIView):
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
+
+    def get(self, request, inCodes, format=None, **kwargs):
+        rules = self.get_object(inCodes, request)
+        serializer = serializers.ExtendedRulesSerializer(rules, many=True)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
+class ListRequestedRulesActive(APIView):
+    def get_object(self, inCodes, request):
+        listRequested = ListRequestedRules()
+        rules = listRequested.get_object(inCodes, request, active=True)
+        return rules
 
     def get(self, request, inCodes, format=None, **kwargs):
         rules = self.get_object(inCodes, request)
