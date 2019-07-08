@@ -70,22 +70,21 @@ class ModifyRule(APIView):
         if 'ageEnd' in body_data:
             ageEnd = int(body_data['ageEnd'])
         else:
-            ageEnd = 0
+            ageEnd = 150
 
         # TODO: gender not implemented in Rule
         if 'gender' in body_data:
-            gender = body_data['gender']
-        else:
-            pass
-
-        # If an id attribute is provided by the json object, we are modifying an existing rule in database
-        if 'id' in body_data and body_data['id'] != '':
-            # TODO: Modifying a rule
-            pass
-        else:  # Creating a new rule
+            gender = body_data['gender'][0]
             newRule = Rule.objects.create(
-                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True)
+                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True, gender=gender)
             newRule.save()
+        else:
+            newRuleMale = Rule.objects.create(
+                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True, gender='M')
+            newRuleMale.save()
+            newRuleFemale = Rule.objects.create(
+                lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True, gender='F')
+            newRuleFemale.save()
 
         return HttpResponse(201)
 
