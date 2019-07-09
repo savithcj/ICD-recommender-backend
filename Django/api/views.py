@@ -17,6 +17,8 @@ import random
 from django.db.models import Q
 from django.db import transaction
 
+import time
+
 # TODO: implement access permissions?
 
 
@@ -449,6 +451,7 @@ class ListAncestors(APIView):
 @permission_classes((permissions.AllowAny,))
 class ListCodeAutosuggestions(APIView):
     def get(self, request, matchString, format=None, **kwargs):
+        # time.sleep(1)
         descMatch = ListMatchingDescriptions()
         codeMatch = ListChildrenOfCode()
 
