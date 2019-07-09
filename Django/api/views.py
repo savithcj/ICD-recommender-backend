@@ -127,11 +127,11 @@ class RuleSearch(APIView):
 
         # Filter the result set using each of the codes from LHS
         for code in LHSCodesList:
-            rules = rules.filter(lhs__icontains=code)
+            rules = rules.filter(Q(lhs=code) | Q(lhs__endswith=code) | Q(lhs__icontains=code+','))
 
         # Filter the result set using each of the codes from RHS
         for code in RHSCodesList:
-            rules = rules.filter(rhs__icontains=code)
+            rules = rules.filter(Q(rhs=code) | Q(rhs__endswith=code) | Q(rhs__icontains=code+','))
 
         serializer = serializers.RulesSerializer(rules, many=True)
         return Response(serializer.data)
