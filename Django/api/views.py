@@ -30,10 +30,10 @@ class ListAllRules(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ModifyRule(APIView):
-    """Used to manually create/modify a rule from  the Admin page"""
+class CreateRule(generics.CreateAPIView):
+    """Used to manually create a rule from  the Admin page"""
 
-    def put(self, request, format=None, **kwargs):
+    def post(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
         body_data = json.loads(body)
         LHSCodes = ''
@@ -72,7 +72,6 @@ class ModifyRule(APIView):
         else:
             ageEnd = 150
 
-        # TODO: gender not implemented in Rule
         if 'gender' in body_data:
             gender = body_data['gender'][0]
             newRule = Rule.objects.create(
@@ -90,7 +89,7 @@ class ModifyRule(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class FlagRuleForReview(generics.ListAPIView):
+class FlagRuleForReview(generics.UpdateAPIView):
     """Used to flag a rule for review"""
 
     def put(self, request, ruleId, format=None, **kwargs):
@@ -111,7 +110,7 @@ class FlagRuleForReview(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class RuleSearch(generics.ListAPIView):
+class RuleSearch(APIView):
     """Used to search for a rule given LHS and/or RHS codes"""
 
     def post(self, request, format=None, **kwargs):
@@ -139,7 +138,7 @@ class RuleSearch(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListCodeBlockUsage(APIView):
+class ListCodeBlockUsage(generics.ListAPIView):
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
         for block in blocks:
@@ -153,7 +152,7 @@ class ListCodeBlockUsage(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class SingleCodeDescription(APIView):
+class SingleCodeDescription(generics.RetrieveAPIView):
     def get(self, request, inCode, format=None, **kwargs):
         try:
             codeObject = Code.objects.get(code=inCode)
@@ -164,7 +163,7 @@ class SingleCodeDescription(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListChildrenOfCode(APIView):
+class ListChildrenOfCode(generics.ListAPIView):
     def get_object(self, inCode):
         try:
             childrenCodes = Code.objects.get(code=inCode).children
@@ -181,7 +180,7 @@ class ListChildrenOfCode(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListRequestedRules(APIView):
+class ListRequestedRules(generics.ListAPIView):
     def get_object(self, inCodes, request, active=None):
         try:
             # Sort input codes
@@ -238,33 +237,13 @@ class ListRequestedRules(APIView):
 
                 for rule in tempRules:
                     ruleIds.append(rule.id)
-                #     if len(ruleIds) > 100:
-                #         break
-                # if len(ruleIds) > 100:
-                #     break
-            # construct a new queryset of rules because the old queryset would cause max param size error
 
+            # construct a new queryset of rules because the old queryset would cause max param size error
             # exclude rules with code in RHS that already exist in the LHS
             rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
 
             if active != None:
                 rules = rules.filter(active=active)
-
-            # # Excluding rules that aren't for the patient age
-            # age_param = request.GET.get('age', None)
-            # if age_param is not None and age_param.isdigit():
-            #     age = int(age_param)
-            #     print("In Age:", age)
-            #     rules = rules.exclude(min_age__gt=age)
-            #     rules = rules.exclude(max_age__lt=age)
-
-            # Filtering rules for the correct gender
-            # gender_param = request.GET.get('gender', None)
-            # print("In gender:", gender_param)
-            # if gender_param == "Male":
-            #     rules = rules.filter(gender='M')
-            # elif gender_param == "Female":
-            #     rules = rules.filter(gender='F')
 
             # Adding parts to the rule
             for rule in rules:
@@ -290,7 +269,7 @@ class ListRequestedRules(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListRequestedRulesActive(APIView):
+class ListRequestedRulesActive(generics.ListAPIView):
     def get_object(self, inCodes, request):
         listRequested = ListRequestedRules()
         rules = listRequested.get_object(inCodes, request, active=True)
@@ -303,7 +282,7 @@ class ListRequestedRulesActive(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class DaggerAsteriskAPI(APIView):
+class DaggerAsteriskAPI(generics.ListAPIView):
     def get_object(self, inCodes, request):
         try:
             # Getting input codes
@@ -325,7 +304,7 @@ class DaggerAsteriskAPI(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListFlaggedRules(APIView):
+class ListFlaggedRules(generics.ListAPIView):
     def get_objects(self):
         try:
             rules = Rule.objects.filter(review_status=1)
@@ -346,7 +325,7 @@ class ListFlaggedRules(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class UpdateFlaggedRule(APIView):
+class UpdateFlaggedRule(generics.UpdateAPIView):
 
     def put(self, request, ruleIdAndDecision, format=None, **kwargs):
         ruleId, decision = ruleIdAndDecision.split(",")
@@ -378,7 +357,7 @@ class UpdateFlaggedRule(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class Family(APIView):
+class Family(generics.ListAPIView):
     def get_children(self, inCode):
         try:
             childrenCodes = TreeCode.objects.get(code=inCode).children
@@ -428,7 +407,7 @@ class Family(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListMatchingDescriptions(APIView):
+class ListMatchingDescriptions(generics.ListAPIView):
     def get_object(self, descSubstring):
         if len(descSubstring) < 3:
             return Code.objects.none()
@@ -441,7 +420,7 @@ class ListMatchingDescriptions(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListAncestors(APIView):
+class ListAncestors(generics.ListAPIView):
     def get_object(self, code):
         ancestors = []
         print("Getting ancestors of", code)
@@ -461,7 +440,7 @@ class ListAncestors(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListCodeAutosuggestions(APIView):
+class ListCodeAutosuggestions(generics.ListAPIView):
     def get(self, request, matchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
         codeMatch = ListChildrenOfCode()
@@ -514,7 +493,7 @@ class EnterLog(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ChangeRuleStatus(APIView):
+class ChangeRuleStatus(generics.UpdateAPIView):
     """Used to set a rule to active or inactive"""
 
     def patch(self, request, format=None, **kwargs):
