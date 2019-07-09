@@ -511,3 +511,23 @@ class EnterLog(APIView):
                 return HttpResponse(status=400)
 
         return HttpResponse(status=200)
+
+
+@permission_classes((permissions.AllowAny,))
+class ChangeRuleStatus(APIView):
+    """Used to set a rule to active or inactive"""
+
+    def patch(self, request, format=None, **kwargs):
+        try:
+            body = request.body.decode('utf-8')
+            body_data = json.loads(body)
+            status = body_data["status"]
+            rule_id = body_data["rule_id"]
+
+            rule = Rule.objects.get(id=rule_id)
+            rule.active = status
+            rule.save()
+
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=400)
