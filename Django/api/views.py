@@ -30,8 +30,8 @@ class ListAllRules(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class CreateRule(generics.CreateAPIView):
-    """Used to manually create a rule from  the Admin page"""
+class CreateRule(APIView):
+    """Used to manually create a rule from the Admin page"""
 
     def post(self, request, format=None, **kwargs):
         body = request.body.decode('utf-8')
@@ -89,7 +89,7 @@ class CreateRule(generics.CreateAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class FlagRuleForReview(generics.UpdateAPIView):
+class FlagRuleForReview(APIView):
     """Used to flag a rule for review"""
 
     def put(self, request, ruleId, format=None, **kwargs):
@@ -127,18 +127,18 @@ class RuleSearch(APIView):
 
         # Filter the result set using each of the codes from LHS
         for code in LHSCodesList:
-            rules = rules.filter(lhs__icontains=code)
+            rules = rules.filter(Q(lhs=code) | Q(lhs__endswith=code) | Q(lhs__icontains=code+','))
 
         # Filter the result set using each of the codes from RHS
         for code in RHSCodesList:
-            rules = rules.filter(rhs__icontains=code)
+            rules = rules.filter(Q(rhs=code) | Q(rhs__endswith=code) | Q(rhs__icontains=code+','))
 
         serializer = serializers.RulesSerializer(rules, many=True)
         return Response(serializer.data)
 
 
 @permission_classes((permissions.AllowAny,))
-class ListCodeBlockUsage(generics.ListAPIView):
+class ListCodeBlockUsage(APIView):
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
         for block in blocks:
@@ -152,7 +152,7 @@ class ListCodeBlockUsage(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class SingleCodeDescription(generics.RetrieveAPIView):
+class SingleCodeDescription(APIView):
     def get(self, request, inCode, format=None, **kwargs):
         try:
             codeObject = Code.objects.get(code=inCode)
@@ -163,7 +163,7 @@ class SingleCodeDescription(generics.RetrieveAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListChildrenOfCode(generics.ListAPIView):
+class ListChildrenOfCode(APIView):
     def get_object(self, inCode):
         try:
             childrenCodes = Code.objects.get(code=inCode).children
@@ -180,7 +180,7 @@ class ListChildrenOfCode(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListRequestedRules(generics.ListAPIView):
+class ListRequestedRules(APIView):
     def get_object(self, inCodes, request, active=None):
         try:
             # Sort input codes
@@ -269,7 +269,7 @@ class ListRequestedRules(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListRequestedRulesActive(generics.ListAPIView):
+class ListRequestedRulesActive(APIView):
     def get_object(self, inCodes, request):
         listRequested = ListRequestedRules()
         rules = listRequested.get_object(inCodes, request, active=True)
@@ -282,7 +282,7 @@ class ListRequestedRulesActive(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class DaggerAsteriskAPI(generics.ListAPIView):
+class DaggerAsteriskAPI(APIView):
     def get_object(self, inCodes, request):
         try:
             # Getting input codes
@@ -304,7 +304,7 @@ class DaggerAsteriskAPI(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListFlaggedRules(generics.ListAPIView):
+class ListFlaggedRules(APIView):
     def get_objects(self):
         try:
             rules = Rule.objects.filter(review_status=1)
@@ -325,7 +325,7 @@ class ListFlaggedRules(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class UpdateFlaggedRule(generics.UpdateAPIView):
+class UpdateFlaggedRule(APIView):
 
     def put(self, request, ruleIdAndDecision, format=None, **kwargs):
         ruleId, decision = ruleIdAndDecision.split(",")
@@ -357,7 +357,7 @@ class UpdateFlaggedRule(generics.UpdateAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class Family(generics.ListAPIView):
+class Family(APIView):
     def get_children(self, inCode):
         try:
             childrenCodes = TreeCode.objects.get(code=inCode).children
@@ -407,7 +407,7 @@ class Family(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListMatchingDescriptions(generics.ListAPIView):
+class ListMatchingDescriptions(APIView):
     def get_object(self, descSubstring):
         if len(descSubstring) < 3:
             return Code.objects.none()
@@ -420,7 +420,7 @@ class ListMatchingDescriptions(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListAncestors(generics.ListAPIView):
+class ListAncestors(APIView):
     def get_object(self, code):
         ancestors = []
         print("Getting ancestors of", code)
@@ -440,7 +440,7 @@ class ListAncestors(generics.ListAPIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ListCodeAutosuggestions(generics.ListAPIView):
+class ListCodeAutosuggestions(APIView):
     def get(self, request, matchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
         codeMatch = ListChildrenOfCode()
@@ -493,7 +493,7 @@ class EnterLog(APIView):
 
 
 @permission_classes((permissions.AllowAny,))
-class ChangeRuleStatus(generics.UpdateAPIView):
+class ChangeRuleStatus(APIView):
     """Used to set a rule to active or inactive"""
 
     def patch(self, request, format=None, **kwargs):
@@ -510,3 +510,11 @@ class ChangeRuleStatus(generics.UpdateAPIView):
             return HttpResponse(status=200)
         except ObjectDoesNotExist:
             return HttpResponse(status=400)
+
+
+@permission_classes((permissions.AllowAny,))
+class InactiveRules(generics.ListAPIView):
+    """Returns all rules with inactive status"""
+
+    queryset = Rule.objects.filter(active=False)
+    serializer_class = serializers.RulesSerializer

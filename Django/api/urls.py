@@ -19,5 +19,6 @@ urlpatterns = [
     path('updateFlaggedRule/<str:ruleIdAndDecision>/', views.UpdateFlaggedRule.as_view(), name="update-flagged-rule"),
     path('daggerAsterisk/<str:inCodes>/', views.DaggerAsteriskAPI.as_view(), name="dagger-asterisk"),
     path('enterLog/', views.EnterLog.as_view(), name="enter-log"),
+    path('inactiveRules/', views.InactiveRules.as_view(), name="inactive-rules"),
     path('changeRuleStatus/', views.ChangeRuleStatus.as_view(), name="change-rule-status"),
 ]
