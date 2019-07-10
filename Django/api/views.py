@@ -48,6 +48,10 @@ class CreateRule(APIView):
             print("Wrong number of items in fields, rule not created.")
             return HttpResponse(400)
 
+        if(body_data['RHSCodes'][0] in body_data['LHSCodes']):
+            print("RHS in LHS")
+            return HttpResponse(400)
+
         # read and sort LHS codes from json, append to string
         LHSCodesList = list(body_data['LHSCodes'])
         LHSCodesList.sort()
@@ -444,7 +448,7 @@ class ListAncestors(APIView):
 @permission_classes((permissions.AllowAny,))
 class ListCodeAutosuggestions(APIView):
     def get(self, request, matchString, format=None, **kwargs):
-        # time.sleep(1)
+        # time.sleep(2)
         descMatch = ListMatchingDescriptions()
         codeMatch = ListChildrenOfCode()
 
