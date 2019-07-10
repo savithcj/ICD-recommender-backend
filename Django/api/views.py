@@ -444,7 +444,7 @@ class ListAncestors(APIView):
 @permission_classes((permissions.AllowAny,))
 class ListCodeAutosuggestions(APIView):
     def get(self, request, matchString, format=None, **kwargs):
-        # time.sleep(1)
+        # time.sleep(2)
         descMatch = ListMatchingDescriptions()
         codeMatch = ListChildrenOfCode()
 
