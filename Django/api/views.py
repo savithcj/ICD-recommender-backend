@@ -36,53 +36,58 @@ class CreateRule(APIView):
     """Used to manually create a rule from the Admin page"""
 
     def post(self, request, format=None, **kwargs):
+        # Taking in the body of the request
         body = request.body.decode('utf-8')
         body_data = json.loads(body)
+        # Initializing parameters
         LHSCodes = ''
         RHSCodes = ''
         ageStart = None
         ageEnd = None
         gender = ''
 
+        # Ensuring that the rule has at least one code in the LHS and exactly one in the RHS
         if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) != 1:
             print("Wrong number of items in fields, rule not created.")
             return HttpResponse(400)
 
+        # Ensuring that the RHS isn't in the LHS
         if(body_data['RHSCodes'][0] in body_data['LHSCodes']):
             print("RHS in LHS")
             return HttpResponse(400)
 
-        # read and sort LHS codes from json, append to string
+        # Read and sort LHS codes from json, append to string
         LHSCodesList = list(body_data['LHSCodes'])
         LHSCodesList.sort()
         for counter, code in enumerate(LHSCodesList):
             LHSCodes = LHSCodes + str(code)
+            # If the code isn't the last code, add a comma after so the new code can be added
             if counter < len(body_data['LHSCodes']) - 1:
                 LHSCodes = LHSCodes + ','
 
-        # read and sort RHS codes from json, append to strinf
+        # Extracting RHS code from a list
         RHSCodesList = list(body_data['RHSCodes'])
-        RHSCodesList.sort()
-        for counter, code in enumerate(RHSCodesList):
-            RHSCodes = RHSCodes + str(code)
-            if counter < len(body_data['RHSCodes']) - 1:
-                RHSCodes = RHSCodes + ','
+        RHSCodes = RHSCodesList[0]
 
+        # Taking age start, or setting to 0 if it was not passed
         if 'ageStart' in body_data:
             ageStart = int(body_data['ageStart'])
         else:
             ageStart = 0
 
+        # Taking age end, or setting to 150 if it was not passed
         if 'ageEnd' in body_data:
             ageEnd = int(body_data['ageEnd'])
         else:
             ageEnd = 150
 
+        # If gender is passed, take first character ('M', 'F', or 'O')
         if 'gender' in body_data:
             gender = body_data['gender'][0]
             newRule = Rule.objects.create(
                 lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True, gender=gender)
             newRule.save()
+        # If gender is not passed, create the rule for both male and female
         else:
             newRuleMale = Rule.objects.create(
                 lhs=LHSCodes, rhs=RHSCodes, min_age=ageStart, max_age=ageEnd, manual=True, gender='M')
@@ -99,14 +104,11 @@ class FlagRuleForReview(APIView):
     """Used to flag a rule for review"""
 
     def put(self, request, ruleId, format=None, **kwargs):
-        print("ruleId=" + ruleId)
-
         try:
             ruleObj = Rule.objects.get(id=ruleId)
-            ruleObj.num_flags += 1
+            ruleObj.num_flags += 1  # Increments the number of times the rule has been flagged
             if ruleObj.active is True and ruleObj.review_status == 0:
                 ruleObj.review_status = 1  # set to user flagged for admin review status
-                # ruleObj.active = False  # disables rule from showing
             ruleObj.save()
             return HttpResponse(200)
 
@@ -120,22 +122,30 @@ class RuleSearch(APIView):
     """Used to search for a rule given LHS and/or RHS codes"""
 
     def post(self, request, format=None, **kwargs):
+        # Decoding the body of the request
         body = request.body.decode('utf-8')
         body_data = json.loads(body)
+        # Extracting LHS and RHS
         LHSCodesList = list(body_data["LHSCodes"])
         RHSCodesList = list(body_data["RHSCodes"])
 
+        # If there is no codes in the search
         if len(LHSCodesList) < 1 and len(RHSCodesList) < 1:
-            print("Nothing entered in search.")
             return HttpResponse(400)
 
         rules = Rule.objects.all()
 
         # Filter the result set using each of the codes from LHS
+        # The LHS is equal to the code (only one code in the LHS) OR
+        # The LHS ends with the code OR
+        # The LHS contains the code and a comma after it
         for code in LHSCodesList:
             rules = rules.filter(Q(lhs=code) | Q(lhs__endswith=code) | Q(lhs__icontains=code+','))
 
         # Filter the result set using each of the codes from RHS
+        # The RHS is equal to the code (only one code in the RHS) OR
+        # The RHS ends with the code OR
+        # The RHS contains the code and a comma after it
         for code in RHSCodesList:
             rules = rules.filter(Q(rhs=code) | Q(rhs__endswith=code) | Q(rhs__icontains=code+','))
 
@@ -145,6 +155,9 @@ class RuleSearch(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListCodeBlockUsage(APIView):
+    """Retrieves the number of times that each code block is used.
+    An example of a code block is: A00-A09: Intestinal infectious diseases"""
+
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
         for block in blocks:
@@ -159,8 +172,11 @@ class ListCodeBlockUsage(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class SingleCodeDescription(APIView):
+    """Returns the description of a single code"""
+
     def get(self, request, inCode, format=None, **kwargs):
         try:
+            # Gets the code object
             codeObject = Code.objects.get(code=inCode)
         except ObjectDoesNotExist:
             return Response({None})
@@ -170,10 +186,15 @@ class SingleCodeDescription(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListChildrenOfCode(APIView):
+    """Returns the children of a code"""
+
     def get_object(self, inCode):
         try:
+            # Takes the children of the code
             childrenCodes = Code.objects.get(code=inCode).children
+            # Turns the children into a list
             childrenCodes = childrenCodes.split(",")
+            # Obtains the code objects for each object in the list
             children = Code.objects.filter(code__in=childrenCodes)
             return children
         except ObjectDoesNotExist:
@@ -187,6 +208,8 @@ class ListChildrenOfCode(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListRequestedRules(APIView):
+    """Returns the rules for the codes entered (entered codes are treated as LHS)"""
+
     def get_object(self, inCodes, request, active=None):
         try:
             # Sort input codes
@@ -276,7 +299,10 @@ class ListRequestedRules(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListRequestedRulesActive(APIView):
+    """Returns active rules based on the entered codes"""
+
     def get_object(self, inCodes, request):
+        # Creates an instance of the class that returns rules
         listRequested = ListRequestedRules()
         rules = listRequested.get_object(inCodes, request, active=True)
         return rules
@@ -289,6 +315,8 @@ class ListRequestedRulesActive(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class DaggerAsteriskAPI(APIView):
+    """Getting dagger/asterisk combinations for any entered codes"""
+
     def get_object(self, inCodes, request):
         try:
             # Getting input codes
@@ -311,11 +339,13 @@ class DaggerAsteriskAPI(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListFlaggedRules(APIView):
+    """Lists all of the flagged rules"""
+
     def get_objects(self):
         try:
             rules = Rule.objects.filter(review_status=1)
 
-            # append description
+            # Append description
             for rule in rules:
                 rule.description = "Suggested: "+str(rule.num_suggested) + ", " + \
                     "Accepted: "+str(rule.num_accepted)+", "+"Rejected: "+str(rule.num_rejected)
@@ -332,30 +362,27 @@ class ListFlaggedRules(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class UpdateFlaggedRule(APIView):
+    """Updates flagged rule depending on admin decision"""
 
     def put(self, request, ruleIdAndDecision, format=None, **kwargs):
         ruleId, decision = ruleIdAndDecision.split(",")
         try:
             rule = Rule.objects.get(id=ruleId)
-            print(rule.review_status)
+            # Rule isn't flagged
             if(rule.review_status == 0):
-                print("Not a flagged rule")
                 return HttpResponse(status=400)
+            # Rule has a decision already
             if(rule.review_status == 2 or rule.review_status == 3):
-                print("Rule already reviewed")
                 return HttpResponse(status=400)
-            if(decision == "ACCEPT"):
+            if(decision == "ACCEPT"):  # Change status to accepted
                 rule.review_status = 2
-                rule.active = True
-            elif(decision == "REJECT"):
+            elif(decision == "REJECT"):  # Change status to rejected
                 rule.review_status = 3
                 rule.active = False
             else:
-                print("Error evaluating decision => "+decision)
                 return HttpResponse(status=400)
 
             rule.save()
-            print("Succesfully updated rule")
             return HttpResponse(status=200)
         except Exception as e:
             print(e)
@@ -364,6 +391,9 @@ class UpdateFlaggedRule(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class Family(APIView):
+    """Returns the family of a code"""
+
+    # Get the children of the entered code
     def get_children(self, inCode):
         try:
             childrenCodes = TreeCode.objects.get(code=inCode).children
@@ -373,6 +403,7 @@ class Family(APIView):
         except ObjectDoesNotExist:
             return TreeCode.objects.none()
 
+    # Get the siblings of the entered code
     def get_siblings(self, inCode):
         try:
             if(TreeCode.objects.get(code=inCode).parent):
@@ -386,6 +417,7 @@ class Family(APIView):
         except ObjectDoesNotExist:
             return TreeCode.objects.none()
 
+    # Get self of code
     def get_single(self, inCode):
         try:
             selfs = TreeCode.objects.get(code=inCode)
@@ -393,6 +425,7 @@ class Family(APIView):
         except ObjectDoesNotExist:
             return None
 
+    # Uses above functions to get family and combine it all
     def get(self, request, inCode, format=None, **kwargs):
         selfs = self.get_single(inCode)
         if selfs == None:
@@ -406,6 +439,7 @@ class Family(APIView):
         childrenSerializer = serializers.TreeCodeSerializer(
             children, many=True)
 
+        # Sending json
         if parent:
             return Response({'self': selfSerializer.data, 'parent': parentSerializer.data, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
         else:
@@ -414,9 +448,14 @@ class Family(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListMatchingDescriptions(APIView):
+    """Used to match text that the user enters in the search box.
+    This is so that the user can enter part of the description instead of the code"""
+
     def get_object(self, descSubstring):
+        # Only check if the length of the entered string is greater than or equal to 3
         if len(descSubstring) < 3:
             return Code.objects.none()
+        # Filters and returns
         return Code.objects.filter(description__icontains=descSubstring).order_by(Length('code').asc())[:15]
 
     def get(self, request, descSubstring, format=None, **kwargs):
@@ -427,16 +466,16 @@ class ListMatchingDescriptions(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListAncestors(APIView):
+    """Lists the ancestors of a code. Used to generate the ancestry chain in the tree"""
+
     def get_object(self, code):
         ancestors = []
-        print("Getting ancestors of", code)
         while True:
             try:
                 ancestor = TreeCode.objects.get(code=code)
                 serializer = serializers.CodeSerializer(ancestor, many=False)
                 ancestors.append(serializer)
                 code = ancestor.parent
-                print("parent:", ancestor.parent)
             except ObjectDoesNotExist:
                 return ancestors
 
@@ -447,8 +486,9 @@ class ListAncestors(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ListCodeAutosuggestions(APIView):
+    """Returns codes based upon the text entered"""
+
     def get(self, request, matchString, format=None, **kwargs):
-        # time.sleep(2)
         descMatch = ListMatchingDescriptions()
         codeMatch = ListChildrenOfCode()
 
@@ -505,11 +545,13 @@ class ChangeRuleStatus(APIView):
 
     def patch(self, request, format=None, **kwargs):
         try:
+            # Decode body
             body = request.body.decode('utf-8')
             body_data = json.loads(body)
             status = body_data["status"]
             rule_id = body_data["rule_id"]
 
+            # Setting rule status
             rule = Rule.objects.get(id=rule_id)
             rule.active = status
             rule.save()
