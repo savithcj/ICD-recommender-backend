@@ -1,6 +1,6 @@
 from django.test import TestCase
 from api import views
-from recommendations.models import Code, TreeCode
+from recommendations.models import Code, TreeCode, Rule
 from django.test import Client
 from django.urls import reverse
 
@@ -23,6 +23,11 @@ class TestAPIs(TestCase):
         self.code000 = TreeCode.objects.create(code='000', children='0000,0001', parent='00', description='000Desc')
         self.code00 = TreeCode.objects.create(code='00', children='000,001', parent='00', description='00Desc')
         self.code0 = TreeCode.objects.create(code='0', children='00', description='0Desc')
+
+        self.rule1 = Rule.objects.create(lhs='001', rhs='0001')
+        self.rule3 = Rule.objects.create(lhs='00', rhs='000')
+        self.rule3 = Rule.objects.create(lhs='00', rhs='001')
+        self.rule4 = Rule.objects.create(lhs='000,001', rhs='0000')
 
     def test_rules(self):
         print("\nTesting ListAllRules view")
@@ -89,8 +94,19 @@ class TestAPIs(TestCase):
 
     def test_codeDescription(self):
         print("\nTesting codeDescription API")
+        client = Client()
+
         # test existing code
         codeToCheck = "001"
         response = client.get('/api/codeDescription/'+codeToCheck+'/')
         self.assertEqual(response.status_code, 200)
         data = response.json()
+        self.assertEqual(data['code'], '001')
+        self.assertEqual(data['description'], '000Desc')
+
+        # test non-existing code
+        codeToCheck = "100"
+        response = client.get('/api/codeDescription/'+codeToCheck+'/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data, [None])
