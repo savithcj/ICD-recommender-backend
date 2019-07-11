@@ -1,12 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
 from recommendations.models import Code, Rule
 from django.db import transaction
+from collections import defaultdict
 import random
 
 
 class Command(BaseCommand):
-    help = '''Adds random numbers to times_coded in Code table,
-              or resets to all zeros, depending on the argument.'''
+    help = ('Sets code usage numbers to zeros, random numbers, or raw DAD numbers. '
+            'Sets rules to zeros or random numbers (random if dad is selected)')
 
     def add_arguments(self, parser):
         parser.add_argument('-m', '--mode', type=str)
@@ -16,32 +17,40 @@ class Command(BaseCommand):
         # Getting all code and rule objects
         codes = Code.objects.all()
         rules = Rule.objects.all()
-        if mode == "random":
-            print("Setting use numbers to a random int")
-        else:
-            print("Setting use numbers to 0")
         with transaction.atomic():
-            print("Setting codes")
-            for code in codes:
-                if mode == "random":
-                    # Setting codes to random
+            # set code usage numbers
+            if mode == "dad":
+                print("Setting code usage numbers to dad values")
+                dxCounts = defaultdict(int)
+                with open('secret/DAD_dx_counts.csv', 'r') as f:
+                    for line in f.readlines():
+                        code, count = line.strip().split(',')
+                        count = int(count)
+                        dxCounts[code] += count
+                for code in codes:
+                    code.times_coded = dxCounts[code]
+            elif mode == "random":
+                print("Setting code usage numbers to a random counts")
+                for code in codes:
                     code.times_coded = random.randint(1, 1001)
-                else:
-                    # Setting codes to 0
+            else:
+                print("Setting code usage numbers to 0")
+                for code in codes:
                     code.times_coded = 0
-                code.save()
-            print("Setting rules")
-            for rule in rules:
-                if mode == "random":
-                    # Setting accepted, rejected and suggested to random numbers
+            code.save()
+
+            # set rule usage numbers
+            if mode == "random" or mode == "dad":
+                print("Setting rule usage counts to random counts")
+                for rule in rules:
                     rule.num_accepted = random.randint(1, 1001)
                     rule.num_rejected = random.randint(1, 1001)
                     rule.num_suggested = rule.num_accepted + rule.num_rejected + random.randint(1, 1001)
-                else:
-                    # Setting accepted, rejected and suggested to 0
+            else:
+                print("Setting rule usage counts to 0")
+                for rule in rules:
                     rule.num_accepted = 0
                     rule.num_rejected = 0
                     rule.num_suggested = 0
-                # Saving the rule
-                rule.save()
+            rule.save()
         print("Done")
