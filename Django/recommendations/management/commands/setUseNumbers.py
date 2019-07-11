@@ -40,9 +40,9 @@ class Command(BaseCommand):
             for code in codes:
                 code.save()
 
-        with transaction.atomic()
+        with transaction.atomic():
            # set rule usage numbers
-           if mode == "random" or mode == "dad":
+            if mode == "random" or mode == "dad":
                 print("Setting rule usage counts to random counts")
                 for rule in rules:
                     rule.num_accepted = random.randint(1, 1001)
