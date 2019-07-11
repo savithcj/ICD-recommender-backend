@@ -37,6 +37,11 @@ class Code(models.Model):
     class Meta:
         db_table = 'codes'
 
+# Used for creating the tree, using chapters as parents to blocks of codes,
+# blocks of codes as parents of high level codes, etc.
+# Example: Chapter 01 is parent of A00-A09, A15-A19, etc.
+# A00-A09 is parent of A00, A01, ... , A09
+
 
 class TreeCode(models.Model):
     code = models.CharField(db_column='code', max_length=20, primary_key=True)
@@ -48,6 +53,8 @@ class TreeCode(models.Model):
         db_table = 'tree_codes'
 
 
+# Used to store how many times each block of code has been used,
+# and the number of rules between different blocks
 class CodeBlockUsage(models.Model):
     block = models.CharField(
         db_column='block', max_length=20, primary_key=True)
@@ -59,6 +66,7 @@ class CodeBlockUsage(models.Model):
         db_table = 'code_usage'
 
 
+# All dagger asterisk pairs
 class DaggerAsterisk(models.Model):
     dagger = models.CharField(db_column='dagger', max_length=20)
     asterisk = models.CharField(db_column='asterisk', max_length=20)
