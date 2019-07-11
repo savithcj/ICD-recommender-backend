@@ -136,6 +136,7 @@ class Command(BaseCommand):
                 else:
                     print(block)
 
+        # Creating and saving objects
         with transaction.atomic():
             count = 0
             codes = list(allCodes)
