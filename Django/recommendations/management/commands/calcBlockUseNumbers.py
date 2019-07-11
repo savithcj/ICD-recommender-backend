@@ -7,27 +7,8 @@ import numpy as np
 
 
 class Command(BaseCommand):
-    help = '''Sums the number of times each code has been coded under a certain block'''
-
-    def findBlock(self, code, blockNames):
-        ancestorCodes = []
-        ancestorCode = code
-        while True:
-            try:
-                ancestor = TreeCode.objects.get(code=ancestorCode)
-                ancestorCode = ancestor.parent
-                ancestorCodes.append(ancestorCode)
-            except ObjectDoesNotExist:
-                break
-        # add code usage to the appropriate block
-        for ancestorCode in ancestorCodes:
-            try:
-                if ancestorCode in blockNames:
-                    return ancestorCode
-                    # print(codeObject.code, ancestorCode, blockUsage[ancestorCode])
-            except ValueError:
-                continue
-        return None
+    help = ('Calculates number of times codes within each block has been coded '
+            ' and also the number of rules between blocks')
 
     def handle(self, *args, **options):
         CodeBlockUsage.objects.all().delete()
@@ -90,3 +71,25 @@ class Command(BaseCommand):
                     destination_counts=destStr)
                 block.save()
         print("Done")
+
+    def findBlock(self, code, blockNames):
+        # get full ancestry
+        ancestorCodes = []
+        ancestorCode = code
+        while True:
+            try:
+                ancestor = TreeCode.objects.get(code=ancestorCode)
+                ancestorCode = ancestor.parent
+                ancestorCodes.append(ancestorCode)
+            except ObjectDoesNotExist:
+                break
+        # if any code in the ancestry is contained within the blockname then it must
+        # exist within that block.
+        # eg A001 will have A00 in its ancestry. A00 is a substring of A00-A23
+        for ancestorCode in ancestorCodes:
+            try:
+                if ancestorCode in blockNames:
+                    return ancestorCode
+            except ValueError:
+                continue
+        return None
