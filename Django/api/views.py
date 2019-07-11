@@ -565,3 +565,26 @@ class InactiveRules(generics.ListAPIView):
 
     queryset = Rule.objects.filter(active=False)
     serializer_class = serializers.RulesSerializer
+
+
+@permission_classes((permissions.AllowAny,))
+class Stats(APIView):
+
+    def get(self, request, format=None, **kwargs):
+        codes = Code.objects.all()
+
+        sum = 0  # Total number of codes entered
+        numUnique = 0  # Number of unique codes entered
+        for code in codes:
+            sum += code.times_coded
+            if code.times_coded > 0:
+                numUnique += 1
+
+        # Top 10 common codes
+        codes = codes.order_by('-times_coded')[:10]
+        print("\n\n\n\n\n", codes)
+        topCodes = []
+        for code in codes:
+            topCodes.append({"code": code.code, "times_coded": code.times_coded})
+
+        return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
