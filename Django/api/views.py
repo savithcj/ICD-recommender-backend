@@ -582,9 +582,8 @@ class Stats(APIView):
 
         # Top 10 common codes
         codes = codes.order_by('-times_coded')[:10]
-        print("\n\n\n\n\n", codes)
         topCodes = []
         for code in codes:
-            topCodes.append({"code": code.code, "times_coded": code.times_coded})
+            topCodes.append({"code": code.code, "times_coded": code.times_coded, "description": code.description})
 
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
