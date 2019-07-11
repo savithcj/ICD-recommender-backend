@@ -7,7 +7,7 @@ class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
         fields = ("id", "lhs", "rhs", "min_age", "max_age", "support",
-                  "confidence", "num_accepted", "num_rejected", "num_suggested", "active")
+                  "confidence", "num_accepted", "num_rejected", "num_suggested", "active", "gender")
 
 
 class CodeBlockUsageSerializer(serializers.ModelSerializer):
