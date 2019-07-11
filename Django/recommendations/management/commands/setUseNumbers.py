@@ -13,6 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         mode = options['mode']
+        # Getting all code and rule objects
         codes = Code.objects.all()
         rules = Rule.objects.all()
         if mode == "random":
@@ -23,19 +24,24 @@ class Command(BaseCommand):
             print("Setting codes")
             for code in codes:
                 if mode == "random":
+                    # Setting codes to random
                     code.times_coded = random.randint(1, 1001)
                 else:
+                    # Setting codes to 0
                     code.times_coded = 0
                 code.save()
             print("Setting rules")
             for rule in rules:
                 if mode == "random":
+                    # Setting accepted, rejected and suggested to random numbers
                     rule.num_accepted = random.randint(1, 1001)
                     rule.num_rejected = random.randint(1, 1001)
                     rule.num_suggested = rule.num_accepted + rule.num_rejected + random.randint(1, 1001)
                 else:
+                    # Setting accepted, rejected and suggested to 0
                     rule.num_accepted = 0
                     rule.num_rejected = 0
                     rule.num_suggested = 0
+                # Saving the rule
                 rule.save()
         print("Done")

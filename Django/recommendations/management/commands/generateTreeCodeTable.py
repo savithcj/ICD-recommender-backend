@@ -17,14 +17,14 @@ class Command(BaseCommand):
         return parent
 
     def setCategoryHiearchy(self, startNum, endNum, block, startLetter, parentDict, childrenDict):
-        # sets hierarchy of block categories
+        # Sets hierarchy of block categories
         for j in range(startNum, endNum+1):
             child = startLetter + '{:02d}'.format(j)
             parentDict[child] = block
             childrenDict[block].append(child)
 
     def findChapter(self, block):
-        # determine which chapter the block belongs to by some character math
+        # Determine which chapter the block belongs to by some character math
         for chapterRange in self.chapterRanges:
             blockVal = ord(block[0])*100 + int(block[1:3])
             chapVal = ord(chapterRange[0])*100 + int(chapterRange[1:3])
