@@ -2,6 +2,7 @@ from rest_framework import serializers
 from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage, DaggerAsterisk
 
 
+# Standard rule serializer
 class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
