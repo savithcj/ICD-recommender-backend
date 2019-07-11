@@ -21,14 +21,14 @@ class Command(BaseCommand):
             # set code usage numbers
             if mode == "dad":
                 print("Setting code usage numbers to dad values")
-                dxCounts = defaultdict(int)
+                dxCounts = dict()
                 with open('secret/DAD_dx_counts.csv', 'r') as f:
                     for line in f.readlines():
                         code, count = line.strip().split(',')
                         count = int(count)
-                        dxCounts[code] += count
+                        dxCounts[code] = count
                 for code in codes:
-                    code.times_coded = dxCounts[code]
+                    code.times_coded = dxCounts.get(code.code, 0)
             elif mode == "random":
                 print("Setting code usage numbers to a random counts")
                 for code in codes:
@@ -37,10 +37,12 @@ class Command(BaseCommand):
                 print("Setting code usage numbers to 0")
                 for code in codes:
                     code.times_coded = 0
-            code.save()
+            for code in codes:
+                code.save()
 
-            # set rule usage numbers
-            if mode == "random" or mode == "dad":
+        with transaction.atomic()
+           # set rule usage numbers
+           if mode == "random" or mode == "dad":
                 print("Setting rule usage counts to random counts")
                 for rule in rules:
                     rule.num_accepted = random.randint(1, 1001)
@@ -52,5 +54,6 @@ class Command(BaseCommand):
                     rule.num_accepted = 0
                     rule.num_rejected = 0
                     rule.num_suggested = 0
-            rule.save()
+            for rule in rules:
+                rule.save()
         print("Done")

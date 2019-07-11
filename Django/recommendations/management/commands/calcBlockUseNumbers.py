@@ -74,22 +74,22 @@ class Command(BaseCommand):
 
     def findBlock(self, code, blockNames):
         # get full ancestry
-        ancestorCodes = []
         ancestorCode = code
         while True:
             try:
                 ancestor = TreeCode.objects.get(code=ancestorCode)
+                if "Chapter" in ancestor.parent:
+                    return ancestor.code
                 ancestorCode = ancestor.parent
-                ancestorCodes.append(ancestorCode)
             except ObjectDoesNotExist:
                 break
-        # if any code in the ancestry is contained within the blockname then it must
-        # exist within that block.
-        # eg A001 will have A00 in its ancestry. A00 is a substring of A00-A23
-        for ancestorCode in ancestorCodes:
-            try:
-                if ancestorCode in blockNames:
-                    return ancestorCode
-            except ValueError:
-                continue
+        # # if any code in the ancestry is contained within the blockname then it must
+        # # exist within that block.
+        # # eg A001 will have A00 in its ancestry. A00 is a substring of A00-A23
+        # for ancestorCode in ancestorCodes:
+        #     try:
+        #         if ancestorCode in blockNames:
+        #             return ancestorCode
+        #     except ValueError:
+        #         continue
         return None
