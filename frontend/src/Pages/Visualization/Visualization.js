@@ -2,16 +2,15 @@ import React, { useState } from "react";
 import { WidthProvider, Responsive } from "react-grid-layout";
 import MenuBar from "../../Containers/MenuBar/MenuBar";
 import ChordDiagram from "../../Containers/ChordDiagram/ChordDiagram";
-// import BarChart from "../../Containers/BarChart/BarChart";
 import SankeyDiagram from "../../Containers/SankeyDiagram/SankeyDiagram";
 import RulesTable from "../../Containers/RulesTable/RulesTable";
+import DADStats from "../../Containers/DADStats/DADStats";
 import { getFromLS, saveToLS } from "../../Util/layoutFunctions";
 import { defaultLayouts } from "./layouts";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("visualLayouts", "layouts") || defaultLayouts;
 const chordDiagramDiv = React.createRef();
-// const barChartDiv = React.createRef();
 const SankeyDiagramDiv = React.createRef();
 
 function Visualization(props) {
@@ -69,19 +68,19 @@ function Visualization(props) {
         isResizable={isLayoutModifiable}
         onLayoutChange={(layout, layouts) => onLayoutChange(layouts)}
       >
-        <div key="0" className={highlightEditDiv}>
+        <div key="chord" className={highlightEditDiv}>
           <ChordDiagram id="101" ref={chordDiagramDiv} onChange={handleChordChange()} />{" "}
         </div>
-        <div key="1" className={highlightEditDiv}>
+        <div key="sankey" className={highlightEditDiv}>
           <SankeyDiagram id="100" ref={SankeyDiagramDiv} onChange={handleSankeyChange()} />{" "}
         </div>
 
-        <div key="2" id="barDiv" className={highlightEditDiv}>
+        <div key="rules" className={highlightEditDiv}>
           <RulesTable />{" "}
         </div>
-        {/* <div key="3" id="barDiv" className={highlightEditDiv}>
-          <BarChart id="100" ref={barChartDiv} />{" "}
-        </div> */}
+        <div key="dad" className={highlightEditDiv}>
+          <DADStats />{" "}
+        </div>
       </ResponsiveReactGridLayout>
     </div>
   );
