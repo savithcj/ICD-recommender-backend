@@ -9,7 +9,13 @@ const selectedCodesViewer = props => {
   const handleRemoveSelectedCode = event => {
     const selectedCodes = Array.from(props.selectedCodes);
     const removeCodeIndex = parseInt(event.currentTarget.id, 10);
+    const removedCode = selectedCodes[removeCodeIndex];
     selectedCodes.splice(removeCodeIndex, 1);
+    for (let i = 0; i < selectedCodes.length; i++) {
+      if (selectedCodes[i].paired === removedCode.code) {
+        selectedCodes[i].paired = null;
+      }
+    }
     props.removeSelectedCode(removeCodeIndex);
     props.getRecommendedCodes(selectedCodes);
     props.getDaggerAsterisks(selectedCodes);
@@ -60,7 +66,8 @@ const selectedCodesViewer = props => {
 
   const copyToClipboard = () => {
     const codeSelection = getStringFromListOfCodes(props.selectedCodes);
-    navigator.clipboard.writeText(codeSelection);
+    //TODO:fix copy to clipboard issue when connecting to front end from a non local server
+    // navigator.clipboard.writeText(codeSelection);
     props.setAlertMessage({ message: "Selected codes copied to clipboard", messageType: "success" });
   };
 

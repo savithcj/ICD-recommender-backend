@@ -278,17 +278,22 @@ class ListRequestedRules(APIView):
 
             # Adding parts to the rule
             for rule in rules:
-                N = rule.num_suggested
-                A = rule.num_accepted
-                R = rule.num_rejected
-                S = N/(N+10)  # scales how much confidence vs user interaction affects the score
                 code = Code.objects.get(code=rule.rhs)
                 rule.description = code.description
-                effective_confidence = 0.9*rule.manual + rule.confidence
-                rule.conf_factor = (1-S) * effective_confidence  # confidence based portion of score
-                rule.interact_factor = S * A / (A+R+1)  # interaction based portion of score
-                rule.score = rule.conf_factor + rule.interact_factor
-                # can change conf_factor and interact_factor to non-members of rule later
+                if rule.oracle == True:
+                    rule.conf_factor = 0
+                    rule.interact_factor = 0
+                    rule.score = 1
+                else:
+                    N = rule.num_suggested
+                    A = rule.num_accepted
+                    R = rule.num_rejected
+                    S = N/(N+10)  # scales how much confidence vs user interaction affects the score
+                    effective_confidence = 0.9*rule.manual + rule.confidence
+                    rule.conf_factor = (1-S) * effective_confidence  # confidence based portion of score
+                    rule.interact_factor = S * A / (A+R+1)  # interaction based portion of score
+                    rule.score = rule.conf_factor + rule.interact_factor
+                    # can change conf_factor and interact_factor to non-members of rule later
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
