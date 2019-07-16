@@ -211,7 +211,6 @@ class ListRequestedRules(APIView):
     """Returns the rules for the codes entered (entered codes are treated as LHS)"""
 
     def get_object(self, inCodes, request, active=None):
-        print("FROM API")
         try:
             # Sort input codes
             inputCodes = inCodes
@@ -237,7 +236,6 @@ class ListRequestedRules(APIView):
             kwargs["min_age"] = None
             kwargs["max_age"] = None
             kwargs["gender"] = None
-            print(lhs_combinations)
             # get rules
             # sqllite has max query param size of 999
             # werid stuff below to get around max param size. have to get rule ids and then query the rules.
@@ -267,12 +265,9 @@ class ListRequestedRules(APIView):
                     # exclude rules with code in RHS that already exist in the LHS
                     if rule.rhs not in inputCodes:
                         ruleIds.append(rule.id)
-            print(ruleIds)
 
             # construct a new queryset of rules because the old queryset would cause max param size error
             rules = Rule.objects.filter(id__in=ruleIds)
-            for rule in rules:
-                print(rule.lhs, rule.rhs)
             if active != None:
                 rules = rules.filter(active=active)
 

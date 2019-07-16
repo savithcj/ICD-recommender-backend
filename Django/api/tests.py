@@ -30,7 +30,7 @@ class TestAPIs(TestCase):
         self.rule4 = Rule.objects.create(lhs='000,001', rhs='0000', gender='O')
 
     def test_rules(self):
-        print("\nTesting rules-all API")
+        print("\nTesting rules API")
         client = Client()
         url = reverse('rules-all')
         response = client.get(url)
@@ -117,22 +117,26 @@ class TestAPIs(TestCase):
         data = response.json()
         self.assertEqual(data, [None])
 
-    def test_codeDescription(self):
+    def test_requestRules(self):
         print("\nTesting requestRules API")
         client = Client()
-
-        rules = Rule.objects.all()
-        for rule in rules:
-            print(rule.lhs, rule.rhs)
-
         codesToCheck = "000,001"
         url = reverse('rules-specific', args=[codesToCheck])
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        print(url)
         self.assertEqual(len(data), 2)
-        # self.rule1 = Rule.objects.create(lhs='001', rhs='0001')
-        # self.rule3 = Rule.objects.create(lhs='00', rhs='000')
-        # self.rule3 = Rule.objects.create(lhs='00', rhs='001')
-        # self.rule4 = Rule.objects.create(lhs='000,001', rhs='0000')
+
+        codesToCheck = "00"
+        url = reverse('rules-specific', args=[codesToCheck])
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 2)
+
+        codesToCheck = "001"
+        url = reverse('rules-specific', args=[codesToCheck])
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 1)
