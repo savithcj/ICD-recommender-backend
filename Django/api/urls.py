@@ -9,6 +9,7 @@ urlpatterns = [
     path('requestRules/<str:inCodes>/', views.ListRequestedRules.as_view(), name="rules-specific"),
     path('requestRulesActive/<str:inCodes>/', views.ListRequestedRulesActive.as_view(), name="rules-specific-active"),
     path('matchDescription/<str:descSubstring>/', views.ListMatchingDescriptions.as_view(), name="match-description"),
+    path('matchKeyword/<str:keyword>/', views.ListMatchingKeywords.as_view(), name="match-keyword"),
     path('ancestors/<str:inCode>/', views.ListAncestors.as_view(), name="ancestors-of-code"),
     path('codeAutosuggestions/<str:matchString>/', views.ListCodeAutosuggestions.as_view(), name="code-autosuggestions"),
     path('codeBlockUsage/', views.ListCodeBlockUsage.as_view(), name="code-block-usage"),

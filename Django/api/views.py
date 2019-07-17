@@ -453,15 +453,44 @@ class ListMatchingDescriptions(APIView):
     """Used to match text that the user enters in the search box.
     This is so that the user can enter part of the description instead of the code"""
 
-    def get_object(self, descSubstring):
+    def get_object(self, searchString):
         # Only check if the length of the entered string is greater than or equal to 3
-        if len(descSubstring) < 3:
+        if len(searchString) < 3:
             return Code.objects.none()
         # Filters and returns
-        return Code.objects.filter(description__icontains=descSubstring).order_by(Length('code').asc())[:15]
+        searchwords = searchString.split(' ')
+        queryset = Code.objects.filter(description__icontains=searchwords[0])
+        if len(searchwords) > 1:
+            for searchword in searchwords[1:]:
+                queryset = queryset.filter(description__icontains=searchword)
+        return queryset.order_by(Length('code').asc())[:15]
 
-    def get(self, request, descSubstring, format=None, **kwargs):
-        codes = self.get_object(descSubstring)
+    def get(self, request, searchString, format=None, **kwargs):
+        codes = self.get_object(searchString)
+        serializer = serializers.CodeSerializer(codes, many=True)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
+class ListMatchingKeywords(APIView):
+    """Used to match keywords that the user enters in the search box.
+    This is so that the user can enter a keyword instead of the code"""
+
+    def get_object(self, searchString):
+        print(searchString)
+        # Only check if the length of the entered string is greater than or equal to 3
+        if len(searchString) < 3:
+            return Code.objects.none()
+        # Filters and returns
+        searchwords = searchString.split(' ')
+        queryset = Code.objects.filter(keyword_terms__icontains=searchwords[0])
+        if len(searchwords) > 1:
+            for searchword in searchwords[1:]:
+                queryset = queryset.filter(keyword_terms__icontains=searchword)
+        return queryset.order_by(Length('code').asc())[:15]
+
+    def get(self, request, searchString, format=None, **kwargs):
+        codes = self.get_object(searchString)
         serializer = serializers.CodeSerializer(codes, many=True)
         return Response(serializer.data)
 
@@ -492,14 +521,17 @@ class ListCodeAutosuggestions(APIView):
 
     def get(self, request, matchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
+        keywordMatch = ListMatchingKeywords()
         codeMatch = ListChildrenOfCode()
 
         matchesDesc = descMatch.get_object(matchString)
+        matchesKeyword = keywordMatch.get_object(matchString)
         matchesCode = codeMatch.get_object(matchString)
 
         serializerDesc = serializers.CodeSerializer(matchesDesc, many=True)
+        serializerKeyword = serializers.CodeSerializer(matchesKeyword, many=True)
         serializerCode = serializers.CodeSerializer(matchesCode, many=True)
-        return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": []})
+        return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": serializerKeyword.data})
 
 
 @permission_classes((permissions.AllowAny,))
