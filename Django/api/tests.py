@@ -24,24 +24,26 @@ class TestAPIs(TestCase):
         self.code00 = TreeCode.objects.create(code='00', children='000,001', parent='00', description='00Desc')
         self.code0 = TreeCode.objects.create(code='0', children='00', description='0Desc')
 
-        self.rule1 = Rule.objects.create(lhs='001', rhs='0001')
-        self.rule3 = Rule.objects.create(lhs='00', rhs='000')
-        self.rule3 = Rule.objects.create(lhs='00', rhs='001')
-        self.rule4 = Rule.objects.create(lhs='000,001', rhs='0000')
+        self.rule1 = Rule.objects.create(lhs='001', rhs='0001', gender='O')
+        self.rule3 = Rule.objects.create(lhs='00', rhs='000', gender='O')
+        self.rule3 = Rule.objects.create(lhs='00', rhs='001', gender='O')
+        self.rule4 = Rule.objects.create(lhs='000,001', rhs='0000', gender='O')
 
     def test_rules(self):
-        print("\nTesting ListAllRules view")
+        print("\nTesting rules API")
         client = Client()
-        response = client.get('/api/rules/')
+        url = reverse('rules-all')
+        response = client.get(url)
         self.assertEqual(response.status_code, 200)
 
     def test_children(self):
-        print("Testing children API")
+        print("\nTesting children API")
         client = Client()
 
         # test existing code
         codeToCheck = "000"
-        response = client.get('/api/children/'+codeToCheck+'/')
+        url = reverse('children-of-code', args=[codeToCheck])
+        response = client.get(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 2)
@@ -61,7 +63,8 @@ class TestAPIs(TestCase):
 
         # test existing code
         codeToCheck = "000"
-        response = client.get('/api/family/'+codeToCheck+'/')
+        url = reverse('family-of-code', args=[codeToCheck])
+        response = client.get(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data['self']['code'], '000')
@@ -73,7 +76,8 @@ class TestAPIs(TestCase):
 
         # test existing code
         codeToCheck = "001"
-        response = client.get('/api/family/'+codeToCheck+'/')
+        url = reverse('family-of-code', args=[codeToCheck])
+        response = client.get(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data['self']['code'], '001')
@@ -84,7 +88,8 @@ class TestAPIs(TestCase):
 
         # test non existing code
         codeToCheck = "X00"
-        response = client.get('/api/family/'+codeToCheck+'/')
+        url = reverse('family-of-code', args=[codeToCheck])
+        response = client.get(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data['self'], None)
@@ -98,7 +103,8 @@ class TestAPIs(TestCase):
 
         # test existing code
         codeToCheck = "001"
-        response = client.get('/api/codeDescription/'+codeToCheck+'/')
+        url = reverse('single-code', args=[codeToCheck])
+        response = client.get(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data['code'], '001')
@@ -110,3 +116,27 @@ class TestAPIs(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data, [None])
+
+    def test_requestRules(self):
+        print("\nTesting requestRules API")
+        client = Client()
+        codesToCheck = "000,001"
+        url = reverse('rules-specific', args=[codesToCheck])
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 2)
+
+        codesToCheck = "00"
+        url = reverse('rules-specific', args=[codesToCheck])
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 2)
+
+        codesToCheck = "001"
+        url = reverse('rules-specific', args=[codesToCheck])
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 1)

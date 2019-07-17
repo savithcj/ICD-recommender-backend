@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import int_list_validator
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.indexes import GinIndex
 
 
 class Rule(models.Model):
@@ -33,16 +35,13 @@ class Code(models.Model):
     parent = models.CharField(db_column='parent', max_length=20)
     children = models.TextField(db_column='children', max_length=1000)
     times_coded = models.IntegerField(db_column='times_coded', default=0)
+    keyword_terms = models.CharField(db_column='keyword_terms', max_length=30000)
 
-    class Meta:
-        db_table = 'codes'
 
 # Used for creating the tree, using chapters as parents to blocks of codes,
 # blocks of codes as parents of high level codes, etc.
 # Example: Chapter 01 is parent of A00-A09, A15-A19, etc.
 # A00-A09 is parent of A00, A01, ... , A09
-
-
 class TreeCode(models.Model):
     code = models.CharField(db_column='code', max_length=20, primary_key=True)
     description = models.CharField(db_column='description', max_length=1000)

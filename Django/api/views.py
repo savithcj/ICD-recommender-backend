@@ -214,29 +214,28 @@ class ListRequestedRules(APIView):
         try:
             # Sort input codes
             inputCodes = inCodes
-            inputRules = inputCodes.split(",")
-            inputRules.sort()
+            inputCodes = inputCodes.split(",")
+            inputCodes.sort()
 
             # Build combinations of codes
-            # max combination in the LHS of 5 codes
+            # max combination in the LHS of 4 codes
             lhs = []
-            for i in range(min(len(inputRules), 5)):
-                lhs += list(combinations(inputRules, i+1))
+            for i in range(min(len(inputCodes), 4)):
+                lhs += list(combinations(inputCodes, i+1))
 
             # Concatening items in combinations together
-            new_lhs = []
+            lhs_combinations = []
             for entry in lhs:
                 empty = ''
                 for i in range(len(entry)):
                     empty += entry[i] + ","
-                new_lhs.append(empty[:-1])
+                lhs_combinations.append(empty[:-1])
 
             # special params
             kwargs = dict()
             kwargs["min_age"] = None
             kwargs["max_age"] = None
             kwargs["gender"] = None
-
             # get rules
             # sqllite has max query param size of 999
             # werid stuff below to get around max param size. have to get rule ids and then query the rules.
@@ -245,8 +244,8 @@ class ListRequestedRules(APIView):
             ruleIds = []
             age_param = request.GET.get('age', None)
             gender_param = request.GET.get('gender', None)
-            for i in range(0, len(new_lhs), maxSqlParams):
-                temp_lhs = new_lhs[i:i+maxSqlParams]
+            for i in range(0, len(lhs_combinations), maxSqlParams):
+                temp_lhs = lhs_combinations[i:i+maxSqlParams]
                 tempRules = Rule.objects.filter(lhs__in=temp_lhs)
 
                 # Excluding rules that aren't for the patient age
@@ -263,12 +262,12 @@ class ListRequestedRules(APIView):
                     tempRules = tempRules.filter(gender='F')
 
                 for rule in tempRules:
-                    ruleIds.append(rule.id)
+                    # exclude rules with code in RHS that already exist in the LHS
+                    if rule.rhs not in inputCodes:
+                        ruleIds.append(rule.id)
 
             # construct a new queryset of rules because the old queryset would cause max param size error
-            # exclude rules with code in RHS that already exist in the LHS
-            rules = Rule.objects.filter(id__in=ruleIds).exclude(rhs__iregex=r'(' + '|'.join(new_lhs) + ')')
-
+            rules = Rule.objects.filter(id__in=ruleIds)
             if active != None:
                 rules = rules.filter(active=active)
 
@@ -454,15 +453,44 @@ class ListMatchingDescriptions(APIView):
     """Used to match text that the user enters in the search box.
     This is so that the user can enter part of the description instead of the code"""
 
-    def get_object(self, descSubstring):
+    def get_object(self, searchString):
         # Only check if the length of the entered string is greater than or equal to 3
-        if len(descSubstring) < 3:
+        if len(searchString) < 3:
             return Code.objects.none()
         # Filters and returns
-        return Code.objects.filter(description__icontains=descSubstring).order_by(Length('code').asc())[:15]
+        searchwords = searchString.split(' ')
+        queryset = Code.objects.filter(description__icontains=searchwords[0])
+        if len(searchwords) > 1:
+            for searchword in searchwords[1:]:
+                queryset = queryset.filter(description__icontains=searchword)
+        return queryset.order_by(Length('code').asc())[:15]
 
-    def get(self, request, descSubstring, format=None, **kwargs):
-        codes = self.get_object(descSubstring)
+    def get(self, request, searchString, format=None, **kwargs):
+        codes = self.get_object(searchString)
+        serializer = serializers.CodeSerializer(codes, many=True)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
+class ListMatchingKeywords(APIView):
+    """Used to match keywords that the user enters in the search box.
+    This is so that the user can enter a keyword instead of the code"""
+
+    def get_object(self, searchString):
+        print(searchString)
+        # Only check if the length of the entered string is greater than or equal to 3
+        if len(searchString) < 3:
+            return Code.objects.none()
+        # Filters and returns
+        searchwords = searchString.split(' ')
+        queryset = Code.objects.filter(keyword_terms__icontains=searchwords[0])
+        if len(searchwords) > 1:
+            for searchword in searchwords[1:]:
+                queryset = queryset.filter(keyword_terms__icontains=searchword)
+        return queryset.order_by(Length('code').asc())[:15]
+
+    def get(self, request, searchString, format=None, **kwargs):
+        codes = self.get_object(searchString)
         serializer = serializers.CodeSerializer(codes, many=True)
         return Response(serializer.data)
 
@@ -493,14 +521,17 @@ class ListCodeAutosuggestions(APIView):
 
     def get(self, request, matchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
+        keywordMatch = ListMatchingKeywords()
         codeMatch = ListChildrenOfCode()
 
         matchesDesc = descMatch.get_object(matchString)
+        matchesKeyword = keywordMatch.get_object(matchString)
         matchesCode = codeMatch.get_object(matchString)
 
         serializerDesc = serializers.CodeSerializer(matchesDesc, many=True)
+        serializerKeyword = serializers.CodeSerializer(matchesKeyword, many=True)
         serializerCode = serializers.CodeSerializer(matchesCode, many=True)
-        return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": []})
+        return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": serializerKeyword.data})
 
 
 @permission_classes((permissions.AllowAny,))
