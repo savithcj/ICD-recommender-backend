@@ -37,12 +37,11 @@ class Code(models.Model):
     class Meta:
         db_table = 'codes'
 
+
 # Used for creating the tree, using chapters as parents to blocks of codes,
 # blocks of codes as parents of high level codes, etc.
 # Example: Chapter 01 is parent of A00-A09, A15-A19, etc.
 # A00-A09 is parent of A00, A01, ... , A09
-
-
 class TreeCode(models.Model):
     code = models.CharField(db_column='code', max_length=20, primary_key=True)
     description = models.CharField(db_column='description', max_length=1000)
