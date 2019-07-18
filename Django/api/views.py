@@ -407,6 +407,11 @@ class Family(APIView):
             childrenCodes = TreeCode.objects.get(code=inCode).children
             childrenCodes = childrenCodes.split(",")
             children = TreeCode.objects.filter(code__in=childrenCodes)
+            for child in children:
+                if child.children:
+                    child.hasChildren = True
+                else:
+                    child.hasChildren = False
             return children
         except ObjectDoesNotExist:
             return TreeCode.objects.none()
@@ -419,9 +424,22 @@ class Family(APIView):
                 siblingCodes = TreeCode.objects.get(
                     code=parent).children.split(",")
                 siblings = TreeCode.objects.filter(code__in=siblingCodes)
+                for sibling in siblings:
+                    if sibling.children:
+                        sibling.hasChildren = True
+                    else:
+                        sibling.hasChildren = False
                 return siblings
             else:
-                return TreeCode.objects.filter(code=inCode)
+                siblings = TreeCode.objects.filter(code=inCode)
+                for sibling in siblings:
+                    print(sibling)
+                    if sibling.children:
+                        print("sibling has children!")
+                        sibling.hasChildren = True
+                    else:
+                        sibling.hasChildren = False
+                return siblings
         except ObjectDoesNotExist:
             return TreeCode.objects.none()
 
@@ -429,6 +447,10 @@ class Family(APIView):
     def get_single(self, inCode):
         try:
             selfs = TreeCode.objects.get(code=inCode)
+            if selfs.children:
+                selfs.hasChildren = True
+            else:
+                selfs.hasChildren = False
             return selfs
         except ObjectDoesNotExist:
             return None
@@ -439,13 +461,15 @@ class Family(APIView):
         if selfs == None:
             return Response({'self': None, 'parent': None, 'siblings': None, 'children': None})
         parent = self.get_single(selfs.parent)
+        print("parent", parent)
+        if(parent != None):
+            parent.hasChildren = True
+            parentSerializer = serializers.TreeCodeSerializer(parent, many=False)
         children = self.get_children(inCode)
         siblings = self.get_siblings(inCode)
         selfSerializer = serializers.TreeCodeSerializer(selfs, many=False)
-        parentSerializer = serializers.TreeCodeSerializer(parent, many=False)
         siblingSerializer = serializers.TreeCodeSerializer(siblings, many=True)
-        childrenSerializer = serializers.TreeCodeSerializer(
-            children, many=True)
+        childrenSerializer = serializers.TreeCodeSerializer(children, many=True)
 
         # Sending json
         if parent:
