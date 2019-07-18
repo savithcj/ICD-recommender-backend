@@ -646,3 +646,14 @@ class Stats(APIView):
             topCodes.append({"code": code.code, "times_coded": code.times_coded, "description": code.description})
 
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
+
+
+@permission_classes((permissions.AllowAny,))
+class CheckCode(APIView):
+
+    def get(self, request, inCode, format=None, **kwargs):
+        codes = Code.objects.filter(code=inCode)
+        if codes:
+            return Response({'exists': True})
+        else:
+            return Response({'exists': False})
