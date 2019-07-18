@@ -215,6 +215,12 @@ class ListRequestedRules(APIView):
             # Sort input codes
             inputCodes = inCodes
             inputCodes = inputCodes.split(",")
+
+            codesToAdd = []
+            for code in inputCodes:
+                parent = Code.objects.get(code=code).parent
+                codesToAdd.append(parent)
+            inputCodes += codesToAdd
             inputCodes.sort()
 
             # Build combinations of codes
@@ -238,7 +244,7 @@ class ListRequestedRules(APIView):
             kwargs["gender"] = None
             # get rules
             # sqllite has max query param size of 999
-            # werid stuff below to get around max param size. have to get rule ids and then query the rules.
+            # weird stuff below to get around max param size. have to get rule ids and then query the rules.
             # direct query will cause overflow of param size
             maxSqlParams = 500
             ruleIds = []
