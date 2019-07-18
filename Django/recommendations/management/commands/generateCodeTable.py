@@ -32,7 +32,8 @@ class Command(BaseCommand):
                 desc = line[1].strip().replace('"', '')
                 categoryDescriptions[code] = desc
 
-        # Generate all parents and add to code set
+        # Generate all intermediate nodes and add to code set
+        # Repeat until no more intermediate nodes are created
         parentsAdded = -1
         while parentsAdded != 0:
             parents = []
@@ -43,19 +44,16 @@ class Command(BaseCommand):
             oldLen = len(allCodes)
             allCodes.update(parents)
             parentsAdded = len(allCodes) - oldLen
-            print("New Length: ", len(allCodes))
-            print("Parents Added:", parentsAdded, '\n')
+        print("Number of nodes: ", len(allCodes))
 
-        # Store all parents
         parentDict = dict()
-        for code in allCodes:
-            parentDict[code] = self.findParent(code)
-
-        # Store all children
         childrenDict = defaultdict(list)
         for code in allCodes:
             parent = self.findParent(code)
+            # set parent of code
+            parentDict[code] = parent
             if parent != '':
+                # set code as child of parent
                 childrenDict[parent].append(code)
 
         keywordDict = term_preprocessing.getKeywordTerms()
@@ -64,8 +62,10 @@ class Command(BaseCommand):
             codes = list(allCodes)
             codes.sort()
             for code in codes:
+                # Check if ICD-10-CA has a description first and use that
                 description = codeDescriptions.get(code, '')
                 if description == '':
+                    # Use descfiption from ICD-10-CM if it doesn't exist
                     description = categoryDescriptions.get(code, '')
                 parent = parentDict[code]
                 children = ''
