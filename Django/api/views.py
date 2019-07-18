@@ -464,11 +464,11 @@ class ListMatchingDescriptions(APIView):
         if len(searchString) < 3:
             return Code.objects.none()
         # Filters and returns
-        searchwords = searchString.split(' ')
-        queryset = Code.objects.filter(description__icontains=searchwords[0])
+        searchwords = searchString.lower().split(' ')
+        queryset = Code.objects.filter(description__contains=searchwords[0])
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
-                queryset = queryset.filter(description__icontains=searchword)
+                queryset = queryset.filter(description__contains=searchword)
         return queryset.order_by(Length('code').asc())[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
@@ -488,11 +488,11 @@ class ListMatchingKeywords(APIView):
         if len(searchString) < 3:
             return Code.objects.none()
         # Filters and returns
-        searchwords = searchString.split(' ')
-        queryset = Code.objects.filter(keyword_terms__icontains=searchwords[0])
+        searchwords = searchString.lower().split(' ')
+        queryset = Code.objects.filter(keyword_terms__contains=searchwords[0])
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
-                queryset = queryset.filter(keyword_terms__icontains=searchword)
+                queryset = queryset.filter(keyword_terms__contains=searchword)
         return queryset.order_by(Length('code').asc())[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
@@ -525,14 +525,14 @@ class ListAncestors(APIView):
 class ListCodeAutosuggestions(APIView):
     """Returns codes based upon the text entered"""
 
-    def get(self, request, matchString, format=None, **kwargs):
+    def get(self, request, searchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
         keywordMatch = ListMatchingKeywords()
         codeMatch = ListChildrenOfCode()
 
-        matchesDesc = descMatch.get_object(matchString)
-        matchesKeyword = keywordMatch.get_object(matchString)
-        matchesCode = codeMatch.get_object(matchString)
+        matchesDesc = descMatch.get_object(searchString)
+        matchesKeyword = keywordMatch.get_object(searchString)
+        matchesCode = codeMatch.get_object(searchString)
 
         serializerDesc = serializers.CodeSerializer(matchesDesc, many=True)
         serializerKeyword = serializers.CodeSerializer(matchesKeyword, many=True)

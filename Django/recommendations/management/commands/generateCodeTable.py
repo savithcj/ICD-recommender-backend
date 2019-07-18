@@ -15,17 +15,22 @@ class Command(BaseCommand):
 
         # Read codes and descriptions from text file
         allCodes = set()
-        descriptions = defaultdict(str)
+        codeDescriptions = dict()
         with open('secret/codedescriptions.txt') as f:
-            lines = f.readlines()
-            for i in range(1, len(lines)):
-                line = lines[i].split('\t')
+            for line in f.readlines():
+                line = line.split('\t')
                 code = line[0].strip()
                 desc = line[1].strip().replace('"', '')
                 allCodes.add(code)
-                descriptions[code] = desc
+                codeDescriptions[code] = desc
 
-        print(len(allCodes), len(descriptions))
+        categoryDescriptions = dict()
+        with open('secret/categories.csv') as f:
+            for line in f.readlines():
+                line = line.split(',')
+                code = line[0].strip()
+                desc = line[1].strip().replace('"', '')
+                categoryDescriptions[code] = desc
 
         # Generate all parents and add to code set
         parentsAdded = -1
@@ -59,7 +64,9 @@ class Command(BaseCommand):
             codes = list(allCodes)
             codes.sort()
             for code in codes:
-                description = descriptions[code]
+                description = codeDescriptions.get(code, '')
+                if description == '':
+                    description = categoryDescriptions.get(code, '')
                 parent = parentDict[code]
                 children = ''
                 if len(childrenDict[code]) > 0:
@@ -69,11 +76,11 @@ class Command(BaseCommand):
                     children = children[:-1]
 
                 # check if code has keyword associated with it
-                keyword_terms = keywordDict[code]
+                keyword_terms = keywordDict[code].lower()
                 if keyword_terms == '' and len(code) > 3:
                     # add keywords from children if empty (due to using CM keywords)
                     for i in range(10):
-                        keyword_terms += keywordDict[code + str(i)]
+                        keyword_terms += keywordDict[code + str(i)].lower()
                 row = Code.objects.create(code=code, children=children, parent=parent,
                                           description=description, keyword_terms=keyword_terms)
                 row.save()

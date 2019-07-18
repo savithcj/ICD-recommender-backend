@@ -40,15 +40,22 @@ class Command(BaseCommand):
         TreeCode.objects.all().delete()
 
         allCodes = set()
-        descriptions = defaultdict(str)
+        descriptions = dict()
         with open('secret/codedescriptions.txt') as f:
-            lines = f.readlines()
-            for i in range(1, len(lines)):
-                line = lines[i].split('\t')
+            for line in f.readlines():
+                line = line.split('\t')
                 code = line[0].strip()
                 desc = line[1].strip().replace('"', '')
                 allCodes.add(code)
                 descriptions[code] = desc
+
+        categoryDescriptions = dict()
+        with open('secret/categories.csv') as f:
+            for line in f.readlines():
+                line = line.split(',')
+                code = line[0].strip()
+                desc = line[1].strip().replace('"', '')
+                categoryDescriptions[code] = desc
 
         print(len(allCodes), len(descriptions))
 
@@ -93,7 +100,6 @@ class Command(BaseCommand):
                 chap = 'Chapter ' + line[0]
                 chapChildren = line[1]
                 chapDesc = line[2]
-
                 allCodes.add(chap)
                 descriptions[chap] = chapDesc
                 parentDict[chap] = baseCode
@@ -142,7 +148,10 @@ class Command(BaseCommand):
             codes = list(allCodes)
             codes.sort()
             for code in codes:
-                description = descriptions[code]
+                # Check if ICD-10-CA has a description first and use that
+                description = codeDescriptions.get(code, '')
+                if description == '':
+                    # Use descfiption from ICD-10-CM if it doesn't exist
                 parent = parentDict[code]
                 children = ''
                 if len(childrenDict[code]) > 0:
