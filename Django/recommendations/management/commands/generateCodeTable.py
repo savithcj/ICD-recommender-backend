@@ -15,19 +15,25 @@ class Command(BaseCommand):
 
         # Read codes and descriptions from text file
         allCodes = set()
-        descriptions = defaultdict(str)
+        codeDescriptions = dict()
         with open('secret/codedescriptions.txt') as f:
-            lines = f.readlines()
-            for i in range(1, len(lines)):
-                line = lines[i].split('\t')
+            for line in f.readlines():
+                line = line.split('\t')
                 code = line[0].strip()
                 desc = line[1].strip().replace('"', '')
                 allCodes.add(code)
-                descriptions[code] = desc
+                codeDescriptions[code] = desc
 
-        print(len(allCodes), len(descriptions))
+        categoryDescriptions = dict()
+        with open('secret/categories.csv') as f:
+            for line in f.readlines():
+                line = line.split(',')
+                code = line[0].strip()
+                desc = line[1].strip().replace('"', '')
+                categoryDescriptions[code] = desc
 
-        # Generate all parents and add to code set
+        # Generate all intermediate nodes and add to code set
+        # Repeat until no more intermediate nodes are created
         parentsAdded = -1
         while parentsAdded != 0:
             parents = []
@@ -38,19 +44,16 @@ class Command(BaseCommand):
             oldLen = len(allCodes)
             allCodes.update(parents)
             parentsAdded = len(allCodes) - oldLen
-            print("New Length: ", len(allCodes))
-            print("Parents Added:", parentsAdded, '\n')
+        print("Number of nodes: ", len(allCodes))
 
-        # Store all parents
         parentDict = dict()
-        for code in allCodes:
-            parentDict[code] = self.findParent(code)
-
-        # Store all children
         childrenDict = defaultdict(list)
         for code in allCodes:
             parent = self.findParent(code)
+            # set parent of code
+            parentDict[code] = parent
             if parent != '':
+                # set code as child of parent
                 childrenDict[parent].append(code)
 
         keywordDict = term_preprocessing.getKeywordTerms()
@@ -59,7 +62,11 @@ class Command(BaseCommand):
             codes = list(allCodes)
             codes.sort()
             for code in codes:
-                description = descriptions[code]
+                # Check if ICD-10-CA has a description first and use that
+                description = codeDescriptions.get(code, '')
+                if description == '':
+                    # Use descfiption from ICD-10-CM if it doesn't exist
+                    description = categoryDescriptions.get(code, '')
                 parent = parentDict[code]
                 children = ''
                 if len(childrenDict[code]) > 0:
@@ -69,11 +76,11 @@ class Command(BaseCommand):
                     children = children[:-1]
 
                 # check if code has keyword associated with it
-                keyword_terms = keywordDict[code]
+                keyword_terms = keywordDict[code].lower()
                 if keyword_terms == '' and len(code) > 3:
                     # add keywords from children if empty (due to using CM keywords)
                     for i in range(10):
-                        keyword_terms += keywordDict[code + str(i)]
+                        keyword_terms += keywordDict[code + str(i)].lower()
                 row = Code.objects.create(code=code, children=children, parent=parent,
                                           description=description, keyword_terms=keyword_terms)
                 row.save()

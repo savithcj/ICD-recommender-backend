@@ -48,12 +48,10 @@ class CreateRule(APIView):
 
         # Ensuring that the rule has at least one code in the LHS and exactly one in the RHS
         if len(body_data['LHSCodes']) < 1 or len(body_data['RHSCodes']) != 1:
-            print("Wrong number of items in fields, rule not created.")
             return HttpResponse(400)
 
         # Ensuring that the RHS isn't in the LHS
         if(body_data['RHSCodes'][0] in body_data['LHSCodes']):
-            print("RHS in LHS")
             return HttpResponse(400)
 
         # Read and sort LHS codes from json, append to string
@@ -257,7 +255,6 @@ class ListRequestedRules(APIView):
                 # Excluding rules that aren't for the patient age
                 if age_param is not None and age_param.isdigit():
                     age = int(age_param)
-                    print("In Age:", age)
                     tempRules = tempRules.filter(min_age__lte=age)
                     tempRules = tempRules.filter(max_age__gte=age)
 
@@ -407,6 +404,11 @@ class Family(APIView):
             childrenCodes = TreeCode.objects.get(code=inCode).children
             childrenCodes = childrenCodes.split(",")
             children = TreeCode.objects.filter(code__in=childrenCodes)
+            for child in children:
+                if child.children:
+                    child.hasChildren = True
+                else:
+                    child.hasChildren = False
             return children
         except ObjectDoesNotExist:
             return TreeCode.objects.none()
@@ -419,9 +421,20 @@ class Family(APIView):
                 siblingCodes = TreeCode.objects.get(
                     code=parent).children.split(",")
                 siblings = TreeCode.objects.filter(code__in=siblingCodes)
+                for sibling in siblings:
+                    if sibling.children:
+                        sibling.hasChildren = True
+                    else:
+                        sibling.hasChildren = False
                 return siblings
             else:
-                return TreeCode.objects.filter(code=inCode)
+                siblings = TreeCode.objects.filter(code=inCode)
+                for sibling in siblings:
+                    if sibling.children:
+                        sibling.hasChildren = True
+                    else:
+                        sibling.hasChildren = False
+                return siblings
         except ObjectDoesNotExist:
             return TreeCode.objects.none()
 
@@ -429,6 +442,10 @@ class Family(APIView):
     def get_single(self, inCode):
         try:
             selfs = TreeCode.objects.get(code=inCode)
+            if selfs.children:
+                selfs.hasChildren = True
+            else:
+                selfs.hasChildren = False
             return selfs
         except ObjectDoesNotExist:
             return None
@@ -439,13 +456,14 @@ class Family(APIView):
         if selfs == None:
             return Response({'self': None, 'parent': None, 'siblings': None, 'children': None})
         parent = self.get_single(selfs.parent)
+        if(parent != None):
+            parent.hasChildren = True
+            parentSerializer = serializers.TreeCodeSerializer(parent, many=False)
         children = self.get_children(inCode)
         siblings = self.get_siblings(inCode)
         selfSerializer = serializers.TreeCodeSerializer(selfs, many=False)
-        parentSerializer = serializers.TreeCodeSerializer(parent, many=False)
         siblingSerializer = serializers.TreeCodeSerializer(siblings, many=True)
-        childrenSerializer = serializers.TreeCodeSerializer(
-            children, many=True)
+        childrenSerializer = serializers.TreeCodeSerializer(children, many=True)
 
         # Sending json
         if parent:
@@ -464,11 +482,11 @@ class ListMatchingDescriptions(APIView):
         if len(searchString) < 3:
             return Code.objects.none()
         # Filters and returns
-        searchwords = searchString.split(' ')
-        queryset = Code.objects.filter(description__icontains=searchwords[0])
+        searchwords = searchString.lower().split(' ')
+        queryset = Code.objects.filter(description__contains=searchwords[0])
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
-                queryset = queryset.filter(description__icontains=searchword)
+                queryset = queryset.filter(description__contains=searchword)
         return queryset.order_by(Length('code').asc())[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
@@ -483,16 +501,15 @@ class ListMatchingKeywords(APIView):
     This is so that the user can enter a keyword instead of the code"""
 
     def get_object(self, searchString):
-        print(searchString)
         # Only check if the length of the entered string is greater than or equal to 3
         if len(searchString) < 3:
             return Code.objects.none()
         # Filters and returns
-        searchwords = searchString.split(' ')
-        queryset = Code.objects.filter(keyword_terms__icontains=searchwords[0])
+        searchwords = searchString.lower().split(' ')
+        queryset = Code.objects.filter(keyword_terms__contains=searchwords[0])
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
-                queryset = queryset.filter(keyword_terms__icontains=searchword)
+                queryset = queryset.filter(keyword_terms__contains=searchword)
         return queryset.order_by(Length('code').asc())[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
@@ -525,14 +542,14 @@ class ListAncestors(APIView):
 class ListCodeAutosuggestions(APIView):
     """Returns codes based upon the text entered"""
 
-    def get(self, request, matchString, format=None, **kwargs):
+    def get(self, request, searchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
         keywordMatch = ListMatchingKeywords()
         codeMatch = ListChildrenOfCode()
 
-        matchesDesc = descMatch.get_object(matchString)
-        matchesKeyword = keywordMatch.get_object(matchString)
-        matchesCode = codeMatch.get_object(matchString)
+        matchesDesc = descMatch.get_object(searchString)
+        matchesKeyword = keywordMatch.get_object(searchString)
+        matchesCode = codeMatch.get_object(searchString)
 
         serializerDesc = serializers.CodeSerializer(matchesDesc, many=True)
         serializerKeyword = serializers.CodeSerializer(matchesKeyword, many=True)
@@ -629,3 +646,14 @@ class Stats(APIView):
             topCodes.append({"code": code.code, "times_coded": code.times_coded, "description": code.description})
 
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
+
+
+@permission_classes((permissions.AllowAny,))
+class CheckCode(APIView):
+
+    def get(self, request, inCode, format=None, **kwargs):
+        codes = Code.objects.filter(code=inCode)
+        if codes:
+            return Response({'exists': True})
+        else:
+            return Response({'exists': False})

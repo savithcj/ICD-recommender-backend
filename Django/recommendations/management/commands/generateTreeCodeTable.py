@@ -7,7 +7,7 @@ import numpy as np
 
 
 class Command(BaseCommand):
-    help = 'Generates Table of ICD-10 Codes'
+    help = 'Generates Table of ICD-10 Codes (Includes chapters and blocks for the tree viewer)'
 
     def findParent(self, code):
         # returns parent code of actual codes
@@ -30,7 +30,6 @@ class Command(BaseCommand):
             chapVal = ord(chapterRange[0])*100 + int(chapterRange[1:3])
             if blockVal >= chapVal:
                 chapter = self.chapters[chapterRange]
-                print("BLOCK:", block, "CHAPTER", chapter, "CHAPTER RANGE:", chapterRange)
                 return chapter
         chapter = self.chapters[chapterRange]
         return chapter
@@ -40,19 +39,25 @@ class Command(BaseCommand):
         TreeCode.objects.all().delete()
 
         allCodes = set()
-        descriptions = defaultdict(str)
+        descriptions = dict()
         with open('secret/codedescriptions.txt') as f:
-            lines = f.readlines()
-            for i in range(1, len(lines)):
-                line = lines[i].split('\t')
+            for line in f.readlines():
+                line = line.split('\t')
                 code = line[0].strip()
                 desc = line[1].strip().replace('"', '')
                 allCodes.add(code)
                 descriptions[code] = desc
 
-        print(len(allCodes), len(descriptions))
+        categoryDescriptions = dict()
+        with open('secret/categories.csv') as f:
+            for line in f.readlines():
+                line = line.split(',')
+                code = line[0].strip()
+                desc = line[1].strip().replace('"', '')
+                categoryDescriptions[code] = desc
 
-        # Generate all parents and add to code set
+        # Generate all intermediate nodes and add to code set
+        # Repeat until no more intermediate nodes are created
         parentsAdded = -1
         while parentsAdded != 0:
             parents = []
@@ -63,37 +68,31 @@ class Command(BaseCommand):
             oldLen = len(allCodes)
             allCodes.update(parents)
             parentsAdded = len(allCodes) - oldLen
-            print("New Length: ", len(allCodes))
-            print("Parents Added:", parentsAdded, '\n')
+        print("Number of nodes: ", len(allCodes))
 
-        # Store all parents
         parentDict = dict()
-        for code in allCodes:
-            parentDict[code] = self.findParent(code)
-
-        # Store all children
         childrenDict = defaultdict(list)
         for code in allCodes:
             parent = self.findParent(code)
+            # set parent of code
+            parentDict[code] = parent
             if parent != '':
+                # set code as child of parent
                 childrenDict[parent].append(code)
 
         # Add ICD-10 chapters
         self.chapterRanges = []
         self.chapters = dict()
         with open('secret/ICDChapters.txt') as f:
-            lines = f.readlines()
             baseCode = 'ICD-10-CA'
             allCodes.add(baseCode)
             descriptions[baseCode] = ''
             parentDict[baseCode] = ''
-            for i in range(len(lines)):
-                line = lines[i].replace('\n', '').split('\t')
-                print(line)
+            for line in f.readlines():
+                line = line.strip().split('\t')
                 chap = 'Chapter ' + line[0]
                 chapChildren = line[1]
                 chapDesc = line[2]
-
                 allCodes.add(chap)
                 descriptions[chap] = chapDesc
                 parentDict[chap] = baseCode
@@ -106,9 +105,8 @@ class Command(BaseCommand):
 
         # Add ICD-10 blocks
         with open('secret/ICDBlocks.txt') as f:
-            lines = f.readlines()
-            for i in range(len(lines)):
-                line = lines[i].split('\t')
+            for line in f.readlines():
+                line = line.strip().split('\t')
                 block = line[0].strip()
                 blockDesc = line[1].strip().replace('"', '')
                 allCodes.add(block)
@@ -119,7 +117,6 @@ class Command(BaseCommand):
 
                 # Add 3 letter codes to blocks
                 if len(block) > 3:
-                    print(block, ': ', block[0], block[1:3], block[5:7])
                     startNum = int(block[1:3])
                     endNum = int(block[5:7])
                     startLetter = block[0]
@@ -133,8 +130,6 @@ class Command(BaseCommand):
                         self.setCategoryHiearchy(0, endNum, block, endLetter, parentDict, childrenDict)
                     else:
                         self.setCategoryHiearchy(startNum, endNum, block, startLetter, parentDict, childrenDict)
-                else:
-                    print(block)
 
         # Creating and saving objects
         with transaction.atomic():
@@ -142,7 +137,11 @@ class Command(BaseCommand):
             codes = list(allCodes)
             codes.sort()
             for code in codes:
-                description = descriptions[code]
+                # Check if ICD-10-CA has a description first and use that
+                description = descriptions.get(code, '')
+                if description == '':
+                    description = categoryDescriptions.get(code, '')
+                    # Use descfiption from ICD-10-CM if it doesn't exist
                 parent = parentDict[code]
                 children = ''
                 if len(childrenDict[code]) > 0:
