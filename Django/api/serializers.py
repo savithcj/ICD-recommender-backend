@@ -75,9 +75,14 @@ class CodeSerializer(serializers.ModelSerializer):
 
 
 class TreeCodeSerializer(serializers.ModelSerializer):
+    hasChildren = serializers.SerializerMethodField()
+
+    def get_hasChildren(self, obj):
+        return obj.hasChildren
+
     class Meta:
         model = TreeCode
-        fields = ("code", "description")
+        fields = ("code", "description", "hasChildren")
 
 
 class daggerAsteriskSerializer(serializers.ModelSerializer):
