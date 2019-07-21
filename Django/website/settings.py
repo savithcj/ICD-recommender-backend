@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'web',
     'api',
     'corsheaders',
+    'oauth2_provider',  # Added for OAuth2
 ]
 
 MIDDLEWARE = [
@@ -66,7 +67,7 @@ ROOT_URLCONF = 'website.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # site root-level templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,9 +140,26 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Added for OAuth2
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
+}
+
+
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES':
-    ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
+    # Added for OAuth2:
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    ),
+    # Added for OAuth2:
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+
+    # Removed for OAuth2:
+    # 'DEFAULT_PERMISSION_CLASSES':
+    # ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
