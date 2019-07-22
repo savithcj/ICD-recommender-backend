@@ -35,6 +35,7 @@ class Code(models.Model):
     parent = models.CharField(db_column='parent', max_length=20)
     children = models.CharField(db_column='children', max_length=1000)
     times_coded = models.IntegerField(db_column='times_coded', default=0)
+    times_coded_dad = models.IntegerField(db_column='times_coded_dad', default=0)
     keyword_terms = models.TextField(db_column='keyword_terms')
 
 
