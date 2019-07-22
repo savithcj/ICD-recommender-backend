@@ -9,28 +9,28 @@ parser.add_argument('-m', '--mode', type=str)
 options = vars(parser.parse_args())
 
 # Importing rules
-print("Running importRules")
+print("\n***********Running importRules***********")
 os.system("python manage.py importRules")
 
 # Generating the code table
-print("Running generateCodeTable")
+print("\n***********Running generateCodeTable***********")
 os.system("python manage.py generateCodeTable")
 
 # Generating the tree code table
-print("Running generateTreeCodeTable")
+print("\n***********Running generateTreeCodeTable***********")
 os.system("python manage.py generateTreeCodeTable")
 
 # Generating the dagger asterisk table
-print("Running generateDaggerAsterisk")
+print("\n***********Running generateDaggerAsterisk***********")
 os.system("python manage.py generateDaggerAsterisk")
 
 # Running the usage numbers with entered mode
-print("Running setUseNumbers")
+print("\n***********Running setUseNumbers***********")
 if options["mode"]:
     os.system("python manage.py setUseNumbers -m " + options["mode"])  # Sets numbers randomly
 else:
     os.system("python manage.py setUseNumbers")  # Sets numbers to 0
 
 # Calculating block use numbers
-print("Running calcBlockUseNumbers")
+print("\n***********Running calcBlockUseNumbers***********")
 os.system("python manage.py calcBlockUseNumbers")

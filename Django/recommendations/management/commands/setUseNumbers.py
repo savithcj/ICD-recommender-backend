@@ -18,18 +18,17 @@ class Command(BaseCommand):
         codes = Code.objects.all()
         rules = Rule.objects.all()
         with transaction.atomic():
+            print("Reading DAD usage numbers")
+            dxCounts = dict()
+            with open('secret/DAD_dx_counts.csv', 'r') as f:
+                for line in f.readlines():
+                    code, count = line.strip().split(',')
+                    count = int(count)
+                    dxCounts[code] = count
+            for code in codes:
+                code.times_coded_dad = dxCounts.get(code.code, 0)
             # set code usage numbers
-            if mode == "dad":
-                print("Setting code usage numbers to dad values")
-                dxCounts = dict()
-                with open('secret/DAD_dx_counts.csv', 'r') as f:
-                    for line in f.readlines():
-                        code, count = line.strip().split(',')
-                        count = int(count)
-                        dxCounts[code] = count
-                for code in codes:
-                    code.times_coded = dxCounts.get(code.code, 0)
-            elif mode == "random":
+            if mode == "random":
                 print("Setting code usage numbers to a random counts")
                 for code in codes:
                     code.times_coded = random.randint(1, 1001)
@@ -42,7 +41,7 @@ class Command(BaseCommand):
 
         with transaction.atomic():
            # set rule usage numbers
-            if mode == "random" or mode == "dad":
+            if mode == "random":
                 print("Setting rule usage counts to random counts")
                 for rule in rules:
                     rule.num_accepted = random.randint(1, 1001)
