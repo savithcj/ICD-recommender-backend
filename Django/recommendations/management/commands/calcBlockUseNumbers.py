@@ -54,7 +54,7 @@ class Command(BaseCommand):
             # get ancestry of codes
             blockName = self.findBlock(codeObject.code, blockNames)
             if blockName is not None:
-                blockUsage[blockName] += codeObject.times_coded
+                blockUsage[blockName] += codeObject.times_coded_dad
             if count % 1000 == 0:
                 print(count, "codes processed")
 
