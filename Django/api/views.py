@@ -17,21 +17,22 @@ import random
 from django.db.models import Q
 from django.db import transaction
 
-import time
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope  # Added for OAuth2
 
 # TODO: implement access permissions?
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListAllRules(generics.ListAPIView):
     """
     Lists all rules
     """
     queryset = Rule.objects.all()
     serializer_class = serializers.RulesSerializer
+    # permission_classes = [permissions.IsAuthenticated, TokenHasScope]   # Added for OAuth2
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class CreateRule(APIView):
     """Used to manually create a rule from the Admin page"""
 
@@ -97,7 +98,7 @@ class CreateRule(APIView):
         return HttpResponse(201)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class FlagRuleForReview(APIView):
     """Used to flag a rule for review"""
 
@@ -115,7 +116,7 @@ class FlagRuleForReview(APIView):
             return HttpResponse(400)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class RuleSearch(APIView):
     """Used to search for a rule given LHS and/or RHS codes"""
 
@@ -151,7 +152,7 @@ class RuleSearch(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListCodeBlockUsage(APIView):
     """Retrieves the number of times that each code block is used.
     An example of a code block is: A00-A09: Intestinal infectious diseases"""
@@ -168,7 +169,7 @@ class ListCodeBlockUsage(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class SingleCodeDescription(APIView):
     """Returns the description of a single code"""
 
@@ -182,7 +183,7 @@ class SingleCodeDescription(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListChildrenOfCode(APIView):
     """Returns the children of a code"""
 
@@ -204,7 +205,7 @@ class ListChildrenOfCode(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListRequestedRules(APIView):
     """Returns the rules for the codes entered (entered codes are treated as LHS)"""
 
@@ -302,7 +303,7 @@ class ListRequestedRules(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListRequestedRulesActive(APIView):
     """Returns active rules based on the entered codes"""
 
@@ -318,7 +319,7 @@ class ListRequestedRulesActive(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class DaggerAsteriskAPI(APIView):
     """Getting dagger/asterisk combinations for any entered codes"""
 
@@ -342,7 +343,7 @@ class DaggerAsteriskAPI(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListFlaggedRules(APIView):
     """Lists all of the flagged rules"""
 
@@ -365,7 +366,7 @@ class ListFlaggedRules(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class UpdateFlaggedRule(APIView):
     """Updates flagged rule depending on admin decision"""
 
@@ -394,7 +395,7 @@ class UpdateFlaggedRule(APIView):
             return HttpResponse(status=400)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class Family(APIView):
     """Returns the family of a code"""
 
@@ -472,7 +473,7 @@ class Family(APIView):
             return Response({'self': selfSerializer.data, 'parent': None, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListMatchingDescriptions(APIView):
     """Used to match text that the user enters in the search box.
     This is so that the user can enter part of the description instead of the code"""
@@ -495,7 +496,7 @@ class ListMatchingDescriptions(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListMatchingKeywords(APIView):
     """Used to match keywords that the user enters in the search box.
     This is so that the user can enter a keyword instead of the code"""
@@ -518,7 +519,7 @@ class ListMatchingKeywords(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListAncestors(APIView):
     """Lists the ancestors of a code. Used to generate the ancestry chain in the tree"""
 
@@ -538,7 +539,7 @@ class ListAncestors(APIView):
         return Response([ancestor.data for ancestor in ancestors])
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ListCodeAutosuggestions(APIView):
     """Returns codes based upon the text entered"""
 
@@ -557,7 +558,7 @@ class ListCodeAutosuggestions(APIView):
         return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": serializerKeyword.data})
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class EnterLog(APIView):
     """
     Receives log of user interaction with the system and updates the database.
@@ -596,7 +597,7 @@ class EnterLog(APIView):
         return HttpResponse(status=200)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class ChangeRuleStatus(APIView):
     """Used to set a rule to active or inactive"""
 
@@ -618,7 +619,7 @@ class ChangeRuleStatus(APIView):
             return HttpResponse(status=400)
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class InactiveRules(generics.ListAPIView):
     """Returns all rules with inactive status"""
 
@@ -626,7 +627,7 @@ class InactiveRules(generics.ListAPIView):
     serializer_class = serializers.RulesSerializer
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class Stats(APIView):
 
     def get(self, request, format=None, **kwargs):
@@ -648,7 +649,7 @@ class Stats(APIView):
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
 
 
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 class CheckCode(APIView):
 
     def get(self, request, inCode, format=None, **kwargs):
