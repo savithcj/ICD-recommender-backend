@@ -38,8 +38,7 @@ class CreateRule(APIView):
 
     def post(self, request, format=None, **kwargs):
         # Taking in the body of the request
-        body = request.body.decode('utf-8')
-        body_data = json.loads(body)
+        body_data = request.data
         # Initializing parameters
         LHSCodes = ''
         RHSCodes = ''
@@ -121,9 +120,7 @@ class RuleSearch(APIView):
     """Used to search for a rule given LHS and/or RHS codes"""
 
     def post(self, request, format=None, **kwargs):
-        # Decoding the body of the request
-        body = request.body.decode('utf-8')
-        body_data = json.loads(body)
+        body_data = request.data
         # Extracting LHS and RHS
         LHSCodesList = list(body_data["LHSCodes"])
         RHSCodesList = list(body_data["RHSCodes"])
@@ -565,8 +562,7 @@ class EnterLog(APIView):
     """
 
     def put(self, request, format=None, **kwargs):
-        body_unicode = request.body.decode('utf-8')  # Decoding the body
-        body = json.loads(body_unicode)  # Loading body in json format
+        body = request.data
         rules = body['rule_actions']  # Rule id and action
         entered = body['entered']  # List of codes entered
         codes = Code.objects.filter(code__in=entered)  # Removing any potential incorrect codes
@@ -603,9 +599,7 @@ class ChangeRuleStatus(APIView):
 
     def patch(self, request, format=None, **kwargs):
         try:
-            # Decode body
-            body = request.body.decode('utf-8')
-            body_data = json.loads(body)
+            body_data = request.data
             status = body_data["status"]
             rule_id = body_data["rule_id"]
 
