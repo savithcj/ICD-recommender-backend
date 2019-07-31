@@ -143,7 +143,9 @@ STATIC_URL = '/static/'
 # Added for OAuth2
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
-    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'},
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 604800
 }
 
 
