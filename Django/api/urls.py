@@ -22,6 +22,7 @@ urlpatterns = [
     path('enterLog/', views.EnterLog.as_view(), name="enter-log"),
     path('inactiveRules/', views.InactiveRules.as_view(), name="inactive-rules"),
     path('stats/', views.Stats.as_view(), name="stats"),
+    path('createUser/', views.CreateUser.as_view(), name="create-user"),
     path('checkCode/<str:inCode>/', views.CheckCode.as_view(), name="checkCode"),
     path('changeRuleStatus/', views.ChangeRuleStatus.as_view(), name="change-rule-status"),
 ]
