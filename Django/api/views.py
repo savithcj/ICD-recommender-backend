@@ -669,3 +669,43 @@ class CreateUser(APIView):
         user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
         user.save()
         print("user saved \n\n\n\n\n")
+
+
+# Remove the allow any later
+@permission_classes((permissions.AllowAny,))
+class ListUnverifiedUsers(APIView):
+    def get(self, request, format=None, **kwargs):
+        accounts = CustomUser.objects.filter(verified=False)
+        serializer = serializers.UserSerializer(accounts, many=True)
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.AllowAny,))
+class ApproveUser(APIView):
+    def patch(self, request, format=None, **kwargs):
+        try:
+            print('HELLO')
+            print(request)
+            print(request.data)
+            body_data = request.data
+            print("BODY_DATA", body_data)
+            id = body_data["idToApprove"]
+            print(id, "/n/n/n/n/n/n")
+            # Verifying user
+            user = CustomUser.objects.get(id=id)
+            user.verified = True
+            user.save()
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=400)
+
+
+@permission_classes((permissions.AllowAny,))
+class RejectUser(APIView):
+    def delete(self, request, idToDelete, format=None, **kwargs):
+        try:
+            user = CustomUser.objects.get(id=idToDelete)
+            user.delete()
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=400)
