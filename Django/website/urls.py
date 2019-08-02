@@ -16,12 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.contrib.auth import views as auth_views
+from users.views import CustomTokenView
 # admin.autodiscover()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('o/token/', CustomTokenView.as_view(), name="token"),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),  # Added for OAuth2
-    path('accounts/login/', auth_views.LoginView.as_view(), name="login"),
+    # path('accounts/login/', auth_views.LoginView.as_view(), name="login"),
     #path('accounts/', include('accounts.urls')),
     #path('accounts/', include('django.contrib.auth.urls')),
     path('', include('recommendations.urls')),
