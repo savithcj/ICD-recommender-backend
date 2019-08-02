@@ -669,8 +669,7 @@ class CreateUser(APIView):
         user.save()
         return HttpResponse(status=200)
 
-# Remove the allow any later
-@permission_classes((permissions.AllowAny,))
+
 class ListUnverifiedUsers(APIView):
     def get(self, request, format=None, **kwargs):
         accounts = CustomUser.objects.filter(verified=False)
@@ -678,7 +677,6 @@ class ListUnverifiedUsers(APIView):
         return Response(serializer.data)
 
 
-@permission_classes((permissions.AllowAny,))
 class ApproveUser(APIView):
     def patch(self, request, format=None, **kwargs):
         try:
@@ -698,7 +696,6 @@ class ApproveUser(APIView):
             return HttpResponse(status=400)
 
 
-@permission_classes((permissions.AllowAny,))
 class RejectUser(APIView):
     def delete(self, request, idToDelete, format=None, **kwargs):
         try:
