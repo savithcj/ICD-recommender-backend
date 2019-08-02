@@ -16,8 +16,9 @@ import json
 import random
 from django.db.models import Q
 from django.db import transaction
-
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope  # Added for OAuth2
+from users.models import CustomUser
+from django.contrib.auth.hashers import make_password
 
 # TODO: implement access permissions?
 
@@ -652,3 +653,19 @@ class CheckCode(APIView):
             return Response({'exists': True})
         else:
             return Response({'exists': False})
+
+
+@permission_classes((permissions.AllowAny,))
+class CreateUser(APIView):
+
+    def post(self, request, format=None, **kwargs):
+        body = request.data
+        print("\n\n\n\n\n", body)
+        fname = body['fname']
+        lname = body['lname']
+        password = make_password(body['password'])
+        username = body['username']
+
+        user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
+        user.save()
+        print("user saved \n\n\n\n\n")
