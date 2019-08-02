@@ -631,15 +631,16 @@ class Stats(APIView):
         sum = 0  # Total number of codes entered
         numUnique = 0  # Number of unique codes entered
         for code in codes:
-            sum += code.times_coded
-            if code.times_coded > 0:
+            sum += code.times_coded_dad
+            if code.times_coded_dad > 0:
                 numUnique += 1
 
         # Top 10 common codes
-        codes = codes.order_by('-times_coded')[:10]
+        codes = codes.order_by('-times_coded_dad')[:10]
         topCodes = []
         for code in codes:
-            topCodes.append({"code": code.code, "times_coded": code.times_coded, "description": code.description})
+            topCodes.append({"code": code.code, "times_coded_dad": code.times_coded_dad,
+                             "description": code.description})
 
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
 
