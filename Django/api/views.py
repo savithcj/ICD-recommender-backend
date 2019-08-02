@@ -669,3 +669,4 @@ class CreateUser(APIView):
         user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
         user.save()
         print("user saved \n\n\n\n\n")
+        return HttpResponse(status=200)
