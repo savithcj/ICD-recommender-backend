@@ -660,7 +660,6 @@ class CreateUser(APIView):
 
     def post(self, request, format=None, **kwargs):
         body = request.data
-        print("\n\n\n\n\n", body)
         fname = body['fname']
         lname = body['lname']
         password = make_password(body['password'])
@@ -668,8 +667,7 @@ class CreateUser(APIView):
 
         user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
         user.save()
-        print("user saved \n\n\n\n\n")
-
+        return HttpResponse(status=200)
 
 # Remove the allow any later
 @permission_classes((permissions.AllowAny,))
