@@ -28,4 +28,5 @@ urlpatterns = [
     path('rejectUser/<str:idToDelete>/', views.RejectUser.as_view(), name="reject-user"),
     path('checkCode/<str:inCode>/', views.CheckCode.as_view(), name="checkCode"),
     path('changeRuleStatus/', views.ChangeRuleStatus.as_view(), name="change-rule-status"),
+    path('validateToken/', views.ValidateToken.as_view(), name="validate-token"),
 ]
