@@ -1,7 +1,0 @@
-.ReactTable .rt-thead {
-  overflow-y: scroll;
-}
-
-.ReactTable .rt-thead::-webkit-scrollbar {
-  background: transparent;
-}
