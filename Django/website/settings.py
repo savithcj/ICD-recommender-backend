@@ -92,7 +92,7 @@ DATABASES = {
     #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     # }
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.environ['RDS_DB_NAME'],
         'USER': os.environ['RDS_USERNAME'],
         'PASSWORD': os.environ['RDS_PASSWORD'],
@@ -101,7 +101,10 @@ DATABASES = {
     }
 }
 
-
+print('***********************NAME', os.environ['RDS_DB_NAME'])
+print('***********************USER', os.environ['RDS_USERNAME'])
+print('***********************HOST', os.environ['RDS_HOSTNAME'])
+print('***********************PORT', os.environ['RDS_PORT'])
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
