@@ -213,17 +213,24 @@ class ListRequestedRules(APIView):
             inputCodes = inCodes
             inputCodes = inputCodes.split(",")
 
-            codesToAdd = []
+            codesToAdd = set()
             for code in inputCodes:
                 parent = Code.objects.get(code=code).parent
-                codesToAdd.append(parent)
-            inputCodes += codesToAdd
+                codesToAdd.add(parent)
+                while True:
+                    try:
+                        parent = Code.objects.get(code=parent).parent
+                        codesToAdd.add(parent)
+                    except ObjectDoesNotExist:
+                        break
+
+            inputCodes += list(codesToAdd)
             inputCodes.sort()
 
             # Build combinations of codes
-            # max combination in the LHS of 4 codes
+            # max combination in the LHS of 3 codes
             lhs = []
-            for i in range(min(len(inputCodes), 4)):
+            for i in range(min(len(inputCodes), 3)):
                 lhs += list(combinations(inputCodes, i+1))
 
             # Concatening items in combinations together
@@ -631,15 +638,16 @@ class Stats(APIView):
         sum = 0  # Total number of codes entered
         numUnique = 0  # Number of unique codes entered
         for code in codes:
-            sum += code.times_coded
-            if code.times_coded > 0:
+            sum += code.times_coded_dad
+            if code.times_coded_dad > 0:
                 numUnique += 1
 
         # Top 10 common codes
-        codes = codes.order_by('-times_coded')[:10]
+        codes = codes.order_by('-times_coded_dad')[:10]
         topCodes = []
         for code in codes:
-            topCodes.append({"code": code.code, "times_coded": code.times_coded, "description": code.description})
+            topCodes.append({"code": code.code, "times_coded_dad": code.times_coded_dad,
+                             "description": code.description})
 
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
 
@@ -660,7 +668,6 @@ class CreateUser(APIView):
 
     def post(self, request, format=None, **kwargs):
         body = request.data
-        print("\n\n\n\n\n", body)
         fname = body['fname']
         lname = body['lname']
         password = make_password(body['password'])
@@ -668,5 +675,40 @@ class CreateUser(APIView):
 
         user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
         user.save()
-        print("user saved \n\n\n\n\n")
         return HttpResponse(status=200)
+
+
+class ListUnverifiedUsers(APIView):
+    def get(self, request, format=None, **kwargs):
+        accounts = CustomUser.objects.filter(verified=False)
+        serializer = serializers.UserSerializer(accounts, many=True)
+        return Response(serializer.data)
+
+
+class ApproveUser(APIView):
+    def patch(self, request, format=None, **kwargs):
+        try:
+            print('HELLO')
+            print(request)
+            print(request.data)
+            body_data = request.data
+            print("BODY_DATA", body_data)
+            id = body_data["idToApprove"]
+            print(id, "/n/n/n/n/n/n")
+            # Verifying user
+            user = CustomUser.objects.get(id=id)
+            user.verified = True
+            user.save()
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=400)
+
+
+class RejectUser(APIView):
+    def delete(self, request, idToDelete, format=None, **kwargs):
+        try:
+            user = CustomUser.objects.get(id=idToDelete)
+            user.delete()
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=400)

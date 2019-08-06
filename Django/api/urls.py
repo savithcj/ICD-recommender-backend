@@ -23,6 +23,9 @@ urlpatterns = [
     path('inactiveRules/', views.InactiveRules.as_view(), name="inactive-rules"),
     path('stats/', views.Stats.as_view(), name="stats"),
     path('createUser/', views.CreateUser.as_view(), name="create-user"),
+    path('unverifiedAccounts/', views.ListUnverifiedUsers.as_view(), name="unverified-accounts"),
+    path('approveUser/', views.ApproveUser.as_view(), name="approve-user"),
+    path('rejectUser/<str:idToDelete>/', views.RejectUser.as_view(), name="reject-user"),
     path('checkCode/<str:inCode>/', views.CheckCode.as_view(), name="checkCode"),
     path('changeRuleStatus/', views.ChangeRuleStatus.as_view(), name="change-rule-status"),
 ]

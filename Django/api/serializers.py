@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from recommendations.models import Rule, Code, TreeCode, CodeBlockUsage, DaggerAsterisk
+from users.models import CustomUser
 
 
 # Standard rule serializer
@@ -89,3 +90,9 @@ class daggerAsteriskSerializer(serializers.ModelSerializer):
     class Meta:
         model = DaggerAsterisk
         fields = ("dagger", "asterisk")
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ("id", "username")
