@@ -40,13 +40,9 @@ const Home = props => {
     };
   }, []);
 
+  // equivalent to componentDidUpdate. used to verify that the token is valid
   useEffect(() => {
-    APIUtility.API.makeAPICall(APIUtility.CODE_DESCRIPTION, "I100").then(response => {
-      if (response.status === 200) {
-        props.setIsAuthorized(true);
-      }
-      setIsLoading(false);
-    });
+    APIUtility.API.verifyLSToken(() => setIsLoading(false));
   }, []);
 
   //equivalent to componentDidUpdate. Listens to changes to the alertMessage state
@@ -91,6 +87,10 @@ const Home = props => {
     return <Loading />;
   }
 
+  if (props.isServerDown) {
+    return <Redirect to="/server-down" />;
+  }
+
   if (!props.isAuthorized) {
     return <Redirect to="/sign-in" />;
   }
@@ -99,12 +99,10 @@ const Home = props => {
     <div className="Home">
       <MenuBar
         title="ICD-10 Code Suggestion and Usage Insight"
-        firstLinkName="Visualization"
-        firstLinkRoute="/visualization"
-        secondLinkName="Admin"
-        secondLinkRoute="/admin"
-        thirdLinkName="Manage Accounts"
-        thirdLinkRoute="/manage-accounts"
+        adminLink={props.userRole === "admin"}
+        manageAccountsLink={props.userRole === "admin"}
+        visualizationLink
+        aboutLink
         handleLayoutConfirm={() => handleLayoutModifierButton()}
         handleResetLayout={resetLayout}
         inModifyMode={isLayoutModifiable}
@@ -146,7 +144,9 @@ const Home = props => {
 const mapStateToProps = state => {
   return {
     alertMessage: state.alert.alertMessage,
-    isAuthorized: state.authentication.isAuthorized
+    isAuthorized: state.authentication.isAuthorized,
+    userRole: state.authentication.userRole,
+    isServerDown: state.authentication.isServerDown
   };
 };
 

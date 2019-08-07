@@ -712,3 +712,8 @@ class RejectUser(APIView):
             return HttpResponse(status=200)
         except ObjectDoesNotExist:
             return HttpResponse(status=400)
+
+
+class ValidateToken(APIView):
+    def get(self, request, format=None, **kwargs):
+        return HttpResponse(status=200)

@@ -31,8 +31,12 @@ function ManageAccounts(props) {
 
   const highlightEditDiv = isLayoutModifiable ? "grid-border edit-border" : "grid-border";
 
-  if (props.oAuthToken === null) {
+  if (!props.isAuthorized) {
     return <Redirect to="/sign-in" />;
+  }
+
+  if (props.userRole !== "admin") {
+    return <Redirect to="/forbidden" />;
   }
 
   return (
@@ -40,12 +44,10 @@ function ManageAccounts(props) {
       <div>
         <MenuBar
           title="Manage Accounts"
-          firstLinkName="Home"
-          firstLinkRoute="/"
-          secondLinkName="Visualization"
-          secondLinkRoute="/visualization"
-          thirdLinkName="Admin"
-          thirdLinkRoute="/admin"
+          homeLink
+          adminLink
+          visualizationLink
+          aboutLink
           handleLayoutConfirm={() => handleLayoutModifierButton()}
           handleResetLayout={resetLayout}
           inModifyMode={isLayoutModifiable}
@@ -71,7 +73,8 @@ function ManageAccounts(props) {
 
 const mapStateToProps = state => {
   return {
-    oAuthToken: state.authentication.oAuthToken
+    isAuthorized: state.authentication.isAuthorized,
+    userRole: state.authentication.userRole
   };
 };
 

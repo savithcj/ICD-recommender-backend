@@ -10,6 +10,7 @@ import { setRulesInSession, setRolledRules, setRHSExclusion } from "./session";
 import { setAlertMessage } from "./alert";
 import * as HelperFunctions from "../../Util/utility.js";
 import { setCodeInTree } from "./tree";
+import { setIsAuthorized, setUserRole } from "./authentication";
 
 export const fetchRecommendationsAndUpdateCache = codeObjArray => {
   return (dispatch, getState) => {
