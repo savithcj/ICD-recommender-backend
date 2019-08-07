@@ -228,9 +228,9 @@ class ListRequestedRules(APIView):
             inputCodes.sort()
 
             # Build combinations of codes
-            # max combination in the LHS of 3 codes
+            # max combination in the LHS of 4 codes
             lhs = []
-            for i in range(min(len(inputCodes), 3)):
+            for i in range(min(len(inputCodes), 4)):
                 lhs += list(combinations(inputCodes, i+1))
 
             # Concatening items in combinations together
