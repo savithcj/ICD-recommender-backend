@@ -2,7 +2,7 @@ astroid==2.2.5
 certifi==2019.3.9
 chardet==3.0.4
 colorama==0.4.1
-Django==2.2.1
+Django==2.1
 django-cors-headers==3.0.1
 django-oauth-toolkit==1.2.0
 djangorestframework==3.9.4
