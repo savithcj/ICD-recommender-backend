@@ -68,6 +68,7 @@ class CreateRule(APIView):
         RHSCodesList = list(body_data['RHSCodes'])
         RHSCodes = RHSCodesList[0]
 
+        print(body_data)
         # Taking age start, or setting to 0 if it was not passed
         if 'ageStart' in body_data:
             ageStart = int(body_data['ageStart'])
@@ -228,9 +229,9 @@ class ListRequestedRules(APIView):
             inputCodes.sort()
 
             # Build combinations of codes
-            # max combination in the LHS of 3 codes
+            # max combination in the LHS of 4 codes
             lhs = []
-            for i in range(min(len(inputCodes), 3)):
+            for i in range(min(len(inputCodes), 4)):
                 lhs += list(combinations(inputCodes, i+1))
 
             # Concatening items in combinations together

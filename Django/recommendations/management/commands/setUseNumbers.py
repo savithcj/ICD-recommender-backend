@@ -3,6 +3,7 @@ from recommendations.models import Code, Rule
 from django.db import transaction
 from collections import defaultdict
 import random
+from utils.S3Utils import readFileFromS3
 
 
 class Command(BaseCommand):

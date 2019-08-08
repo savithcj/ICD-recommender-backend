@@ -1,6 +1,11 @@
 
+<<<<<<< HEAD
 frontend/
 
+=======
+frontend/package-lock.json
+*.elasticbeanstalk/
+>>>>>>> master
 env/
 *.sqlite3
 secret/

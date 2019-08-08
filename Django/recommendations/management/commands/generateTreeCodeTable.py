@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from utils.S3Utils import readFileFromS3
 
+
 class Command(BaseCommand):
     help = 'Generates Table of ICD-10 Codes (Includes chapters and blocks for the tree viewer)'
 
@@ -49,11 +50,10 @@ class Command(BaseCommand):
 
         categoryDescriptions = dict()
         for line in readFileFromS3("categories.csv"):
-            for line in f.readlines():
-                line = line.split(',')
-                code = line[0].strip()
-                desc = line[1].strip().replace('"', '')
-                categoryDescriptions[code] = desc
+            line = line.split(',')
+            code = line[0].strip()
+            desc = line[1].strip().replace('"', '')
+            categoryDescriptions[code] = desc
 
         # Generate all intermediate nodes and add to code set
         # Repeat until no more intermediate nodes are created
