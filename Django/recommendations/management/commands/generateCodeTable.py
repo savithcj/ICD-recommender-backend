@@ -4,7 +4,6 @@ from collections import defaultdict
 from django.db import transaction
 import pandas as pd
 import numpy as np
-from secret import term_preprocessing
 
 
 class Command(BaseCommand):

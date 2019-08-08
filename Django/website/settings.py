@@ -89,10 +89,6 @@ WSGI_APPLICATION = 'website.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 if 'RDS_DB_NAME' in os.environ:
-    print('***********************NAME', os.environ['RDS_DB_NAME'])
-    print('***********************USER', os.environ['RDS_USERNAME'])
-    print('***********************HOST', os.environ['RDS_HOSTNAME'])
-    print('***********************PORT', os.environ['RDS_PORT'])
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
