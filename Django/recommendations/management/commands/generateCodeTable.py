@@ -4,7 +4,6 @@ from collections import defaultdict
 from django.db import transaction
 import pandas as pd
 import numpy as np
-from secret import term_preprocessing
 
 
 class Command(BaseCommand):
@@ -56,7 +55,11 @@ class Command(BaseCommand):
                 # set code as child of parent
                 childrenDict[parent].append(code)
 
-        keywordDict = term_preprocessing.getKeywordTerms()
+        keywordDict = dict()
+        with open('secret/keywordTerms.txt') as f:
+            for line in f.readlines():
+                splitline = line.split('\t')
+                keywordDict[splitline[0]] = splitline[1]
         with transaction.atomic():
             count = 0
             codes = list(allCodes)
@@ -76,11 +79,11 @@ class Command(BaseCommand):
                     children = children[:-1]
 
                 # check if code has keyword associated with it
-                keyword_terms = keywordDict[code].lower()
+                keyword_terms = keywordDict.get(code, '').lower()
                 if keyword_terms == '' and len(code) > 3:
                     # add keywords from children if empty (due to using CM keywords)
                     for i in range(10):
-                        keyword_terms += keywordDict[code + str(i)].lower()
+                        keyword_terms += keywordDict.get(code + str(i), '').lower()
                 row = Code.objects.create(code=code, children=children, parent=parent,
                                           description=description, keyword_terms=keyword_terms)
                 row.save()
