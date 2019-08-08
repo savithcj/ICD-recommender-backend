@@ -1,5 +1,5 @@
 
-frontend/package-lock.json
+frontend/
 
 env/
 *.sqlite3
