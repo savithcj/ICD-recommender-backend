@@ -82,7 +82,7 @@ class Command(BaseCommand):
         # Add ICD-10 chapters
         self.chapterRanges = []
         self.chapters = dict()
-
+    
         baseCode = 'ICD-10-CA'
         allCodes.add(baseCode)
         descriptions[baseCode] = ''

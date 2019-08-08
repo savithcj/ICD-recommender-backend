@@ -15,16 +15,15 @@ class Command(BaseCommand):
         # Read codes and descriptions from text file
         allCodes = set()
         codeDescriptions = dict()
-        with open('secret/codedescriptions.txt') as f:
-            for line in f.readlines():
-                line = line.split('\t')
-                code = line[0].strip()
-                desc = line[1].strip().replace('"', '')
-                allCodes.add(code)
-                codeDescriptions[code] = desc
+        for line in readFileFromS3("codedescriptions.txt"):
+            line = line.split('\t')
+            code = line[0].strip()
+            desc = line[1].strip().replace('"', '')
+            allCodes.add(code)
+            codeDescriptions[code] = desc
 
         categoryDescriptions = dict()
-        with open('secret/categories.csv') as f:
+        for line in readFileFromS3("categories.csv"):
             for line in f.readlines():
                 line = line.split(',')
                 code = line[0].strip()

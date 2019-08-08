@@ -20,11 +20,10 @@ class Command(BaseCommand):
         with transaction.atomic():
             print("Reading DAD usage numbers")
             dxCounts = dict()
-            with open('secret/DAD_dx_counts.csv', 'r') as f:
-                for line in f.readlines():
-                    code, count = line.strip().split(',')
-                    count = int(count)
-                    dxCounts[code] = count
+            for line in readFileFromS3("DAD_dx_counts.csv"):
+                code, count = line.strip().split(',')
+                count = int(count)
+                dxCounts[code] = count
             for code in codes:
                 code.times_coded_dad = dxCounts.get(code.code, 0)
             # set code usage numbers
