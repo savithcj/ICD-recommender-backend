@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.db import transaction
 import pandas as pd
 import numpy as np
-
+from utils.S3Utils import readFileFromS3
 
 class Command(BaseCommand):
     help = 'Generates Table of ICD-10 Codes (Includes chapters and blocks for the tree viewer)'

@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from recommendations.models import DaggerAsterisk, Code
 from django.db import transaction
 import csv
+from utils.S3Utils import readFileFromS3
 
 
 class Command(BaseCommand):
