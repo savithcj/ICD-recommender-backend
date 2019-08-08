@@ -30,5 +30,4 @@ class Command(BaseCommand):
                                                        confidence=line[3])
                             ruleSet.add(potentialRule)
                             rule.save()
-
         print("Done")
