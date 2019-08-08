@@ -15,7 +15,7 @@ class Command(BaseCommand):
         ruleSet = set()  # Create a set of rules to prevent duplicate rules
         with transaction.atomic():  # Saves all of the rules at once
             # Adding the additional mined rules
-            for i, line in enumerate(readFileFromS3("output_rules_cleaned.csv")):
+            for i, line in enumerate(readFileFromS3("output_rules_cleaned_shuffled.csv")):
                 if i != 0:  # If i = 0, it is the header, and therefore should not be processed
                     line = line.strip().split(",")
                     potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
