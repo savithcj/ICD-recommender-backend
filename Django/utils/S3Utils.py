@@ -13,7 +13,7 @@ def readFileFromS3(filename):
     )
     fileobj = s3client.get_object(
         Bucket='icd-django-data',
-        Key='output_rules_cleaned.csv')
+        Key=filename)
     filedata = fileobj['Body'].read()
     contents = filedata.decode('utf-8').split('\n')
     if contents[-1] == '':
