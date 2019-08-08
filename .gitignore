@@ -1,6 +1,6 @@
 
 frontend/package-lock.json
-
+*.elasticbeanstalk/
 env/
 *.sqlite3
 secret/
