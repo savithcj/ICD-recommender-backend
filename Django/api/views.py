@@ -68,6 +68,7 @@ class CreateRule(APIView):
         RHSCodesList = list(body_data['RHSCodes'])
         RHSCodes = RHSCodesList[0]
 
+        print(body_data)
         # Taking age start, or setting to 0 if it was not passed
         if 'ageStart' in body_data:
             ageStart = int(body_data['ageStart'])
