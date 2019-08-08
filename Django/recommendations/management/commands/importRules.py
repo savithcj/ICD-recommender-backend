@@ -47,9 +47,9 @@ class Command(BaseCommand):
         df["min_age"] = age_min
         df["max_age"] = age_max
 
-        print("Saving...")
         ruleSet = set()  # Create a set of rules to prevent duplicate rules
         with transaction.atomic():  # Saves all of the rules at once
+            print("Adding in Oracle rules")
             for row in range(df.shape[0]):
                 # Creating male version of the rule (oracle rules did not have a gender)
                 ruleM = Rule.objects.create(lhs=df.loc[row, "lhs"],
@@ -79,6 +79,7 @@ class Command(BaseCommand):
                              df.loc[row, "min_age"], df.loc[row, "max_age"]))
                 ruleF.save()
             # Adding the additional mined rules
+            print("Adding in rules mined")
             with open("secret/output_rules_cleaned.csv", 'r') as f:
                 for i, line in enumerate(f.readlines()):
                     if i != 0:  # If i = 0, it is the header, and therefore should not be processed
@@ -97,6 +98,7 @@ class Command(BaseCommand):
                             rule.save()
 
             # Adding in mined rules truncated to 3 characters
+            print("Adding in rules truncated to 3 characters")
             with open("secret/output_rules_cleaned_trunc3.csv", 'r') as f:
                 for i, line in enumerate(f.readlines()):
                     if i != 0:  # If i = 0, it is the header, and therefore should not be processed
@@ -115,6 +117,7 @@ class Command(BaseCommand):
                             rule.save()
 
             # Adding in mined rules truncated to 4 characters
+            print("Adding in rules truncated to 4 characters")
             with open("secret/output_rules_cleaned_trunc4.csv", 'r') as f:
                 for i, line in enumerate(f.readlines()):
                     if i != 0:  # If i = 0, it is the header, and therefore should not be processed
@@ -131,4 +134,36 @@ class Command(BaseCommand):
                                                        confidence=line[3])
                             ruleSet.add(potentialRule)
                             rule.save()
+
+            # Adding in rules without age or gender
+            print("Adding in rules without age or gender")
+            with open("secret/output_rules_500_no_age_or_gender.csv", 'r') as f:
+                for i, line in enumerate(f.readlines()):
+                    if i != 0:  # If i = 0, it is the header, and therefore should not be processed
+                        line = line.strip().split(",")
+                        # Creating male version
+                        potentialRule = (line[0], line[1], 'M', 0, 150)
+                        if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                            rule = Rule.objects.create(lhs=line[0],
+                                                       rhs=line[1],
+                                                       gender='M',
+                                                       min_age=0,
+                                                       max_age=150,
+                                                       support=line[2],
+                                                       confidence=line[3])
+                            ruleSet.add(potentialRule)
+                            rule.save()
+                        # Creating female version
+                        potentialRule = (line[0], line[1], 'F', 0, 150)
+                        if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                            rule = Rule.objects.create(lhs=line[0],
+                                                       rhs=line[1],
+                                                       gender='F',
+                                                       min_age=0,
+                                                       max_age=150,
+                                                       support=line[2],
+                                                       confidence=line[3])
+                            ruleSet.add(potentialRule)
+                            rule.save()
+            print("Saving...")
         print("Done")
