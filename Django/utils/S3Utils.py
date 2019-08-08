@@ -1,0 +1,18 @@
+import boto3
+s3 = boto3.resource('s3')
+
+
+def readFileFromS3(filename):
+    print("Reading", filename, "from S3")
+    s3client = boto3.client(
+        's3',
+        region_name='us-east-2'
+    )
+    fileobj = s3client.get_object(
+        Bucket='icd-django-data',
+        Key='output_rules_cleaned.csv')
+    filedata = fileobj['Body'].read()
+    contents = filedata.decode('utf-8').split('\n')
+    if contents[-1] == '':
+        del contents[-1]
+    return contents
