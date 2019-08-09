@@ -281,9 +281,11 @@ class ListRequestedRules(APIView):
             if active != None:
                 rules = rules.filter(active=active)
 
+            parents = []
             # Adding parts to the rule
             for rule in rules:
                 code = Code.objects.get(code=rule.rhs)
+                parents.append(code.parent)
                 rule.description = code.description
                 if rule.oracle == True:
                     rule.conf_factor = 0
@@ -299,6 +301,12 @@ class ListRequestedRules(APIView):
                     rule.interact_factor = S * A / (A+R+1)  # interaction based portion of score
                     rule.score = rule.conf_factor + rule.interact_factor
                     # can change conf_factor and interact_factor to non-members of rule later
+            # Removing rules which are suggesting a parent if the child is already being suggested
+            rulesToRemove = []
+            for rule in rules:
+                if rule.rhs in parents:
+                    rulesToRemove.append(rule)
+            rules = list(set(rules)-set(rulesToRemove))
             return rules
         except ObjectDoesNotExist:
             return Rule.objects.none()
