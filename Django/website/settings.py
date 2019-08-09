@@ -168,6 +168,10 @@ REST_FRAMEWORK = {
     # ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
 }
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_REGEX_WHITELIST = [r".*3\.18\.106\.79.*"]
 
