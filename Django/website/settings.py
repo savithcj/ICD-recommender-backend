@@ -174,7 +174,8 @@ CSRF_COOKIE_SECURE = True
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_REGEX_WHITELIST = [r".*icdrecommender\.xyz",
-                               r".*d4ke7rrycp0g7\.amplifyapp\.com", r".*d1akoj8b9a2w4o\.amplifyapp\.com"]
+                               r".*d4ke7rrycp0g7\.amplifyapp\.com", r".*d1akoj8b9a2w4o\.amplifyapp\.com",
+                               r"3\.18\.106\.79"]
 
 # CORS_ALLOW_CREDENTIALS = True
 # SESSION_COOKIE_SAMESITE = None
