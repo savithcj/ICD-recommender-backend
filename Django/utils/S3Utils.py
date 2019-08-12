@@ -7,7 +7,6 @@ def readFileFromS3(filename):
     print("Reading", filename, "from S3")
     s3client = boto3.client(
         's3',
-        region_name='us-east-2',
         aws_access_key_id=os.environ['S3_ACCESS_KEY'],
         aws_secret_access_key=os.environ['S3_SECRET_ACCESS_KEY']
     )
