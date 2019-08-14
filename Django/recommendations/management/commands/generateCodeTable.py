@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.db import transaction
 import pandas as pd
 import numpy as np
-from utils.S3Utils import readFileFromS3
+from utils.ImportDataFile import readDataFile
 
 
 class Command(BaseCommand):
@@ -16,7 +16,7 @@ class Command(BaseCommand):
         # Read codes and descriptions from text file
         allCodes = set()
         codeDescriptions = dict()
-        for line in readFileFromS3("codedescriptions.txt"):
+        for line in readDataFile("codedescriptions.txt"):
             line = line.split('\t')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
@@ -24,7 +24,7 @@ class Command(BaseCommand):
             codeDescriptions[code] = desc
 
         categoryDescriptions = dict()
-        for line in readFileFromS3("categories.csv"):
+        for line in readDataFile("categories.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                 childrenDict[parent].append(code)
 
         keywordDict = dict()
-        for line in readFileFromS3("keywordTerms.txt"):
+        for line in readDataFile("keywordTerms.txt"):
             splitline = line.split('\t')
             keywordDict[splitline[0]] = splitline[1]
         with transaction.atomic():
