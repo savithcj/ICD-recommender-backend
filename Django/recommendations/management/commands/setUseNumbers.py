@@ -3,7 +3,7 @@ from recommendations.models import Code, Rule
 from django.db import transaction
 from collections import defaultdict
 import random
-from utils.S3Utils import readFileFromS3
+from utils.ImportDataFile import readDataFile
 
 
 class Command(BaseCommand):
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             print("Reading DAD usage numbers")
             dxCounts = dict()
-            for line in readFileFromS3("DAD_dx_counts.csv"):
+            for line in readDataFile("DAD_dx_counts.csv"):
                 code, count = line.strip().split(',')
                 count = int(count)
                 dxCounts[code] = count

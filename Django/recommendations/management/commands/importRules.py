@@ -3,7 +3,7 @@ from recommendations.models import Rule
 from django.db import transaction
 import pandas as pd
 import numpy as np
-from utils.S3Utils import readFileFromS3
+from utils.ImportDataFile import readDataFile
 
 
 class Command(BaseCommand):
@@ -15,7 +15,7 @@ class Command(BaseCommand):
         ruleSet = set()  # Create a set of rules to prevent duplicate rules
         with transaction.atomic():  # Saves all of the rules at once
             # Adding the additional mined rules
-            for i, line in enumerate(readFileFromS3("output_rules_cleaned_shuffled.csv")):
+            for i, line in enumerate(readDataFile("output_rules_cleaned_shuffled.csv")):
                 if i != 0:  # If i = 0, it is the header, and therefore should not be processed
                     line = line.strip().split(",")
                     potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[

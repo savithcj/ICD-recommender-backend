@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from recommendations.models import DaggerAsterisk, Code
 from django.db import transaction
 import csv
-from utils.S3Utils import readFileFromS3
+from utils.ImportDataFile import readDataFile
 
 
 class Command(BaseCommand):
@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
         # Transaction.atomic in order to save all of the objects at once at the end
         with transaction.atomic():
-            for i, line in enumerate(readFileFromS3("DaggerAsterisks.csv")):
+            for i, line in enumerate(readDataFile("DaggerAsterisks.csv")):
                 row = line.split(',')
                 # Skip the header
                 if i == 0:

@@ -9,13 +9,15 @@ def readDataFile(filename):
     else:
         return readFileFromLocal(filename)
 
+
 def readFileFromLocal(filename):
     print("Reading", filename, "from local")
     with open("secret/"+filename, 'r') as f:
-            contents = f.readlines()
+        contents = f.readlines()
     if contents[-1] == '':
         del contents[-1]
     return contents
+
 
 def readFileFromS3(filename):
     print("Reading", filename, "from S3")

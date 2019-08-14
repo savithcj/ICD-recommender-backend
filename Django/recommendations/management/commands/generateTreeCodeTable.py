@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.db import transaction
 import pandas as pd
 import numpy as np
-from utils.S3Utils import readFileFromS3
+from utils.ImportDataFile import readDataFile
 
 
 class Command(BaseCommand):
@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
         allCodes = set()
         descriptions = dict()
-        for line in readFileFromS3("codedescriptions.txt"):
+        for line in readDataFile("codedescriptions.txt"):
             line = line.split('\t')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
@@ -49,7 +49,7 @@ class Command(BaseCommand):
             descriptions[code] = desc
 
         categoryDescriptions = dict()
-        for line in readFileFromS3("categories.csv"):
+        for line in readDataFile("categories.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
@@ -87,7 +87,7 @@ class Command(BaseCommand):
         allCodes.add(baseCode)
         descriptions[baseCode] = ''
         parentDict[baseCode] = ''
-        for line in readFileFromS3("ICDChapters.txt"):
+        for line in readDataFile("ICDChapters.txt"):
             line = line.strip().split('\t')
             chap = 'Chapter ' + line[0]
             chapChildren = line[1]
@@ -103,7 +103,7 @@ class Command(BaseCommand):
             self.chapterRanges.reverse()
 
         # Add ICD-10 blocks
-        for line in readFileFromS3("ICDBlocks.txt"):
+        for line in readDataFile("ICDBlocks.txt"):
             line = line.strip().split('\t')
             block = line[0].strip()
             blockDesc = line[1].strip().replace('"', '')
