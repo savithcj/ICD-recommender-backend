@@ -80,25 +80,25 @@ Save and close Django admin.
 3. This repo has the following 3 files pre-configured in the .ebextensions folder:
 ![](docs/Picture1.png)
 
-In the 01_packages.config file, we added git and postgresql packages.
+- In the 01_packages.config file, we added git and postgresql packages:
 ![](docs/Picture2.png)
 
-In the 02_python.config file: 
-- DJANGO_SETTINGS_MODULE is set to “website.settings” because the default app of our Django project is an app named website.
-- The PYTHONPATH setting adds Django to the Python environment path.
-- leader_only: true makes sure that the migrate commands only runs on the first EC2 instance.
-- The collectstatic –noinput line ensures the static Django files are used.
+- In the 02_python.config file: 
+-- DJANGO_SETTINGS_MODULE is set to “website.settings” because the default app of our Django project is an app named website.
+-- The PYTHONPATH setting adds Django to the Python environment path.
+-- leader_only: true makes sure that the migrate commands only runs on the first EC2 instance.
+-- The collectstatic –noinput line ensures the static Django files are used.
 ![](docs/Picture3.png)
 
-In the wsgi_custom.conf file, the WSGIPassAuthorization setting is set to On so that the EC2 Apache server will not consume the request header which contains authentication tokens, and that it is passed to Django backend.
+- In the wsgi_custom.conf file, the WSGIPassAuthorization setting is set to On so that the EC2 Apache server will not consume the request header which contains authentication tokens, and that it is passed to Django backend.
 ![](docs/Picture4.png)
 
 4. Open a terminal, cd into the project repo directory, and run the following commands:
 
-'''
+```
 eb init
 eb create
-'''
+```
 
 5. If prompted to set up or create a new IAM user, the user needs to have S3 access, or access to the S3 Bucket that will be used with this Elastic Beanstalk app instance:
 ![](docs/Picture5.png)
