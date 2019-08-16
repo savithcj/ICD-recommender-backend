@@ -13,6 +13,7 @@ class Command(BaseCommand):
         print("Reading rules...")
         Rule.objects.all().delete()  # Deletes all existing rules before importing
 
+        ruleSet = set()  # Create a set of rules to prevent duplicate rules
         with transaction.atomic():  # Saves all of the rules at once
             # Adding the additional mined rules
             print("Adding in rules mined")
