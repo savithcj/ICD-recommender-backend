@@ -172,8 +172,12 @@ REST_FRAMEWORK = {
 #SESSION_COOKIE_SECURE = True
 #CSRF_COOKIE_SECURE = True
 
-CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_REGEX_WHITELIST = [r".*\.icdrecommender\.xyz"]
+if os.environ["ICD_DATA_LOCATION"] == "S3":
+    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ORIGIN_REGEX_WHITELIST = [r".*\.icdrecommender\.xyz"]
+else:
+    CORS_ORIGIN_ALLOW_ALL = True
+    print("WARNING Using development setting: CORS_ORIGIN_ALLOW_ALL = True")
 
 # CORS_ALLOW_CREDENTIALS = True
 # SESSION_COOKIE_SAMESITE = None
