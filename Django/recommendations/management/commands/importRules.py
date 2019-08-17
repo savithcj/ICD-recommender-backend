@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = 'Imports the oracle rules in addition to extra mined rules'
 
     def handle(self, *args, **options):
-        print("Reading rules...")
+        print("Adding in Oracle rules")
         Rule.objects.all().delete()  # Deletes all existing rules before importing
 
         df1 = pd.read_csv("secret/three_digit_rules.csv")  # 3 digit oracle rules
@@ -49,8 +49,8 @@ class Command(BaseCommand):
         df["max_age"] = age_max
 
         ruleSet = set()  # Create a set of rules to prevent duplicate rules
+
         with transaction.atomic():  # Saves all of the rules at once
-            print("Adding in Oracle rules")
             for row in range(df.shape[0]):
                 # Creating male version of the rule (oracle rules did not have a gender)
                 ruleM = Rule.objects.create(lhs=df.loc[row, "lhs"],
@@ -79,7 +79,9 @@ class Command(BaseCommand):
                 ruleSet.add((df.loc[row, "lhs"], df.loc[row, "rhs"], 'F',
                              df.loc[row, "min_age"], df.loc[row, "max_age"]))
                 ruleF.save()
-            # Adding the additional mined rules
+            
+        # Adding the additional mined rules
+        with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules mined")
             for line in readDataFile("output_rules_cleaned.csv")[1:]:
                 line = line.strip().split(",")
@@ -96,7 +98,8 @@ class Command(BaseCommand):
                     ruleSet.add(potentialRule)
                     rule.save()
 
-            # Adding in mined rules truncated to 3 characters
+        # Adding in mined rules truncated to 3 characters
+        with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules truncated to 3 characters")
             for line in readDataFile("output_rules_cleaned_trunc3.csv")[1:]:
                 line = line.strip().split(",")
@@ -112,8 +115,9 @@ class Command(BaseCommand):
                                                confidence=line[3])
                     ruleSet.add(potentialRule)
                     rule.save()
-
-            # Adding in mined rules truncated to 4 characters
+            
+        # Adding in mined rules truncated to 4 characters
+        with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules truncated to 4 characters")
             for line in readDataFile("output_rules_cleaned_trunc4.csv")[1:]:
                 line = line.strip().split(",")
@@ -130,9 +134,10 @@ class Command(BaseCommand):
                     ruleSet.add(potentialRule)
                     rule.save()
 
-            # Adding in rules without age or gender
+        # Adding in rules without age or gender
+        with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules without age or gender")
-            for line in readDataFile("output_rules_500_no_age_or_gender.csv", 'r')[1:]:
+            for line in readDataFile("output_rules_500_no_age_or_gender.csv")[1:]:
                 line = line.strip().split(",")
                 # Creating male version
                 potentialRule = (line[0], line[1], 'M', 0, 150)
@@ -158,5 +163,4 @@ class Command(BaseCommand):
                                                confidence=line[3])
                     ruleSet.add(potentialRule)
                     rule.save()
-            print("Saving...")
         print("Done")
