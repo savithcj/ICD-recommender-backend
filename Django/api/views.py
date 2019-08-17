@@ -686,7 +686,7 @@ class CheckCode(APIView):
             return Response({'exists': False})
 
 
-
+@permission_classes((permissions.AllowAny,))
 class CreateUser(APIView):
 
     def post(self, request, format=None, **kwargs):
@@ -695,10 +695,13 @@ class CreateUser(APIView):
         lname = body['lname']
         password = make_password(body['password'])
         username = body['username']
-
-        user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
-        user.save()
-        return HttpResponse(status=200)
+        try:
+            duplicatedUser = CustomUser.objects.get(username=username)
+            return HttpResponse(status=409)
+        except:
+            user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
+            user.save()
+            return HttpResponse(status=200)
 
 
 class ListUnverifiedUsers(APIView):
