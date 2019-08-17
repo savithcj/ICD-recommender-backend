@@ -26,7 +26,7 @@ We have provided a script to set up these environment variables temporarily in /
 
 To use it, run it in the same terminal session that you will be running the development servers before starting up the servers:
 ```
-source ./development_settings/dev_env_vars.command
+source ./docs/dev_env_vars.command
 ```
 
 3. Create a secret folder under Django/, and copy files for populating database into this directory: 
