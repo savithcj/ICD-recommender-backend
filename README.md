@@ -22,6 +22,13 @@ ICD_DATA_LOCATION
 ```
 The ICD_DATA_LOCATION should only be set to "S3" when deploying to AWS.
 
+We have provided a script to set up these environment variables temporarily in /development_settings/dev_env_vars.command
+
+To use it, run it in the same terminal session that you will be running the development servers before starting up the servers:
+```
+source ./development_settings/dev_env_vars.command
+```
+
 3. Create a secret folder under Django/, and copy files for populating database into this directory: 
 ```
 Django/secret/
