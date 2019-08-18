@@ -16,26 +16,38 @@ import json
 import random
 from django.db.models import Q
 from django.db import transaction
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope  # Added for OAuth2
 from users.models import CustomUser
 from django.contrib.auth.hashers import make_password
 
-# TODO: implement access permissions?
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        allowedRoles = []
+        if request.user.role == "admin":
+            return True
+        return False
 
+class IsCoder(permissions.BasePermission):
+    def has_permission(self, request, view):
+        allowedRoles = []
+        if request.user.role == "coder":
+            return True
+        return False
 
-# @permission_classes((permissions.AllowAny,))
-class ListAllRules(generics.ListAPIView):
+class ListAllRules(APIView):
     """
     Lists all rules
     """
-    queryset = Rule.objects.all()
-    serializer_class = serializers.RulesSerializer
-    # permission_classes = [permissions.IsAuthenticated, TokenHasScope]   # Added for OAuth2
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+
+    def get(self, request, format=None, **kwargs):
+        queryset = Rule.objects.all()
+        serializer = serializers.RulesSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class CreateRule(APIView):
     """Used to manually create a rule from the Admin page"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def post(self, request, format=None, **kwargs):
         # Taking in the body of the request
@@ -99,9 +111,9 @@ class CreateRule(APIView):
         return HttpResponse(201)
 
 
-# @permission_classes((permissions.AllowAny,))
 class FlagRuleForReview(APIView):
     """Used to flag a rule for review"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def put(self, request, ruleId, format=None, **kwargs):
         try:
@@ -117,9 +129,9 @@ class FlagRuleForReview(APIView):
             return HttpResponse(400)
 
 
-# @permission_classes((permissions.AllowAny,))
 class RuleSearch(APIView):
     """Used to search for a rule given LHS and/or RHS codes"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def post(self, request, format=None, **kwargs):
         body_data = request.data
@@ -151,10 +163,10 @@ class RuleSearch(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListCodeBlockUsage(APIView):
     """Retrieves the number of times that each code block is used.
     An example of a code block is: A00-A09: Intestinal infectious diseases"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
@@ -168,9 +180,9 @@ class ListCodeBlockUsage(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class SingleCodeDescription(APIView):
     """Returns the description of a single code"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, inCode, format=None, **kwargs):
         try:
@@ -182,9 +194,9 @@ class SingleCodeDescription(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListChildrenOfCode(APIView):
     """Returns the children of a code"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, inCode):
         try:
@@ -204,9 +216,9 @@ class ListChildrenOfCode(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListRequestedRules(APIView):
     """Returns the rules for the codes entered (entered codes are treated as LHS)"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, inCodes, request, active=None):
         try:
@@ -317,9 +329,9 @@ class ListRequestedRules(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListRequestedRulesActive(APIView):
     """Returns active rules based on the entered codes"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, inCodes, request):
         # Creates an instance of the class that returns rules
@@ -333,9 +345,9 @@ class ListRequestedRulesActive(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class DaggerAsteriskAPI(APIView):
     """Getting dagger/asterisk combinations for any entered codes"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, inCodes, request):
         try:
@@ -357,9 +369,10 @@ class DaggerAsteriskAPI(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
+
 class ListFlaggedRules(APIView):
     """Lists all of the flagged rules"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def get_objects(self):
         try:
@@ -380,9 +393,9 @@ class ListFlaggedRules(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class UpdateFlaggedRule(APIView):
     """Updates flagged rule depending on admin decision"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def put(self, request, ruleIdAndDecision, format=None, **kwargs):
         ruleId, decision = ruleIdAndDecision.split(",")
@@ -409,9 +422,9 @@ class UpdateFlaggedRule(APIView):
             return HttpResponse(status=400)
 
 
-# @permission_classes((permissions.AllowAny,))
 class Family(APIView):
     """Returns the family of a code"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     # Get the children of the entered code
     def get_children(self, inCode):
@@ -487,10 +500,11 @@ class Family(APIView):
             return Response({'self': selfSerializer.data, 'parent': None, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
 
 
-# @permission_classes((permissions.AllowAny,))
+
 class ListMatchingDescriptions(APIView):
     """Used to match text that the user enters in the search box.
     This is so that the user can enter part of the description instead of the code"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, searchString):
         # Only check if the length of the entered string is greater than or equal to 3
@@ -510,10 +524,10 @@ class ListMatchingDescriptions(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListMatchingKeywords(APIView):
     """Used to match keywords that the user enters in the search box.
     This is so that the user can enter a keyword instead of the code"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, searchString):
         # Only check if the length of the entered string is greater than or equal to 3
@@ -533,9 +547,9 @@ class ListMatchingKeywords(APIView):
         return Response(serializer.data)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListAncestors(APIView):
     """Lists the ancestors of a code. Used to generate the ancestry chain in the tree"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get_object(self, code):
         ancestors = []
@@ -553,9 +567,9 @@ class ListAncestors(APIView):
         return Response([ancestor.data for ancestor in ancestors])
 
 
-# @permission_classes((permissions.AllowAny,))
 class ListCodeAutosuggestions(APIView):
     """Returns codes based upon the text entered"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, searchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
@@ -572,11 +586,11 @@ class ListCodeAutosuggestions(APIView):
         return Response({"description matches": serializerDesc.data, "code matches": serializerCode.data, "keyword matches": serializerKeyword.data})
 
 
-# @permission_classes((permissions.AllowAny,))
 class EnterLog(APIView):
     """
     Receives log of user interaction with the system and updates the database.
     """
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def put(self, request, format=None, **kwargs):
         body = request.data
@@ -610,9 +624,9 @@ class EnterLog(APIView):
         return HttpResponse(status=200)
 
 
-# @permission_classes((permissions.AllowAny,))
 class ChangeRuleStatus(APIView):
     """Used to set a rule to active or inactive"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def patch(self, request, format=None, **kwargs):
         try:
@@ -630,16 +644,16 @@ class ChangeRuleStatus(APIView):
             return HttpResponse(status=400)
 
 
-# @permission_classes((permissions.AllowAny,))
 class InactiveRules(generics.ListAPIView):
     """Returns all rules with inactive status"""
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     queryset = Rule.objects.filter(active=False)
     serializer_class = serializers.RulesSerializer
 
 
-# @permission_classes((permissions.AllowAny,))
 class Stats(APIView):
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, format=None, **kwargs):
         codes = Code.objects.all()
@@ -661,8 +675,8 @@ class Stats(APIView):
         return Response({'totalNumber': sum, 'Top10': topCodes, 'numUnique': numUnique})
 
 
-# @permission_classes((permissions.AllowAny,))
 class CheckCode(APIView):
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, inCode, format=None, **kwargs):
         codes = Code.objects.filter(code=inCode)
@@ -681,13 +695,18 @@ class CreateUser(APIView):
         lname = body['lname']
         password = make_password(body['password'])
         username = body['username']
-
-        user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
-        user.save()
-        return HttpResponse(status=200)
+        try:
+            duplicatedUser = CustomUser.objects.get(username=username)
+            return HttpResponse(status=409)
+        except:
+            user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
+            user.save()
+            return HttpResponse(status=200)
 
 
 class ListUnverifiedUsers(APIView):
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+
     def get(self, request, format=None, **kwargs):
         accounts = CustomUser.objects.filter(verified=False)
         serializer = serializers.UserSerializer(accounts, many=True)
@@ -695,15 +714,12 @@ class ListUnverifiedUsers(APIView):
 
 
 class ApproveUser(APIView):
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+
     def patch(self, request, format=None, **kwargs):
         try:
-            print('HELLO')
-            print(request)
-            print(request.data)
             body_data = request.data
-            print("BODY_DATA", body_data)
             id = body_data["idToApprove"]
-            print(id, "/n/n/n/n/n/n")
             # Verifying user
             user = CustomUser.objects.get(id=id)
             user.verified = True
@@ -714,6 +730,8 @@ class ApproveUser(APIView):
 
 
 class RejectUser(APIView):
+    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+
     def delete(self, request, idToDelete, format=None, **kwargs):
         try:
             user = CustomUser.objects.get(id=idToDelete)
@@ -723,6 +741,8 @@ class RejectUser(APIView):
             return HttpResponse(status=400)
 
 
-class ValidateToken(APIView):
+class ValidateToken(APIView, permissions.BasePermission):
+    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+
     def get(self, request, format=None, **kwargs):
         return HttpResponse(status=200)
