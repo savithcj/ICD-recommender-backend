@@ -18,9 +18,10 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
     print("SENDING PASSWORD EMAIL")
     send_mail(
         'Subject here',
-        'Here is the message.\n' + reset_password_token.key,
+        'Here is the message.\n' + os.environ['DJANGO_FRONTEND_HOSTNAME'] +
+        '/resetPassword/' + reset_password_token.key + '\n',
         'noreply@icdrecommender.xyz',
-        [os.environ['DJANGO_TEST_EMAIL']],
+        [reset_password_token.user.email],
         fail_silently=False,
     )
     # # send an e-mail to the user
