@@ -17,37 +17,10 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
     """
     print("SENDING PASSWORD EMAIL TO ", reset_password_token.user.email)
     send_mail(
-        'Subject here',
-        'Here is the message.\n' + os.environ['DJANGO_FRONTEND_HOSTNAME'] +
-        '/resetPassword/' + reset_password_token.key + '\n',
+        'Password Reset for ICD Recommender',
+        'Click below if you have requested a password reset.\n' +
+        os.environ['DJANGO_FRONTEND_HOSTNAME'] + '/reset-password?token=' + reset_password_token.key + '\n',
         'noreply@icdrecommender.xyz',
         [reset_password_token.user.email],
         fail_silently=False,
     )
-    # # send an e-mail to the user
-    # context = {
-    #     'current_user': reset_password_token.user,
-    #     'username': reset_password_token.user.username,
-    #     # 'email': reset_password_token.user.email,
-    #     'email': "eiden.yoshida@ucalgary.ca",
-    #     # ToDo: The URL can (and should) be constructed using pythons built-in `reverse` method.
-    #     'reset_password_url': "http://some_url/reset/?token={token}".format(token=reset_password_token.key)
-    # }
-
-    # # render email text
-    # #email_html_message = render_to_string('email/user_reset_password.html', context)
-    # email_plaintext_message = token = reset_password_token.key
-
-    # msg = EmailMultiAlternatives(
-    #     # title:
-    #     _("Password Reset for {title}".format(title="Some website title")),
-    #     # message:
-    #     email_plaintext_message,
-    #     # from:
-    #     "noreply@somehost.local",
-    #     # to:
-    #     [reset_password_token.user.email]
-    # )
-    # msg.attach_alternative('test alternative', "text/html")
-    # #msg.attach_alternative(email_html_message, "text/html")
-    # msg.send()

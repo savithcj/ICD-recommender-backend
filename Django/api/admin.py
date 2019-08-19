@@ -23,12 +23,14 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('username', 'is_staff', 'verified', 'role')
+    list_display = ('username', 'is_staff', 'verified', 'role', 'email')
     list_filter = ('is_staff', 'verified')
 
     fieldsets = (
         (None, {'fields': ('username',)}),
+        (None, {'fields': ('email',)}),
         ('Permissions', {'fields': ('verified', 'role')}),
+
     )
 
     search_fields = ('username',)
