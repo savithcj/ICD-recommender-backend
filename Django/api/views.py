@@ -693,15 +693,24 @@ class CreateUser(APIView):
         body = request.data
         fname = body['fname']
         lname = body['lname']
+        email = body['email']
         password = make_password(body['password'])
         username = body['username']
+        
         try:
-            duplicatedUser = CustomUser.objects.get(username=username)
-            return HttpResponse(status=409)
+            duplicatedUserName = CustomUser.objects.get(username=username)
+            return HttpResponse( json.dumps({"message": "Please try a different username."}), status=409)
         except:
-            user = CustomUser.objects.create(first_name=fname, last_name=lname, password=password, username=username)
+            pass
+        
+        try:
+            duplicatedUserEmail = CustomUser.objects.get(email=email)
+            return HttpResponse( json.dumps({"message": "Please try a different email address."}), status=409)
+        
+        except:
+            user = CustomUser.objects.create(first_name=fname, last_name=lname, email=email, password=password, username=username)
             user.save()
-            return HttpResponse(status=200)
+            return HttpResponse(json.dumps({"message": "User created."}), status=200)
 
 
 class ListUnverifiedUsers(APIView):
