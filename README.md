@@ -20,6 +20,12 @@ DJANGO_ADMIN_PASSWORD
 DJANGO_SECRET_KEY
 ICD_DATA_LOCATION
 ```
+Email server settings:
+```
+DJANGO_EMAIL_USERNAME
+DJANGO_EMAIL_PASSWORD
+DJANGO_FRONTEND_HOSTNAME
+```
 The ICD_DATA_LOCATION should only be set to "S3" when deploying to AWS.
 
 We have provided a script to set up these environment variables temporarily in /docs/dev_env_vars.command
