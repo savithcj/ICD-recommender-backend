@@ -15,7 +15,7 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
     :param kwargs:
     :return:
     """
-    print("SENDING PASSWORD EMAIL")
+    print("SENDING PASSWORD EMAIL TO ", reset_password_token.user.email)
     send_mail(
         'Subject here',
         'Here is the message.\n' + os.environ['DJANGO_FRONTEND_HOSTNAME'] +
