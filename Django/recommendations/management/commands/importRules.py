@@ -79,88 +79,100 @@ class Command(BaseCommand):
                 ruleSet.add((df.loc[row, "lhs"], df.loc[row, "rhs"], 'F',
                              df.loc[row, "min_age"], df.loc[row, "max_age"]))
                 ruleF.save()
-            
+
         # Adding the additional mined rules
         with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules mined")
             for line in readDataFile("output_rules_cleaned.csv")[1:]:
                 line = line.strip().split(",")
-                potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
-                    3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
-                if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
-                    rule = Rule.objects.create(lhs=line[0].split("_")[0],
-                                               rhs=line[1].split("_")[0],
-                                               gender=line[1].split("_")[3],
-                                               min_age=line[1].split("_")[1],
-                                               max_age=line[1].split("_")[2],
-                                               support=line[2],
-                                               confidence=line[3])
-                    ruleSet.add(potentialRule)
-                    rule.save()
+                if "I100" in line[0].split("_")[0] or "I100" in line[1].split("_")[0] or "I10" in line[0].split("_")[0] or "I10" in line[0].split("_")[0]:
+                    continue
+                else:
+                    potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
+                        3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
+                    if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                        rule = Rule.objects.create(lhs=line[0].split("_")[0],
+                                                   rhs=line[1].split("_")[0],
+                                                   gender=line[1].split("_")[3],
+                                                   min_age=line[1].split("_")[1],
+                                                   max_age=line[1].split("_")[2],
+                                                   support=line[2],
+                                                   confidence=line[3])
+                        ruleSet.add(potentialRule)
+                        rule.save()
 
         # Adding in mined rules truncated to 3 characters
         with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules truncated to 3 characters")
             for line in readDataFile("output_rules_cleaned_trunc3.csv")[1:]:
                 line = line.strip().split(",")
-                potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
-                    3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
-                if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
-                    rule = Rule.objects.create(lhs=line[0].split("_")[0],
-                                               rhs=line[1].split("_")[0],
-                                               gender=line[1].split("_")[3],
-                                               min_age=line[1].split("_")[1],
-                                               max_age=line[1].split("_")[2],
-                                               support=line[2],
-                                               confidence=line[3])
-                    ruleSet.add(potentialRule)
-                    rule.save()
-            
+                if "I10" in line[0].split("_")[0] or "I10" in line[0].split("_")[0]:
+                    continue
+                else:
+                    potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
+                        3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
+                    if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                        rule = Rule.objects.create(lhs=line[0].split("_")[0],
+                                                   rhs=line[1].split("_")[0],
+                                                   gender=line[1].split("_")[3],
+                                                   min_age=line[1].split("_")[1],
+                                                   max_age=line[1].split("_")[2],
+                                                   support=line[2],
+                                                   confidence=line[3])
+                        ruleSet.add(potentialRule)
+                        rule.save()
+
         # Adding in mined rules truncated to 4 characters
         with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules truncated to 4 characters")
             for line in readDataFile("output_rules_cleaned_trunc4.csv")[1:]:
                 line = line.strip().split(",")
-                potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
-                    3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
-                if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
-                    rule = Rule.objects.create(lhs=line[0].split("_")[0],
-                                               rhs=line[1].split("_")[0],
-                                               gender=line[1].split("_")[3],
-                                               min_age=line[1].split("_")[1],
-                                               max_age=line[1].split("_")[2],
-                                               support=line[2],
-                                               confidence=line[3])
-                    ruleSet.add(potentialRule)
-                    rule.save()
+                if "I100" in line[0].split("_")[0] or "I100" in line[1].split("_")[0] or "I10" in line[0].split("_")[0] or "I10" in line[0].split("_")[0]:
+                    continue
+                else:
+                    potentialRule = (line[0].split("_")[0], line[1].split("_")[0], line[1].split("_")[
+                        3], float(line[1].split("_")[1]), float(line[1].split("_")[2]))
+                    if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                        rule = Rule.objects.create(lhs=line[0].split("_")[0],
+                                                   rhs=line[1].split("_")[0],
+                                                   gender=line[1].split("_")[3],
+                                                   min_age=line[1].split("_")[1],
+                                                   max_age=line[1].split("_")[2],
+                                                   support=line[2],
+                                                   confidence=line[3])
+                        ruleSet.add(potentialRule)
+                        rule.save()
 
         # Adding in rules without age or gender
         with transaction.atomic():  # Saves all of the rules at once
             print("Adding in rules without age or gender")
             for line in readDataFile("output_rules_500_no_age_or_gender.csv")[1:]:
                 line = line.strip().split(",")
-                # Creating male version
-                potentialRule = (line[0], line[1], 'M', 0, 150)
-                if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
-                    rule = Rule.objects.create(lhs=line[0],
-                                               rhs=line[1],
-                                               gender='M',
-                                               min_age=0,
-                                               max_age=150,
-                                               support=line[2],
-                                               confidence=line[3])
-                    ruleSet.add(potentialRule)
-                    rule.save()
-                # Creating female version
-                potentialRule = (line[0], line[1], 'F', 0, 150)
-                if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
-                    rule = Rule.objects.create(lhs=line[0],
-                                               rhs=line[1],
-                                               gender='F',
-                                               min_age=0,
-                                               max_age=150,
-                                               support=line[2],
-                                               confidence=line[3])
-                    ruleSet.add(potentialRule)
-                    rule.save()
+                if "I100" in line[0].split("_")[0] or "I100" in line[1].split("_")[0] or "I10" in line[0].split("_")[0] or "I10" in line[0].split("_")[0]:
+                    continue
+                else:
+                    # Creating male version
+                    potentialRule = (line[0], line[1], 'M', 0, 150)
+                    if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                        rule = Rule.objects.create(lhs=line[0],
+                                                   rhs=line[1],
+                                                   gender='M',
+                                                   min_age=0,
+                                                   max_age=150,
+                                                   support=line[2],
+                                                   confidence=line[3])
+                        ruleSet.add(potentialRule)
+                        rule.save()
+                    # Creating female version
+                    potentialRule = (line[0], line[1], 'F', 0, 150)
+                    if potentialRule not in ruleSet:  # Checking to ensure there is no duplicate rules
+                        rule = Rule.objects.create(lhs=line[0],
+                                                   rhs=line[1],
+                                                   gender='F',
+                                                   min_age=0,
+                                                   max_age=150,
+                                                   support=line[2],
+                                                   confidence=line[3])
+                        ruleSet.add(potentialRule)
+                        rule.save()
         print("Done")
