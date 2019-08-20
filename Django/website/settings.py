@@ -163,10 +163,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-
-    # Removed for OAuth2:
-    # 'DEFAULT_PERMISSION_CLASSES':
-    # ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
 }
 
 
@@ -180,14 +176,6 @@ else:
     CORS_ORIGIN_ALLOW_ALL = True
     print("WARNING Using development setting: CORS_ORIGIN_ALLOW_ALL = True")
 
-# CORS_ALLOW_CREDENTIALS = True
-# SESSION_COOKIE_SAMESITE = None
-
-# EMAIL_HOST = 'smtp.mailgun.org'
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'postmaster@sandboxc19615fe10d14f9289b26c0c7a3a7ed1.mailgun.org'
-# EMAIL_HOST_PASSWORD = os.environ['DJANGO_EMAIL_PASSWORD']
-# EMAIL_USE_TLS = True
 
 EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 EMAIL_PORT = 587
