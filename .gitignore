@@ -1,6 +1,7 @@
 development_settings/
 
 *.elasticbeanstalk/
+run.bat
 
 env/
 *.sqlite3

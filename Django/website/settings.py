@@ -51,9 +51,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'rest_framework',
+    'django_rest_passwordreset',
     'recommendations',
     'web',
-    'api',
+    'api.apps.ApiConfig',
     'corsheaders',
     'oauth2_provider',  # Added for OAuth2
 
@@ -173,10 +174,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-
-    # Removed for OAuth2:
-    # 'DEFAULT_PERMISSION_CLASSES':
-    # ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
 }
 
 
@@ -190,5 +187,9 @@ else:
     CORS_ORIGIN_ALLOW_ALL = True
     print("WARNING Using development setting: CORS_ORIGIN_ALLOW_ALL = True")
 
-# CORS_ALLOW_CREDENTIALS = True
-# SESSION_COOKIE_SAMESITE = None
+
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ['DJANGO_EMAIL_USERNAME']
+EMAIL_HOST_PASSWORD = os.environ['DJANGO_EMAIL_PASSWORD']
+EMAIL_USE_TLS = True

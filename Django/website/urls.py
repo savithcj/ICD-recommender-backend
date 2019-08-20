@@ -30,5 +30,6 @@ urlpatterns = [
     path('', include('recommendations.urls')),
     path('', include('web.urls')),
     path('api/', include('api.urls')),
+    path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 ]
 urlpatterns += staticfiles_urlpatterns()
