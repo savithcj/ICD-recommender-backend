@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
         # Transaction.atomic in order to save all of the objects at once at the end
         with transaction.atomic():
-            for i, line in enumerate(readDataFile("DaggerAsterisks.csv")):
+            for i, line in enumerate(readDataFile("DaggerAsterisksCodes.csv")):
                 row = line.split(',')
                 # Skip the header
                 if i == 0:
