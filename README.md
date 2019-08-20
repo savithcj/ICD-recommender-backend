@@ -18,7 +18,8 @@ Django development server settings:
 ```
 DJANGO_ADMIN_PASSWORD
 DJANGO_SECRET_KEY
-ICD_DATA_LOCATION
+DJANGO_ICD_DATA_LOCATION
+DJANGO_DEBUG
 ```
 Email server settings:
 ```
@@ -27,6 +28,7 @@ DJANGO_EMAIL_PASSWORD
 DJANGO_FRONTEND_HOSTNAME
 ```
 The ICD_DATA_LOCATION should only be set to "S3" when deploying to AWS.
+The DJANGO_DEBUG should be set to "True" or "False" for Django debug mode.
 
 We have provided a script to set up these environment variables temporarily in /docs/dev_env_vars.command
 
