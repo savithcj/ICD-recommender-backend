@@ -693,9 +693,9 @@ class CreateUser(APIView):
         body = request.data
         fname = body['fname']
         lname = body['lname']
-        email = body['email']
+        email = body['email'].lower()
         password = make_password(body['password'])
-        username = body['username']
+        username = body['username'].lower()
         
         try:
             duplicatedUserName = CustomUser.objects.get(username=username)
