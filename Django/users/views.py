@@ -25,7 +25,8 @@ class CustomTokenView(TokenView):
                 # add username and role to response
                 body['user'] = {
                     'username': token.user.username,
-                    'role': token.user.role
+                    'role': token.user.role,
+                    'email': token.user.email
                 }
                 body = json.dumps(body)
         response = HttpResponse(content=body, status=status)
