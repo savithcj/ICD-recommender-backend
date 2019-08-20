@@ -14,7 +14,7 @@ class Command(BaseCommand):
         ruleSet = set()  # Create a set of rules to prevent duplicate rules
         Rule.objects.all().delete()  # Deletes all existing rules before importing
 
-        if bool(os.environ['DJANGO_DEBUG']) == True:  # Temporararily not adding some rules for the deployment.
+        if os.environ['DJANGO_DEBUG'] == 'True':  # Temporararily not adding some rules for the deployment.
             print("Adding in Oracle rules")
             df1 = pd.read_csv("secret/three_digit_rules.csv")  # 3 digit oracle rules
             df2 = pd.read_csv("secret/four_digit_rules.csv")  # 4 digit oracle rules
