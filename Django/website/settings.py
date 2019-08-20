@@ -33,6 +33,16 @@ if bool(os.environ['DJANGO_DEBUG']) == False:
     CORS_ORIGIN_ALLOW_ALL = False
     CORS_ORIGIN_REGEX_WHITELIST = [r".*\.icdrecommender\.xyz"]
     ALLOWED_HOSTS = [".icdrecommender.xyz", "icd-recommender-django-prod.us-west-2.elasticbeanstalk.com"]
+    # Add own ip for health checks
+    EC2_PRIVATE_IP = None
+    try:
+        EC2_PRIVATE_IP = requests.get(
+            'http://169.254.169.254/latest/meta-data/local-ipv4',
+            timeout=0.01).text
+    except requests.exceptions.RequestException:
+        pass
+    if EC2_PRIVATE_IP:
+        ALLOWED_HOSTS.append(EC2_PRIVATE_IP)
 else:
     CORS_ORIGIN_ALLOW_ALL = True
     ALLOWED_HOSTS = []
