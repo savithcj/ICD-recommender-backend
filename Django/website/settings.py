@@ -23,10 +23,20 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ['DJANGO_DEBUG'])
 
-ALLOWED_HOSTS = []
-
+if bool(os.environ['DJANGO_DEBUG']) == False:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ORIGIN_REGEX_WHITELIST = [r".*\.icdrecommender\.xyz"]
+    ALLOWED_HOSTS = [".icdrecommender.xyz", "icd-recommender-django-prod.us-west-2.elasticbeanstalk.com"]
+else:
+    CORS_ORIGIN_ALLOW_ALL = True
+    ALLOWED_HOSTS = []
+    print("WARNING: Using development settings")
 
 # Application definition
 
@@ -164,18 +174,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
-
-
-if os.environ["ICD_DATA_LOCATION"] == "S3":
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    CORS_ORIGIN_ALLOW_ALL = False
-    CORS_ORIGIN_REGEX_WHITELIST = [r".*\.icdrecommender\.xyz"]
-else:
-    CORS_ORIGIN_ALLOW_ALL = True
-    print("WARNING Using development setting: CORS_ORIGIN_ALLOW_ALL = True")
-
 
 EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 EMAIL_PORT = 587
