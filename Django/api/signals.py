@@ -3,17 +3,14 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import send_mail
 import os
 
+# TODO: REVOKE EXISTING TOKENS WHEN RESETTING PASSWORD
+
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
     """
     Handles password reset tokens
-    When a token is created, an e-mail needs to be sent to the user
-    :param sender:
-    :param reset_password_token:
-    :param args:
-    :param kwargs:
-    :return:
+    When a token is created, an e-mail is sent to the user
     """
     print("SENDING PASSWORD EMAIL TO ", reset_password_token.user.email)
     send_mail(
