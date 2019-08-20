@@ -12,10 +12,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ruleSet = set()  # Create a set of rules to prevent duplicate rules
+        Rule.objects.all().delete()  # Deletes all existing rules before importing
 
         if os.environ["ICD_DATA_LOCATION"] != "S3":  # to make deployment simpler. In the future all data files will be added to s3
             print("Adding in Oracle rules")
-            Rule.objects.all().delete()  # Deletes all existing rules before importing
 
             df1 = pd.read_csv("secret/three_digit_rules.csv")  # 3 digit oracle rules
             df2 = pd.read_csv("secret/four_digit_rules.csv")  # 4 digit oracle rules
