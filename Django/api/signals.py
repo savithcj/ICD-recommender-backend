@@ -13,7 +13,7 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
     print("Sending password reset email to ", reset_password_token.user.email)
     send_mail(
         'Password Reset for ICD Recommender',
-        'Click below if you have requested a password reset for user ' + user.username + '.\n' +
+        'Click below if you have requested a password reset for user ' + reset_password_token.user.username + '.\n' +
         os.environ['DJANGO_FRONTEND_HOSTNAME'] + '/reset-password?token=' + reset_password_token.key + '\n',
         'noreply@icdrecommender.xyz',
         [reset_password_token.user.email],
