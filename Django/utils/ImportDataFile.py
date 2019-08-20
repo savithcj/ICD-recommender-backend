@@ -4,7 +4,7 @@ s3 = boto3.resource('s3')
 
 
 def readDataFile(filename):
-    if os.environ["ICD_DATA_LOCATION"] == "S3":
+    if os.environ["DJANGO_ICD_DATA_LOCATION"] == "S3":
         return readFileFromS3(filename)
     else:
         return readFileFromLocal(filename)
