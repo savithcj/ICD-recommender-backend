@@ -696,7 +696,7 @@ class CheckCode(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class CreateUser(APIView):
-"""Is used to create a user when receiving information from the sign-up page"""
+    """Is used to create a user when receiving information from the sign-up page"""
 
     def post(self, request, format=None, **kwargs):
         # Takes in all user info
