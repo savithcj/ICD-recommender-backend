@@ -171,6 +171,7 @@ class ListCodeBlockUsage(APIView):
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
         for block in blocks:
+            # Obtaining code and description
             blockObject = TreeCode.objects.get(code=block.block)
             block.description = blockObject.description
             block.parent = blockObject.parent
@@ -553,6 +554,7 @@ class ListAncestors(APIView):
 
     def get_object(self, code):
         ancestors = []
+        # Keeps adding ancestors until reaching the top, after which the list is returned
         while True:
             try:
                 ancestor = TreeCode.objects.get(code=code)
@@ -576,6 +578,7 @@ class ListCodeAutosuggestions(APIView):
         keywordMatch = ListMatchingKeywords()
         codeMatch = ListChildrenOfCode()
 
+        # Matches descriptions, keywords, or codes
         matchesDesc = descMatch.get_object(searchString)
         matchesKeyword = keywordMatch.get_object(searchString)
         matchesCode = codeMatch.get_object(searchString)
@@ -648,11 +651,13 @@ class InactiveRules(generics.ListAPIView):
     """Returns all rules with inactive status"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
+    # Gets all rules with active = false
     queryset = Rule.objects.filter(active=False)
     serializer_class = serializers.RulesSerializer
 
 
 class Stats(APIView):
+    """Returns DAD stats to be displayed on the visualization page"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, format=None, **kwargs):
@@ -676,20 +681,25 @@ class Stats(APIView):
 
 
 class CheckCode(APIView):
+    """Checks if a code exists"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, inCode, format=None, **kwargs):
         codes = Code.objects.filter(code=inCode)
+        # return true if a code exists
         if codes:
             return Response({'exists': True})
+        # return false otherwise
         else:
             return Response({'exists': False})
 
 
 @permission_classes((permissions.AllowAny,))
 class CreateUser(APIView):
+"""Is used to create a user when receiving information from the sign-up page"""
 
     def post(self, request, format=None, **kwargs):
+        # Takes in all user info
         body = request.data
         fname = body['fname']
         lname = body['lname']
@@ -697,16 +707,19 @@ class CreateUser(APIView):
         password = make_password(body['password'])
         username = body['username'].lower()
         
+        # Checks for duplicate username
         try:
             duplicatedUserName = CustomUser.objects.get(username=username)
             return HttpResponse( json.dumps({"message": "Please try a different username."}), status=409)
         except:
             pass
         
+        # Checks for duplicate email
         try:
             duplicatedUserEmail = CustomUser.objects.get(email=email)
             return HttpResponse( json.dumps({"message": "Please try a different email address."}), status=409)
         
+        # Creates user if no errors from previous checks
         except:
             user = CustomUser.objects.create(first_name=fname, last_name=lname, email=email, password=password, username=username)
             user.save()
@@ -714,15 +727,18 @@ class CreateUser(APIView):
 
 
 class ListUnverifiedUsers(APIView):
+    """This returns all unverified users for the admin to review"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def get(self, request, format=None, **kwargs):
+        # Getting all users with verified = false
         accounts = CustomUser.objects.filter(verified=False)
         serializer = serializers.UserSerializer(accounts, many=True)
         return Response(serializer.data)
 
 
 class ApproveUser(APIView):
+    """This is used to change the verification status of a user to true"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def patch(self, request, format=None, **kwargs):
@@ -739,10 +755,12 @@ class ApproveUser(APIView):
 
 
 class RejectUser(APIView):
+    """This is used  to remove a user from the system if the admin does not approve their account"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin]
 
     def delete(self, request, idToDelete, format=None, **kwargs):
         try:
+            # Deleting the user
             user = CustomUser.objects.get(id=idToDelete)
             user.delete()
             return HttpResponse(status=200)
@@ -751,6 +769,7 @@ class RejectUser(APIView):
 
 
 class ValidateToken(APIView, permissions.BasePermission):
+    """This is used to validate the token"""
     permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, format=None, **kwargs):
