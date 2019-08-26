@@ -99,10 +99,10 @@ Save and close Django admin.
 ![](docs/Picture2.png)
 
 - In the 02_python.config file: 
-- - DJANGO_SETTINGS_MODULE is set to “website.settings” because the default app of our Django project is an app named website.
-- - The PYTHONPATH setting adds Django to the Python environment path.
-- - leader_only: true makes sure that the migrate commands only runs on the first EC2 instance.
-- - The collectstatic –noinput line ensures the static Django files are used.
+    - DJANGO_SETTINGS_MODULE is set to “website.settings” because the default app of our Django project is an app named website.
+    - The PYTHONPATH setting adds Django to the Python environment path.
+    - leader_only: true makes sure that the migrate commands only runs on the first EC2 instance.
+    - The collectstatic –noinput line ensures the static Django files are used.
 ![](docs/Picture3.png)
 
 - In the wsgi_custom.conf file, the WSGIPassAuthorization setting is set to On so that the EC2 Apache server will not consume the request header which contains authentication tokens, and that it is passed to Django backend.
