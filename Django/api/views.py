@@ -513,11 +513,13 @@ class ListMatchingDescriptions(APIView):
             return Code.objects.none()
         # Filters and returns
         searchwords = searchString.lower().split(' ')
-        queryset = Code.objects.filter(description__contains=searchwords[0])
+        queryset = Code.objects.filter(description__icontains=searchwords[0])
+        # Filter down set to match remaining words
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
-                queryset = queryset.filter(description__contains=searchword)
-        return queryset.order_by(Length('code').asc())[:15]
+                queryset = queryset.filter(description__icontains=searchword)
+        #return top 15 codes. shortest codes appear first, then secondary sort by the code
+        return queryset.order_by(Length('code').asc(), 'code')[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
         codes = self.get_object(searchString)
@@ -534,13 +536,15 @@ class ListMatchingKeywords(APIView):
         # Only check if the length of the entered string is greater than or equal to 3
         if len(searchString) < 3:
             return Code.objects.none()
-        # Filters and returns
+        # Get set matching first word
         searchwords = searchString.lower().split(' ')
-        queryset = Code.objects.filter(keyword_terms__contains=searchwords[0])
+        queryset = Code.objects.filter(keyword_terms__icontains=searchwords[0])
+        # Filter down set to match remaining words
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
-                queryset = queryset.filter(keyword_terms__contains=searchword)
-        return queryset.order_by(Length('code').asc())[:15]
+                queryset = queryset.filter(keyword_terms__icontains=searchword)
+        #return top 15 codes. shortest codes appear first, then secondary sort by the code
+        return queryset.order_by(Length('code').asc(), 'code')[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
         codes = self.get_object(searchString)
