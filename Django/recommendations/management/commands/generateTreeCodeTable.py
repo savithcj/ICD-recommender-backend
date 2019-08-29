@@ -49,7 +49,7 @@ class Command(BaseCommand):
             descriptions[code] = desc
 
         categoryDescriptions = dict()
-        for line in readDataFile("categories.csv"):
+        for line in readDataFile("category_descriptions.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
