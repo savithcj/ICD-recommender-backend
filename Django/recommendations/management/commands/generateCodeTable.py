@@ -13,6 +13,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         Code.objects.all().delete()
 
+        # Read in disabled codes
+        disabledCodes = set()
+        for line in readDataFile("DorO2018.csv"):
+            line = line.strip()
+            disabledCodes.add(line)
+
         # Read codes and descriptions from text file
         allCodes = set()
         codeDescriptions = dict()
@@ -20,15 +26,17 @@ class Command(BaseCommand):
             line = line.split('\t')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            allCodes.add(code)
-            codeDescriptions[code] = desc
+            if code not in disabledCodes:
+                allCodes.add(code)
+                codeDescriptions[code] = desc
 
         categoryDescriptions = dict()
         for line in readDataFile("category_descriptions.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            categoryDescriptions[code] = desc
+            if code not in disabledCodes:
+                categoryDescriptions[code] = desc
 
         # Generate all intermediate nodes and add to code set
         # Repeat until no more intermediate nodes are created

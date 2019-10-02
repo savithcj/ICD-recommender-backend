@@ -39,21 +39,29 @@ class Command(BaseCommand):
         # Read codes and descriptions from text file
         TreeCode.objects.all().delete()
 
+        # Read in disabled codes
+        disabledCodes = set()
+        for line in readDataFile("DorO2018.csv"):
+            line = line.strip()
+            disabledCodes.add(line)
+
         allCodes = set()
         descriptions = dict()
         for line in readDataFile("codedescriptions.txt"):
             line = line.split('\t')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            allCodes.add(code)
-            descriptions[code] = desc
+            if code not in disabledCodes:
+                allCodes.add(code)
+                descriptions[code] = desc
 
         categoryDescriptions = dict()
         for line in readDataFile("category_descriptions.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            categoryDescriptions[code] = desc
+            if code not in disabledCodes:
+                categoryDescriptions[code] = desc
 
         # Generate all intermediate nodes and add to code set
         # Repeat until no more intermediate nodes are created
