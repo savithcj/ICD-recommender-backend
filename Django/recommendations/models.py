@@ -37,6 +37,7 @@ class Code(models.Model):
     times_coded = models.IntegerField(db_column='times_coded', default=0)
     times_coded_dad = models.IntegerField(db_column='times_coded_dad', default=0)
     keyword_terms = models.TextField(db_column='keyword_terms')
+    selectable = models.BooleanField(db_column='selectable', default=True)
 
 
 # Used for creating the tree, using chapters as parents to blocks of codes,

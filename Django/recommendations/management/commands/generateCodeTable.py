@@ -26,17 +26,15 @@ class Command(BaseCommand):
             line = line.split('\t')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            if code not in disabledCodes:
-                allCodes.add(code)
-                codeDescriptions[code] = desc
+            allCodes.add(code)
+            codeDescriptions[code] = desc
 
         categoryDescriptions = dict()
         for line in readDataFile("category_descriptions.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            if code not in disabledCodes:
-                categoryDescriptions[code] = desc
+            categoryDescriptions[code] = desc
 
         # Generate all intermediate nodes and add to code set
         # Repeat until no more intermediate nodes are created
@@ -84,6 +82,11 @@ class Command(BaseCommand):
                         children += child + ','
                     children = children[:-1]
 
+                if code in disabledCodes:
+                    selectable = False
+                else:
+                    selectable = True
+
                 # check if code has keyword associated with it
                 keyword_terms = keywordDict.get(code, '').lower()
                 if keyword_terms == '' and len(code) > 3:
@@ -91,7 +94,7 @@ class Command(BaseCommand):
                     for i in range(10):
                         keyword_terms += keywordDict.get(code + str(i), '').lower()
                 row = Code.objects.create(code=code, children=children, parent=parent,
-                                          description=description, keyword_terms=keyword_terms)
+                                        description=description, keyword_terms=keyword_terms, selectable=selectable)
                 row.save()
                 count += 1
                 if count % 1000 == 0:

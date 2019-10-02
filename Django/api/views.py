@@ -689,13 +689,17 @@ class CheckCode(APIView):
     permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
 
     def get(self, request, inCode, format=None, **kwargs):
-        codes = Code.objects.filter(code=inCode)
-        # return true if a code exists
-        if codes:
-            return Response({'exists': True})
-        # return false otherwise
-        else:
+        # if the code exists, see if it's selectable
+        try:
+            codes = Code.objects.get(code=inCode)
+            if codes.selectable:
+                return Response({'exists': True})
+            else:
+                return Response({'exists': False})
+        # If the code doesn't exist, return false
+        except:
             return Response({'exists': False})
+        
 
 
 @permission_classes((permissions.AllowAny,))

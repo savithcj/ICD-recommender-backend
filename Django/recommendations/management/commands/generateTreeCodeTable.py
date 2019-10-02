@@ -51,17 +51,15 @@ class Command(BaseCommand):
             line = line.split('\t')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            if code not in disabledCodes:
-                allCodes.add(code)
-                descriptions[code] = desc
+            allCodes.add(code)
+            descriptions[code] = desc
 
         categoryDescriptions = dict()
         for line in readDataFile("category_descriptions.csv"):
             line = line.split(',')
             code = line[0].strip()
             desc = line[1].strip().replace('"', '')
-            if code not in disabledCodes:
-                categoryDescriptions[code] = desc
+            categoryDescriptions[code] = desc
 
         # Generate all intermediate nodes and add to code set
         # Repeat until no more intermediate nodes are created
