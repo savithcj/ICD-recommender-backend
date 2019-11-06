@@ -102,7 +102,7 @@ class Command(BaseCommand):
                         ruleSet.add(potentialRule)
                         rule.save()
 
-        if os.environ['DJANGO_DEBUG'] == 'True':  # Temporararily not adding some rules for the deployment.
+        if bool(os.environ['DJANGO_DEBUG']) == True:  # Temporararily not adding some rules for the deployment.
             # Adding in mined rules truncated to 3 characters
             with transaction.atomic():  # Saves all of the rules at once
                 print("Adding in rules truncated to 3 characters")
