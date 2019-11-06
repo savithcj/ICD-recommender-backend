@@ -19,12 +19,16 @@ from django.db import transaction
 from users.models import CustomUser
 from django.contrib.auth.hashers import make_password
 
+from NLP.languageProcessor import LanguageProcessor
+
+
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         allowedRoles = []
         if request.user.role == "admin":
             return True
         return False
+
 
 class IsCoder(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -33,11 +37,12 @@ class IsCoder(permissions.BasePermission):
             return True
         return False
 
+
 class ListAllRules(APIView):
     """
     Lists all rules
     """
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, format=None, **kwargs):
         queryset = Rule.objects.all()
@@ -47,7 +52,7 @@ class ListAllRules(APIView):
 
 class CreateRule(APIView):
     """Used to manually create a rule from the Admin page"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def post(self, request, format=None, **kwargs):
         # Taking in the body of the request
@@ -113,7 +118,7 @@ class CreateRule(APIView):
 
 class FlagRuleForReview(APIView):
     """Used to flag a rule for review"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def put(self, request, ruleId, format=None, **kwargs):
         try:
@@ -131,7 +136,7 @@ class FlagRuleForReview(APIView):
 
 class RuleSearch(APIView):
     """Used to search for a rule given LHS and/or RHS codes"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def post(self, request, format=None, **kwargs):
         body_data = request.data
@@ -166,7 +171,7 @@ class RuleSearch(APIView):
 class ListCodeBlockUsage(APIView):
     """Retrieves the number of times that each code block is used.
     An example of a code block is: A00-A09: Intestinal infectious diseases"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, format=None, **kwargs):
         blocks = CodeBlockUsage.objects.all()
@@ -183,7 +188,7 @@ class ListCodeBlockUsage(APIView):
 
 class SingleCodeDescription(APIView):
     """Returns the description of a single code"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, inCode, format=None, **kwargs):
         try:
@@ -197,7 +202,7 @@ class SingleCodeDescription(APIView):
 
 class ListChildrenOfCode(APIView):
     """Returns the children of a code"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, inCode):
         try:
@@ -219,7 +224,7 @@ class ListChildrenOfCode(APIView):
 
 class ListRequestedRules(APIView):
     """Returns the rules for the codes entered (entered codes are treated as LHS)"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, inCodes, request, active=None):
         try:
@@ -332,7 +337,7 @@ class ListRequestedRules(APIView):
 
 class ListRequestedRulesActive(APIView):
     """Returns active rules based on the entered codes"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, inCodes, request):
         # Creates an instance of the class that returns rules
@@ -348,7 +353,7 @@ class ListRequestedRulesActive(APIView):
 
 class DaggerAsteriskAPI(APIView):
     """Getting dagger/asterisk combinations for any entered codes"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, inCodes, request):
         try:
@@ -370,10 +375,9 @@ class DaggerAsteriskAPI(APIView):
         return Response(serializer.data)
 
 
-
 class ListFlaggedRules(APIView):
     """Lists all of the flagged rules"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def get_objects(self):
         try:
@@ -396,7 +400,7 @@ class ListFlaggedRules(APIView):
 
 class UpdateFlaggedRule(APIView):
     """Updates flagged rule depending on admin decision"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def put(self, request, ruleIdAndDecision, format=None, **kwargs):
         ruleId, decision = ruleIdAndDecision.split(",")
@@ -425,7 +429,7 @@ class UpdateFlaggedRule(APIView):
 
 class Family(APIView):
     """Returns the family of a code"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     # Get the children of the entered code
     def get_children(self, inCode):
@@ -501,11 +505,10 @@ class Family(APIView):
             return Response({'self': selfSerializer.data, 'parent': None, 'siblings': siblingSerializer.data, 'children': childrenSerializer.data})
 
 
-
 class ListMatchingDescriptions(APIView):
     """Used to match text that the user enters in the search box.
     This is so that the user can enter part of the description instead of the code"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, searchString):
         # Only check if the length of the entered string is greater than or equal to 3
@@ -518,7 +521,7 @@ class ListMatchingDescriptions(APIView):
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
                 queryset = queryset.filter(description__icontains=searchword)
-        #return top 15 codes. shortest codes appear first, then secondary sort by the code
+        # return top 15 codes. shortest codes appear first, then secondary sort by the code
         return queryset.order_by(Length('code').asc(), 'code')[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
@@ -530,7 +533,7 @@ class ListMatchingDescriptions(APIView):
 class ListMatchingKeywords(APIView):
     """Used to match keywords that the user enters in the search box.
     This is so that the user can enter a keyword instead of the code"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, searchString):
         # Only check if the length of the entered string is greater than or equal to 3
@@ -543,7 +546,7 @@ class ListMatchingKeywords(APIView):
         if len(searchwords) > 1:
             for searchword in searchwords[1:]:
                 queryset = queryset.filter(keyword_terms__icontains=searchword)
-        #return top 15 codes. shortest codes appear first, then secondary sort by the code
+        # return top 15 codes. shortest codes appear first, then secondary sort by the code
         return queryset.order_by(Length('code').asc(), 'code')[:15]
 
     def get(self, request, searchString, format=None, **kwargs):
@@ -554,7 +557,7 @@ class ListMatchingKeywords(APIView):
 
 class ListAncestors(APIView):
     """Lists the ancestors of a code. Used to generate the ancestry chain in the tree"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get_object(self, code):
         ancestors = []
@@ -575,7 +578,7 @@ class ListAncestors(APIView):
 
 class ListCodeAutosuggestions(APIView):
     """Returns codes based upon the text entered"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, searchString, format=None, **kwargs):
         descMatch = ListMatchingDescriptions()
@@ -597,7 +600,7 @@ class EnterLog(APIView):
     """
     Receives log of user interaction with the system and updates the database.
     """
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def put(self, request, format=None, **kwargs):
         body = request.data
@@ -633,7 +636,7 @@ class EnterLog(APIView):
 
 class ChangeRuleStatus(APIView):
     """Used to set a rule to active or inactive"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def patch(self, request, format=None, **kwargs):
         try:
@@ -653,7 +656,7 @@ class ChangeRuleStatus(APIView):
 
 class InactiveRules(generics.ListAPIView):
     """Returns all rules with inactive status"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     # Gets all rules with active = false
     queryset = Rule.objects.filter(active=False)
@@ -662,7 +665,7 @@ class InactiveRules(generics.ListAPIView):
 
 class Stats(APIView):
     """Returns DAD stats to be displayed on the visualization page"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, format=None, **kwargs):
         codes = Code.objects.all()
@@ -686,7 +689,7 @@ class Stats(APIView):
 
 class CheckCode(APIView):
     """Checks if a code exists"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, inCode, format=None, **kwargs):
         # if the code exists, see if it's selectable
@@ -699,7 +702,6 @@ class CheckCode(APIView):
         # If the code doesn't exist, return false
         except:
             return Response({'exists': False})
-        
 
 
 @permission_classes((permissions.AllowAny,))
@@ -714,29 +716,30 @@ class CreateUser(APIView):
         email = body['email'].lower()
         password = make_password(body['password'])
         username = body['username'].lower()
-        
+
         # Checks for duplicate username
         try:
             duplicatedUserName = CustomUser.objects.get(username=username)
-            return HttpResponse( json.dumps({"message": "Please try a different username."}), status=409)
+            return HttpResponse(json.dumps({"message": "Please try a different username."}), status=409)
         except:
             pass
-        
+
         # Checks for duplicate email
         try:
             duplicatedUserEmail = CustomUser.objects.get(email=email)
-            return HttpResponse( json.dumps({"message": "Please try a different email address."}), status=409)
-        
+            return HttpResponse(json.dumps({"message": "Please try a different email address."}), status=409)
+
         # Creates user if no errors from previous checks
         except:
-            user = CustomUser.objects.create(first_name=fname, last_name=lname, email=email, password=password, username=username)
+            user = CustomUser.objects.create(first_name=fname, last_name=lname,
+                                             email=email, password=password, username=username)
             user.save()
             return HttpResponse(json.dumps({"message": "User created."}), status=200)
 
 
 class ListUnverifiedUsers(APIView):
     """This returns all unverified users for the admin to review"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def get(self, request, format=None, **kwargs):
         # Getting all users with verified = false
@@ -747,7 +750,7 @@ class ListUnverifiedUsers(APIView):
 
 class ApproveUser(APIView):
     """This is used to change the verification status of a user to true"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def patch(self, request, format=None, **kwargs):
         try:
@@ -764,7 +767,7 @@ class ApproveUser(APIView):
 
 class RejectUser(APIView):
     """This is used  to remove a user from the system if the admin does not approve their account"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def delete(self, request, idToDelete, format=None, **kwargs):
         try:
@@ -778,7 +781,19 @@ class RejectUser(APIView):
 
 class ValidateToken(APIView, permissions.BasePermission):
     """This is used to validate the token"""
-    permission_classes = [permissions.IsAuthenticated,IsAdmin|IsCoder]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
     def get(self, request, format=None, **kwargs):
+        return HttpResponse(status=200)
+
+
+class UploadDoc(APIView):
+    """Uploads document for processing"""
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
+
+    def get(self, request, format=None, **kwargs):
+        doc = request.data
+        docId = doc["id"]
+        docType = doc["format"]
+        docText = doc["content"]
         return HttpResponse(status=200)

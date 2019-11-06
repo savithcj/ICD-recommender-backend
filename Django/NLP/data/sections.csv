@@ -1,0 +1,87 @@
+id,ID
+id,IDENTIFICATION
+id,Social
+id,SOCIAL HISTORY
+id,SOCIAL HX
+id,SOCHX
+id,personal and social history
+id,BACKGROUND
+main_dx,MOST RESPONSIBLE DIAGNOSES
+main_dx,PRIMARY DIAGNOSIS
+main_dx,DISCHARGE DIAGNOSIS
+main_dx,MOST RESPONSIBLE ADMITTING DIAGNOSES
+admit_dx,ADMITTING DIAGNOSIS
+admit_dx,ADMITTING DIAGNOSES
+admit_dx,ADMISSION DIAGNOSIS
+admit_dx,ADMITTING DX
+admit_dx,Reason of admission
+other_dx,OTHER DIAGNOSES
+other_dx,DISCHARGE DIAGNOSIS
+other_dx,DISCHARGE DIAGNOSES
+other_dx,POSTOPERATIVE DIAGNOSIS
+fam_hist,FAMILY HISTORY
+past_med_hist,PROFILE
+past_med_hist,PAST MEDICAL HISTORY
+past_med_hist,PMH
+past_med_hist,PMHX
+past_med_hist,PAST HISTORY
+past_med_hist,history
+past_med_hist,PAST SURGERIES
+past_med_hist,PROBLEM LIST AND PLAN
+past_med_hist,PAST PSYCHIATRIC HISTORY
+past_med_hist,PRE-ADMISSION DIAGNOSES
+past_med_hist,ADMISSION HISTORY
+past_med_hist,SECONDARY DIAGNOSIS
+past_med_hist,PRE_ADMISSION COMORBIDITIES
+past_med_hist,medical profile
+meds,Discharge Medications
+meds,MEDS
+meds,Home medications
+meds,MEDICATIONS ON DISCHARGE
+meds,HOME MEDS
+meds,CURRENT MEDICATIONS
+meds,MEDICATIONS ON ADMISSION
+meds,MEDICATIONS AT ADMISSION
+meds,PREADMIT MEDS
+meds,MEDICATIONS PRIOR TO ADMISSION
+meds,MED CHANGES
+hpi,HPI
+hpi,History of Present Illness
+hpi,IMPRESSION
+hpi,HISOTRY of presenting illness
+hpi,HISTORY OF PRESENT ILLNESS
+hpi,HISTORY OF PRESENTING COMPLAINT
+hpi,REASON FOR REFERRAL
+hpi,HISTORY PRESENTING ILLNESS
+hpi,ER INTAKE
+hpi,CHIEF COMPLAINT
+hpi,ER INTAKE AND ASSESSMENT
+hpi,REASON FOR ADMISSION
+hpi,PHYSICAL EXAM AT ADMISSION
+hpi,INITIAL INVESTIGATIONS
+exam,physical exam
+exam,EXAM
+exam,INVESTIGATIONS
+exam,PERTINENT LABS + IMAGING + EXAM
+exam,On EXAM
+exam,ON EXAM
+allergies,ALLERGIES
+allergies,ALLERGY
+allergies,ALLERG
+plan,PLAN
+course,Brief Hospital Course
+course,COURSE
+course,the course in hospital
+course,summary of stay
+course,SUMMARY OF STAY
+course,SUMMARY NOTE
+course,COURSE IN HOSPITAL AND ISSUES FOR FOLLOWUP
+course,SUMMARY OF PRESENTATION
+course,TRANSFER SUMMARY
+discharge_position,DISPOSITION
+discharge_position,DISCHARGE INSTRUCTIONS/PLAN
+discharge_position,INSTRUCTIONS ON DISCHARGE
+discharge_position,DISCHARGE INSTRUCTIONS
+icu,ICU TRANSFER NOTE
+followup,FOLLOWUP
+followup,Followup Instructions
