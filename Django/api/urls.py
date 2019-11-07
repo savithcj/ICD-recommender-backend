@@ -29,4 +29,5 @@ urlpatterns = [
     path('checkCode/<str:inCode>/', views.CheckCode.as_view(), name="checkCode"),
     path('changeRuleStatus/', views.ChangeRuleStatus.as_view(), name="change-rule-status"),
     path('validateToken/', views.ValidateToken.as_view(), name="validate-token"),
+    path('uploadDoc/', views.UploadDoc.as_view(), name="upload-doc")
 ]

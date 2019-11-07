@@ -1,7 +1,5 @@
-
 from spacy.matcher import Matcher
-
-from matcherPatterns import Labels, negation_forward_patterns, negation_backward_patterns, negation_bidirection_patterns, closure_patterns
+from NLP.matcherPatterns import Labels, negation_forward_patterns, negation_backward_patterns, negation_bidirection_patterns, closure_patterns
 
 
 class EntityMatchers:
