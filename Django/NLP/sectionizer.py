@@ -35,10 +35,13 @@ class Sectionizer:
 
         # Sorting sections in order and adding section at the beginning if there is not a section there
         doc_sections.sort()
-        if doc_sections[0][0] != 0:
+
+        if len(doc_sections) > 0 and doc_sections[0][0] != 0:
             temp = doc_sections
             doc_sections = [(0, 0, '')]
             doc_sections.extend(temp)
+        else:
+            doc_sections = [(0, 0, '')]
 
         return doc_sections
 
