@@ -791,7 +791,7 @@ class UploadDoc(APIView):
     """Uploads document for processing"""
     permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
 
-    def get(self, request, format=None, **kwargs):
+    def post(self, request, format=None, **kwargs):
         doc = request.data
         docId = doc["id"]
         docType = doc["format"]
@@ -799,11 +799,13 @@ class UploadDoc(APIView):
         docSections, docEntities = self._processDoc(docText)
 
         return Response(self._makeJSON(docId,docSections,None,None,docEntities))
+        # return Response({'totalNumber': [], 'Top10': 0, 'numUnique': 'numUnique'})
 
     def _processDoc(self, text):
         """Runs NLP to process document, returns document sections, sentences, tokens, and entities."""
         lp = LanguageProcessor(text)
-        sections = lp.getDocumentSections()
+        # sections = lp.getDocumentSections()
+        sections = []
         entities = lp.getDocumentEntities()
         return (sections, entities)
 
