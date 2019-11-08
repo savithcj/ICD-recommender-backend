@@ -1,6 +1,8 @@
 import spacy
 from NLP.entityMatchers import EntityMatchers
 from NLP.sectionizer import Sectionizer
+from NLP.sentencizer import Sentencizer
+from NLP.tokenizer import CustomTokenizer
 
 
 class LanguageProcessor:
@@ -10,9 +12,17 @@ class LanguageProcessor:
 
         self.sectionizer = Sectionizer(self.doc)
         self.entityMatcher = EntityMatchers(self.doc, nlp)
+        self.sentencizer = Sentencizer(self.doc, nlp)
+        self.tokenizer = CustomTokenizer(self.doc, nlp)
 
     def getDocumentSections(self):
         return self.sectionizer.getSectionsForAnnotation()
 
     def getDocumentEntities(self):
         return self.entityMatcher.getMatchesForAnnotation()
+
+    def getDocumentSentences(self):
+        return self.sentencizer.getMatchesForAnnotation()
+
+    def getDocumentTokens(self):
+        return self.tokenizer.getMatchesForAnnotation()

@@ -796,16 +796,18 @@ class UploadDoc(APIView):
         docId = doc["id"]
         docType = doc["format"]
         docText = doc["content"]
-        docSections, docEntities = self._processDoc(docText)
+        docSections, docSentences, docTokens, docEntities = self._processDoc(docText)
 
-        return Response(self._makeJSON(docId,docSections,None,None,docEntities))
+        return Response(self._makeJSON(docId,docSections,docSentences,docTokens,docEntities))
 
     def _processDoc(self, text):
         """Runs NLP to process document, returns document sections, sentences, tokens, and entities."""
         lp = LanguageProcessor(text)
         sections = lp.getDocumentSections()
+        sentences = lp.getDocumentSentences()
+        tokens = lp.getDocumentTokens()
         entities = lp.getDocumentEntities()
-        return (sections, entities)
+        return (sections, sentences, tokens, entities)
 
     def _makeJSON(self, id, sections, sentences, tokens, entities):
         """Makes a serialized JSON string."""
