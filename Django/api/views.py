@@ -818,4 +818,4 @@ class UploadDoc(APIView):
             "tokens": tokens,
             "entities": entities
         }
-        return json.dumps(obj)
+        return obj
