@@ -819,3 +819,14 @@ class UploadDoc(APIView):
             "entities": entities
         }
         return obj
+
+class getSections(APIView):
+    """Returns the sections for annotation"""
+    permission_classes = [permissions.IsAuthenticated, IsAdmin | IsCoder]
+    
+    def get(self, request, format=None, **kwargs):
+        with open('./NLP/data/sections.csv','r') as f:
+            sections = set()
+            for line in f:
+                sections.add(line.strip().split(',')[0])
+        return Response(sections)
