@@ -63,6 +63,6 @@ class CustomTokenizer:
             else:
                 label=''
             
-            tokens.append({"start":start, "end":end, "label": label, "color": color})
+            tokens.append({"start":start, "end":end, "label": label})
             
         return tokens

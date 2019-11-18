@@ -46,5 +46,5 @@ class Sentencizer:
             else:
                 label=''
 
-            sentences.append({"start":start_char, "end": end_char, "label": '', 'color': color})
+            sentences.append({"start":start_char, "end": end_char, "label": ''})
         return sentences
