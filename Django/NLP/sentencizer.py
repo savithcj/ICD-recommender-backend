@@ -46,5 +46,10 @@ class Sentencizer:
             else:
                 label=''
 
-            sentences.append({"start":start_char, "end": end_char, "label": ''})
+            if i % 2 == 0:
+                color = 'rgb(149,156,243)'
+            else:
+                color = 'rgb(244,196,199)'
+
+            sentences.append({"start":start_char, "end": end_char, "label": '', 'color': color})
         return sentences

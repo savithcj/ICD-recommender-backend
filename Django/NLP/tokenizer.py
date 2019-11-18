@@ -62,7 +62,12 @@ class CustomTokenizer:
                 label=str(i)
             else:
                 label=''
+
+            if i % 2 == 0:
+                color = 'rgb(149,156,243)'
+            else:
+                color = 'rgb(244,196,199)'
             
-            tokens.append({"start":start, "end":end, "label": label})
+            tokens.append({"start":start, "end":end, "label": label, "color": color})
             
         return tokens
