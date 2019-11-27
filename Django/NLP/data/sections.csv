@@ -1,3 +1,4 @@
+intro,Visit Data
 id,ID
 id,IDENTIFICATION
 id,Social
@@ -17,6 +18,7 @@ admit_dx,ADMITTING DX
 admit_dx,Reason of admission
 other_dx,OTHER DIAGNOSES
 other_dx,DISCHARGE DIAGNOSIS
+other_dx,diagnoses and surgical procedures
 other_dx,DISCHARGE DIAGNOSES
 other_dx,POSTOPERATIVE DIAGNOSIS
 fam_hist,FAMILY HISTORY
@@ -44,6 +46,7 @@ meds,MEDICATIONS ON ADMISSION
 meds,MEDICATIONS AT ADMISSION
 meds,PREADMIT MEDS
 meds,MEDICATIONS PRIOR TO ADMISSION
+meds,medication reconciliation
 meds,MED CHANGES
 hpi,HPI
 hpi,History of Present Illness
@@ -67,6 +70,7 @@ exam,On EXAM
 exam,ON EXAM
 allergies,ALLERGIES
 allergies,ALLERGY
+allergies,allergy and intolerances
 allergies,ALLERG
 plan,PLAN
 course,Brief Hospital Course
@@ -78,6 +82,7 @@ course,SUMMARY NOTE
 course,COURSE IN HOSPITAL AND ISSUES FOR FOLLOWUP
 course,SUMMARY OF PRESENTATION
 course,TRANSFER SUMMARY
+course,course in hospital
 discharge_position,DISPOSITION
 discharge_position,DISCHARGE INSTRUCTIONS/PLAN
 discharge_position,INSTRUCTIONS ON DISCHARGE
@@ -85,3 +90,4 @@ discharge_position,DISCHARGE INSTRUCTIONS
 icu,ICU TRANSFER NOTE
 followup,FOLLOWUP
 followup,Followup Instructions
+followup,follow-up and recommendations
