@@ -37,6 +37,7 @@ past_med_hist,SECONDARY DIAGNOSIS
 past_med_hist,PRE_ADMISSION COMORBIDITIES
 past_med_hist,medical profile
 meds,Discharge Medications
+meds,medications
 meds,MEDS
 meds,Home medications
 meds,MEDICATIONS ON DISCHARGE
@@ -62,12 +63,14 @@ hpi,ER INTAKE AND ASSESSMENT
 hpi,REASON FOR ADMISSION
 hpi,PHYSICAL EXAM AT ADMISSION
 hpi,INITIAL INVESTIGATIONS
+exam,physical examination
 exam,physical exam
 exam,EXAM
 exam,INVESTIGATIONS
 exam,PERTINENT LABS + IMAGING + EXAM
 exam,On EXAM
 exam,ON EXAM
+exam,laboratory
 allergies,ALLERGIES
 allergies,ALLERGY
 allergies,allergy and intolerances
@@ -77,6 +80,7 @@ course,Brief Hospital Course
 course,COURSE
 course,the course in hospital
 course,summary of stay
+course,hospital course
 course,SUMMARY OF STAY
 course,SUMMARY NOTE
 course,COURSE IN HOSPITAL AND ISSUES FOR FOLLOWUP
