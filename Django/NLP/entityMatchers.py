@@ -123,6 +123,6 @@ class EntityMatchers:
                 annotate_start_char = start_token.idx
                 annotate_end_char = end_token.idx + len(end_token)
                 label = self.doc.vocab.strings[match_id]
-                entities.append({"start": annotate_start_char, "end": annotate_end_char, "label": label})
+                entities.append({"start": annotate_start_char, "end": annotate_end_char, "label": label, "type": "Logic"})
 
         return entities
