@@ -46,7 +46,7 @@ if DEBUG == False:
         ALLOWED_HOSTS.append(EC2_PRIVATE_IP)
 else:
     CORS_ORIGIN_ALLOW_ALL = True
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = [os.environ['DJANGO_HOST_ADDRESS']]
     print("WARNING: Using development settings")
 
 # Application definition
