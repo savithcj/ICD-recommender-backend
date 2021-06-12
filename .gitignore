@@ -1,15 +1,30 @@
-development_settings/
 
-*.elasticbeanstalk/
+environment/
+whoosh/
+
+activate.sh
+
 run.bat
-
+node_modules/
+frontend/package-lock.json
+*.elasticbeanstalk/
 env/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 *.sqlite3
-secret/
+*.sqlite3-journal
+secrets/
 .vscode/
-
-# MacOS system file
 .DS_Store
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+/.pnp
+.pnp.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -59,6 +74,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+/coverage
 
 # Translations
 *.mo
@@ -75,6 +91,9 @@ instance/
 
 # Scrapy stuff:
 .scrapy
+
+# production
+/build
 
 # Sphinx documentation
 docs/_build/
@@ -115,8 +134,3 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
